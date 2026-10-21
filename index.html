@@ -504,8 +504,10 @@ async function cargar(){
   const[s,c,v,q]=await Promise.all([todo("sucursales","*"),
     todo("clientes","id,empresa,giro,tipo,latitud,longitud,link_maps,ciudad,unidades_flota,id_sucursal,km_sucursal,estatus,semanas_arrastre,intentos,horario_sugerido,motivo_escalado"),
     todo("visitas","*"),todo("cotizaciones","*")]);
+  const{data:pf}=await SB.from("perfiles").select("correo,nombre"); // el gerente solo ve el suyo; regional y admin ven todos
+  const NOM=Object.fromEntries((pf||[]).filter(x=>x.nombre).map(x=>[x.correo,x.nombre]));
   const conCli=new Set(c.map(x=>x.id_sucursal));
-  SUC=s.filter(x=>conCli.has(x.id)||x.id===YO.id_sucursal).map(x=>({id:x.id,n:corta(x.nombre),g:x.gerente_correo?nombreDe(x.gerente_correo):"Sin gerente · "+corta(x.nombre),lat:x.latitud,lng:x.longitud}));
+  SUC=s.filter(x=>conCli.has(x.id)||x.id===YO.id_sucursal).map(x=>({id:x.id,n:corta(x.nombre),g:x.gerente_correo?NOM[x.gerente_correo.toLowerCase()]||nombreDe(x.gerente_correo):"Sin gerente · "+corta(x.nombre),lat:x.latitud,lng:x.longitud}));
   const SI=Object.fromEntries(SUC.map(x=>[x.id,x]));
   CL=c.filter(x=>SI[x.id_sucursal]).map(x=>({id:x.id,nombre:x.empresa,giro:x.giro||"Otro",lat:x.latitud,lng:x.longitud,link:x.link_maps,ciudad:x.ciudad,flota:x.unidades_flota,
     suc:SI[x.id_sucursal],km:x.km_sucursal==null?null:+x.km_sucursal,st:STMAP[x.estatus]||"disp",arr:x.estatus==="asignado"&&x.semanas_arrastre>0?1:0,intentos:x.intentos||0,horario:x.horario_sugerido,motivo:x.motivo_escalado,tipo:x.tipo}));
@@ -821,7 +823,7 @@ const msgLogin=(t,ok)=>{const m=$("lErr");m.textContent=t;m.style.color=ok?"var(
 async function entrar(){
   const{data:{user}}=await SB.auth.getUser();if(!user)return;
   const{data:p,error}=await SB.from("perfiles").select("*").eq("correo",user.email.toLowerCase()).maybeSingle();
-  if(error||!p){await SB.auth.signOut();$("loginForm").hidden=false;$("passForm").hidden=true;return msgLogin("Tu correo no tiene acceso todavía. Pide que te den de alta.")}
+  if(error||!p){await SB.auth.signOut();$("loginForm").hidden=false;$("passForm").hidden=true;return msgLogin(error?"No se pudo leer tu perfil: "+error.message:`El correo ${user.email} no está dado de alta en perfiles. Pide que te den de alta.`)}
   YO=p;msgLogin("Cargando tu información…",true);
   try{await cargar()}catch(x){return msgLogin("No se pudo cargar la información: "+x.message)}
   rol=p.rol==="gerente"?p.id_sucursal:"reg";
