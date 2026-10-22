@@ -354,7 +354,7 @@ textarea{width:100%;font:inherit;padding:10px;border-radius:10px;border:1px soli
       <section class="mod tile" id="t3"></section>
 
       <section class="mod c12" id="cotSec">
-        <div class="mod-h"><h2>Cotizaciones</h2><span class="hint" id="cotHint"></span></div>
+        <div class="mod-h"><h2>Cotizaciones</h2><span class="hint" id="cotHint"></span><button class="btn" type="button" id="csvVentas">Descargar ventas (CSV)</button></div>
         <div class="money" id="cotStats"></div>
         <div class="cot-cols">
           <div><div class="lbl">Abiertas · las más cerca de vencer primero</div><div id="cotList"></div></div>
@@ -477,7 +477,7 @@ textarea{width:100%;font:inherit;padding:10px;border-radius:10px;border:1px soli
       <label for="lPass">Contraseña<input id="lPass" type="password" autocomplete="current-password" required></label>
       <button class="btn pri" type="submit" style="padding:12px">Entrar</button>
       <span class="toast" id="lErr" style="color:var(--st-esc)" hidden></span>
-      <span class="hint" style="font-size:11px">Versión 22 oct · celular</span>
+      <span class="hint" style="font-size:11px">Versión 22 oct · check-in y factura (2)</span>
       <button type="button" class="btn" id="olvide" style="border:0;background:none;color:var(--muted);text-decoration:underline;padding:0;justify-self:start">Olvidé mi contraseña</button>
     </form>
     <form class="lg-card" id="passForm" hidden>
@@ -551,7 +551,7 @@ function resumenDe(v){
 }
 async function cargar(){
   const[s,c,v,q]=await Promise.all([todo("sucursales","*"),
-    todo("clientes","id,empresa,giro,tipo,latitud,longitud,link_maps,ciudad,unidades_flota,id_sucursal,km_sucursal,estatus,semanas_arrastre,intentos,horario_sugerido,motivo_escalado"),
+    todo("clientes","id,empresa,giro,tipo,latitud,longitud,link_maps,ciudad,unidades_flota,id_sucursal,km_sucursal,estatus,semanas_arrastre,intentos,horario_sugerido,motivo_escalado,revisar_ubicacion,codigo_erp,razon_social"),
     todo("visitas","*"),todo("cotizaciones","*")]);
   const{data:pf}=await SB.from("perfiles").select("correo,nombre"); // el gerente solo ve el suyo; regional y admin ven todos
   const NOM=Object.fromEntries((pf||[]).filter(x=>x.nombre).map(x=>[x.correo,x.nombre]));
@@ -559,10 +559,10 @@ async function cargar(){
   SUC=s.filter(x=>conCli.has(x.id)||x.id===YO.id_sucursal).map(x=>({id:x.id,n:corta(x.nombre),g:x.gerente_correo?NOM[x.gerente_correo.toLowerCase()]||nombreDe(x.gerente_correo):"Sin gerente · "+corta(x.nombre),lat:x.latitud,lng:x.longitud}));
   const SI=Object.fromEntries(SUC.map(x=>[x.id,x]));
   CL=c.filter(x=>SI[x.id_sucursal]).map(x=>({id:x.id,nombre:x.empresa,giro:x.giro||"Otro",lat:x.latitud,lng:x.longitud,link:x.link_maps,ciudad:x.ciudad,flota:x.unidades_flota,
-    suc:SI[x.id_sucursal],km:x.km_sucursal==null?null:+x.km_sucursal,st:STMAP[x.estatus]||"disp",arr:x.estatus==="asignado"&&x.semanas_arrastre>0?1:0,intentos:x.intentos||0,horario:x.horario_sugerido,motivo:x.motivo_escalado,tipo:x.tipo}));
+    suc:SI[x.id_sucursal],km:x.km_sucursal==null?null:+x.km_sucursal,st:STMAP[x.estatus]||"disp",arr:x.estatus==="asignado"&&x.semanas_arrastre>0?1:0,intentos:x.intentos||0,horario:x.horario_sugerido,motivo:x.motivo_escalado,tipo:x.tipo,revisar:!!x.revisar_ubicacion,erp:x.codigo_erp,rs:x.razon_social}));
   IX=Object.fromEntries(CL.map(x=>[x.id,x]));
-  VISITAS=v.filter(x=>IX[x.cliente_id]).map(x=>({cli:x.cliente_id,fecha:new Date(x.fecha).toLocaleDateString("en-CA"),res:resDe(x),com:resumenDe(x)}));
-  COTS=q.filter(x=>IX[x.cliente_id]).map(x=>({dbid:x.id,id:x.folio,cli:x.cliente_id,fecha:x.fecha,monto:+x.monto,estado:x.estado,ganado:x.monto_ganado==null?0:+x.monto_ganado,motivo:x.motivo,cierre:x.cerrada_en}));
+  VISITAS=v.filter(x=>IX[x.cliente_id]).map(x=>({cli:x.cliente_id,fecha:new Date(x.fecha).toLocaleDateString("en-CA"),res:resDe(x),com:resumenDe(x),ver:x.verificacion,dist:x.distancia_m,tipoV:x.tipo_visita,correo:x.correo}));
+  COTS=q.filter(x=>IX[x.cliente_id]).map(x=>({dbid:x.id,id:x.folio,factura:x.factura,cli:x.cliente_id,fecha:x.fecha,monto:+x.monto,estado:x.estado,ganado:x.monto_ganado==null?0:+x.monto_ganado,motivo:x.motivo,cierre:x.cerrada_en}));
   // pidió cotización en su última visita con interés y todavía no se le registra una
   for(const x of VISITAS)if(x.res==="Pidió cotización"&&!COTS.some(q=>q.cli===x.cli&&q.fecha>=x.fecha))IX[x.cli].pideCot=true;
 }
@@ -717,9 +717,9 @@ function renderR(){
   $("mapBadge").innerHTML=ocultos?`<span class="lbl">${ocultos.toLocaleString("es-MX")} disponibles ocultos</span><span style="font-size:12px">Elige una sucursal para verlos</span>`:`<span class="lbl">Unidades registradas en visitas</span><b class="num">${unid.toLocaleString("es-MX")}</b>`;
 
   $("rankHint").textContent=`Meta ${m} · ${rangoTxt()}`;
-  const rk=SUC.map(x=>{const nn=visitasDe(new Set(CL.filter(c=>c.suc.id===x.id).map(c=>c.id))).length;return{x,nn}}).sort((a,b)=>b.nn-a.nn);
-  $("rank").innerHTML=rk.map(({x,nn},i)=>{const[c,t]=semaforo(nn,m);
-    return `<button class="rk" type="button" data-suc="${x.id}" style="--c:var(${c});opacity:${v==="all"||v===x.id?1:.4}"><span class="pos">${String(i+1).padStart(2,"0")}</span><span class="nm"><b>${x.g}</b><span class="meter"><i style="width:${Math.min(nn/m,1)*100}%"></i></span></span><span class="sc"><b class="num">${nn}/${m}</b><span class="chip">${t}</span></span></button>`}).join("");
+  const rk=SUC.map(x=>{const vv=visitasDe(new Set(CL.filter(c=>c.suc.id===x.id).map(c=>c.id))),nn=vv.length,ok=vv.filter(z=>z.ver==="en_sitio"||z.ver==="ubicacion_nueva").length;return{x,nn,pv:nn?Math.round(ok/nn*100):null}}).sort((a,b)=>b.nn-a.nn);
+  $("rank").innerHTML=rk.map(({x,nn,pv},i)=>{const[c,t]=semaforo(nn,m);
+    return `<button class="rk" type="button" data-suc="${x.id}" style="--c:var(${c});opacity:${v==="all"||v===x.id?1:.4}"><span class="pos">${String(i+1).padStart(2,"0")}</span><span class="nm"><b>${x.g}</b><span class="meter"><i style="width:${Math.min(nn/m,1)*100}%"></i></span></span><span class="sc"><b class="num">${nn}/${m}</b><span class="chip">${t}</span>${pv!=null?`<span class="hint" style="font-size:11px">${pv}% en sitio</span>`:""}</span></button>`}).join("");
 
   tendencia(ids);
 
@@ -735,8 +735,8 @@ function renderR(){
   $("giros").innerHTML=GIROS.map(g=>{const tot=list.filter(c=>c.giro===g).length,vv=list.filter(c=>c.giro===g&&c.st==="vis").length;
     return `<div class="br" title="${g}: ${vv} visitados de ${tot}"><div class="br-top"><span>${g}</span><span class="tn">${vv}/${tot}</span></div><div class="br-track"><i style="width:${tot/gmax*100}%;background:var(--soft2);filter:brightness(.92)"></i><i style="width:${vv/gmax*100}%;background:var(--st-vis)"></i></div></div>`}).join("");
 
-  const escs=list.filter(c=>c.st==="esc");
-  $("alertas").innerHTML=escs.length?escs.map(c=>`<div class="ev" data-id="${c.id}" style="--c:var(--st-esc)"><span class="dot">!</span><div><div class="ev-h"><b>${esc(c.nombre)}</b><span>${c.suc.g}</span></div><p>${c.motivo||"2 semanas asignado sin visita. Reasignar o visitar esta semana."} · ${c.giro} · ${fk(c.km)} km</p></div></div>`).join(""):'<div class="empty">Nada escalado. Todo el equipo va al corriente.</div>';
+  const escs=list.filter(c=>c.st==="esc"||c.revisar);
+  $("alertas").innerHTML=escs.length?escs.map(c=>`<div class="ev" data-id="${c.id}" style="--c:var(--st-esc)"><span class="dot">!</span><div><div class="ev-h"><b>${esc(c.nombre)}</b><span>${c.suc.g}</span></div><p>${c.revisar?"El gerente reportó que la ubicación del cliente está mal":c.motivo||"2 semanas asignado sin visita. Reasignar o visitar esta semana."} · ${c.giro} · ${fk(c.km)} km</p></div></div>`).join(""):'<div class="empty">Nada escalado. Todo el equipo va al corriente.</div>';
 
   $("actHint").textContent=`${vis.length} visitas · ${rangoTxt()}`;
   $("feed").innerHTML=feed(vis,6,true);
@@ -749,10 +749,14 @@ function renderR(){
   $("verMas").textContent=mostrar<filas.length?`Ver las ${filas.length} empresas`:"Ver menos";
 }
 
+const mts=m=>m==null?"":m<1000?m+" m":(m/1000).toFixed(1)+" km";
+const verif=x=>({en_sitio:`<span class="chip" style="--c:var(--st-vis)">En sitio${x.dist!=null?" · "+mts(x.dist):""}</span>`,
+  ubicacion_nueva:'<span class="chip" style="--c:var(--st-asig)">Ubicación registrada</span>',
+  pin_reportado:`<span class="chip" style="--c:var(--warn)">Pin reportado · a ${mts(x.dist)}</span>`}[x.ver]||'<span class="chip" style="--c:var(--st-disp)">Sin verificar</span>');
 function feed(vis,max,conGerente){
   const ult=[...vis].reverse().sort((a,b)=>b.fecha.localeCompare(a.fecha)).slice(0,max);
   return ult.length?ult.map(x=>{const c=cli(x.cli);
-    return `<div class="ev" data-id="${c.id}" style="--c:var(${RES[x.res]})"><span class="dot">${conGerente?iniciales(c.suc.g):fecha(x.fecha).split(" ")[0]}</span><div><div class="ev-h"><b>${esc(c.nombre)}</b><span>${fecha(x.fecha)}${conGerente?" · "+c.suc.n:""}</span></div><p><span class="chip" style="--c:var(${RES[x.res]})">${x.res}</span> ${esc(x.com)}</p></div></div>`}).join(""):'<div class="empty">Sin visitas en este periodo.</div>';
+    return `<div class="ev" data-id="${c.id}" style="--c:var(${RES[x.res]})"><span class="dot">${conGerente?iniciales(c.suc.g):fecha(x.fecha).split(" ")[0]}</span><div><div class="ev-h"><b>${esc(c.nombre)}</b><span>${fecha(x.fecha)}${conGerente?" · "+c.suc.n:""}</span></div><p><span class="chip" style="--c:var(${RES[x.res]})">${x.res}</span> ${verif(x)} ${esc(x.com)}</p></div></div>`}).join(""):'<div class="empty">Sin visitas en este periodo.</div>';
 }
 
 /* ---------- gerente ---------- */
@@ -812,7 +816,7 @@ function abrir(id){const c=cli(id);if(!c)return;
   $("ficha").hidden=$("scrim").hidden=false;$("cerrar").focus()}
 function cerrar(){$("ficha").hidden=$("scrim").hidden=true}
 function historial(id){const h=[...VISITAS].reverse().filter(x=>x.cli===id).sort((a,b)=>b.fecha.localeCompare(a.fecha));
-  $("fHist").innerHTML=`<div class="lbl">Historial · ${h.length} ${h.length===1?"visita":"visitas"}</div>`+(h.length?h.map(x=>`<div class="hi" style="--c:var(${RES[x.res]})"><div class="hi-h"><span>${fecha(x.fecha)}</span><span>${x.res}</span></div><p>${esc(x.com)}</p></div>`).join(""):'<div class="empty" style="padding:0">Aún no hay visitas registradas.</div>')}
+  $("fHist").innerHTML=`<div class="lbl">Historial · ${h.length} ${h.length===1?"visita":"visitas"}</div>`+(h.length?h.map(x=>`<div class="hi" style="--c:var(${RES[x.res]})"><div class="hi-h"><span>${fecha(x.fecha)}${x.tipoV?" · "+x.tipoV:""}</span><span>${x.res}</span></div><p>${verif(x)} ${esc(x.com)}</p></div>`).join(""):'<div class="empty" style="padding:0">Aún no hay visitas registradas.</div>')}
 
 let cotModo=null;
 function cotBlock(id){
@@ -822,11 +826,11 @@ function cotBlock(id){
     h=`<div class="lbl">Cotización abierta · ${q.id}</div><div class="qbig"><b class="num">${mxn(q.monto)}</b><span>cotizada el ${fecha(q.fecha)}</span></div>
     <div class="meter" style="--c:var(${rs<=4?"--st-esc":"--warn"})"><i style="width:${Math.min(d/DIAS_SIN_RESP,1)*100}%"></i></div>
     <div class="hint">Si no hay respuesta, se marca como perdida en ${rs} ${rs===1?"día":"días"} (${fecha(addDias(q.fecha,DIAS_SIN_RESP))}).</div>`;
-    if(cotModo==="ganar")h+=`<label class="qlab" for="qGan">Monto cerrado: lo que realmente se facturó<input class="txt" id="qGan" type="number" inputmode="numeric" min="1" value="${q.monto}"></label><div class="acts"><button class="btn pri" type="button" data-cot="ok-ganar">Confirmar venta</button><button class="btn" type="button" data-cot="cancelar">Cancelar</button></div>`;
+    if(cotModo==="ganar")h+=`<label class="qlab" for="qGan">Monto cerrado: lo que realmente se facturó<input class="txt" id="qGan" type="number" inputmode="numeric" min="1" value="${q.monto}"></label><label class="qlab" for="qFac">Número de factura (obligatorio)<input class="txt" id="qFac" autocomplete="off" placeholder="Ej. A-12345"></label><div class="acts"><button class="btn pri" type="button" data-cot="ok-ganar">Confirmar venta</button><button class="btn" type="button" data-cot="cancelar">Cancelar</button></div>`;
     else if(cotModo==="perder")h+=`<div class="qlab">¿Por qué se perdió?</div><div class="pills">${MOTIVOS.map((m,i)=>`<label><input type="radio" name="motivo" value="${m}" id="mot${i}">${m}</label>`).join("")}</div><div class="acts"><button class="btn pri" type="button" data-cot="ok-perder">Marcar como perdida</button><button class="btn" type="button" data-cot="cancelar">Cancelar</button></div>`;
     else h+=`<div class="acts"><button class="btn pri" type="button" data-cot="ganar">Se ganó</button><button class="btn" type="button" data-cot="perder">Se perdió</button></div>`;
   }else if(c.pideCot)h=`<div class="lbl">Pidió cotización</div><label class="qlab" for="qMonto">Monto cotizado en pesos, con IVA<input class="txt" id="qMonto" type="number" inputmode="numeric" min="1" placeholder="Ej. 85000"></label><div class="acts"><button class="btn pri" type="button" data-cot="nueva">Registrar cotización</button></div>`;
-  if(cer.length)h+=`<div class="lbl">Cotizaciones cerradas</div>`+cer.map(x=>`<div class="hi" style="--c:var(${x.estado==="ganada"?"--st-vis":"--st-esc"})"><div class="hi-h"><span>${x.id} · ${fecha(x.cierre)}</span><span>${x.estado==="ganada"?"Ganada":"Perdida"}</span></div><p>${x.estado==="ganada"?`Cotizado ${mxn(x.monto)} · cerrado ${mxn(x.ganado)}`:`${mxn(x.monto)} · ${x.motivo}`}</p></div>`).join("");
+  if(cer.length)h+=`<div class="lbl">Cotizaciones cerradas</div>`+cer.map(x=>`<div class="hi" style="--c:var(${x.estado==="ganada"?"--st-vis":"--st-esc"})"><div class="hi-h"><span>${x.id} · ${fecha(x.cierre)}</span><span>${x.estado==="ganada"?"Ganada":"Perdida"}</span></div><p>${x.estado==="ganada"?`Cotizado ${mxn(x.monto)} · cerrado ${mxn(x.ganado)}${x.factura?" · factura "+esc(x.factura):""}`:`${mxn(x.monto)} · ${x.motivo}`}</p></div>`).join("");
   el.innerHTML=h+'<span class="toast" id="qMsg" hidden></span>';el.hidden=!h;
 }
 /* ---------- acciones de regional sobre clientes escalados ---------- */
@@ -837,6 +841,7 @@ function regBlock(id){
   const otras=SUC.filter(x=>x.id!==c.suc.id).sort((a,b)=>(c.lat!=null&&a.lat!=null&&b.lat!=null)?dist(c,a)-dist(c,b):a.n.localeCompare(b.n));
   el.innerHTML=`<div class="lbl">Acciones de regional</div>
     <div class="hint">${c.st==="esc"?esc(c.motivo||"Escalado")+". ":"Estatus: "+ST[c.st].t+". "}Gerente actual: ${esc(c.suc.g)} (${esc(c.suc.n)}).</div>
+    ${c.revisar?'<div class="aviso">El gerente reportó que la ubicación del cliente está mal.</div><div class="acts"><button class="btn pri" type="button" data-reg="pin">Usar la ubicación reportada por el gerente</button></div>':""}
     <div class="acts"><button class="btn pri" type="button" data-reg="lista">${c.st==="asig"||c.st==="reint"?"Reiniciar intentos y dejar en la lista":"Poner en la lista de esta semana"}</button><button class="btn" type="button" data-reg="cartera">Devolver a la cartera</button></div>
     <label class="qlab" for="rSuc">Reasignar a otra sucursal<select class="txt" id="rSuc">${otras.map(x=>`<option value="${x.id}">${esc(x.n)} · ${esc(x.g)}${c.lat!=null&&x.lat!=null?" · "+fk(dist(c,x))+" km":""}</option>`).join("")}</select></label>
     <div class="acts"><button class="btn" type="button" data-reg="mover">Reasignar y poner en su lista de esta semana</button></div>
@@ -847,6 +852,10 @@ async function regAccion(a){
   const id=$("ficha").dataset.cli,c=cli(id),m=$("rMsg");
   const base={intentos:0,semanas_arrastre:0,motivo_escalado:null,horario_sugerido:null,actualizado_en:new Date().toISOString()};
   let cambios,msg;
+  if(a==="pin"){$("fReg").querySelectorAll("button,select").forEach(b=>b.disabled=true);
+    const{error}=await SB.rpc("corregir_ubicacion",{cliente:id});
+    if(error){regBlock(id);const m2=$("rMsg");m2.textContent="No se guardó: "+error.message;m2.style.color="var(--st-esc)";m2.hidden=false;return}
+    await recargar(id);const t=$("toast");t.textContent="Ubicación corregida con la de la última visita.";t.style.color="var(--st-vis)";t.hidden=false;return}
   if(a==="lista"){cambios={...base,estatus:"asignado",asignado_en:HOY};msg=`Regresó a la lista de ${c.suc.g}.`}
   else if(a==="cartera"){cambios={...base,estatus:"disponible",asignado_en:null};msg="Regresó a la cartera; se volverá a asignar más adelante."}
   else{const dest=SUC.find(x=>x.id===$("rSuc").value);if(!dest)return;
@@ -862,7 +871,7 @@ async function cotAccion(a){
   const err=t=>{const m=$("qMsg");m.textContent=t;m.style.color="var(--st-esc)";m.hidden=false};
   let r=null;
   if(a==="nueva"){const m=+$("qMonto").value;if(!(m>0))return err("Escribe el monto cotizado.");r=SB.from("cotizaciones").insert({cliente_id:id,monto:m})}
-  else if(a==="ok-ganar"){const m=+$("qGan").value;if(!(m>0))return err("Escribe el monto cerrado.");r=SB.from("cotizaciones").update({estado:"ganada",monto_ganado:m}).eq("id",q.dbid)}
+  else if(a==="ok-ganar"){const m=+$("qGan").value,f=$("qFac").value.trim();if(!(m>0))return err("Escribe el monto cerrado.");if(!f)return err("Escribe el número de factura.");r=SB.from("cotizaciones").update({estado:"ganada",monto_ganado:m,factura:f}).eq("id",q.dbid)}
   else if(a==="ok-perder"){const mo=($("fCot").querySelector("input[name=motivo]:checked")||{}).value;if(!mo)return err("Elige el motivo.");r=SB.from("cotizaciones").update({estado:"perdida",motivo:mo}).eq("id",q.dbid)}
   else{cotModo=a==="cancelar"?null:a;return cotBlock(id)}
   $("fCot").querySelectorAll("button").forEach(b=>b.disabled=true);
@@ -896,8 +905,9 @@ function actualizarForm(){
 $("form").addEventListener("change",actualizarForm);
 // ubicación del celular al guardar (opcional: si la niega o no hay señal, se guarda sin ella)
 const ubic=()=>new Promise(ok=>{if(!navigator.geolocation)return ok(null);
-  navigator.geolocation.getCurrentPosition(p=>ok({lat:p.coords.latitude,lng:p.coords.longitude}),()=>ok(null),{enableHighAccuracy:true,timeout:8000,maximumAge:60000})});
+  navigator.geolocation.getCurrentPosition(p=>ok({lat:p.coords.latitude,lng:p.coords.longitude,acc:p.coords.accuracy}),()=>ok(null),{enableHighAccuracy:true,timeout:10000,maximumAge:0})});
 async function recargar(id){await cargar();render();if(id&&!$("ficha").hidden){const c=cli(id);if(c){$("fChip").innerHTML=chip(c.st);historial(id);cotBlock(id);regBlock(id)}}}
+let forzarPin=false; // el gerente confirmó que el pin del cliente está mal
 $("form").addEventListener("submit",async e=>{e.preventDefault();
   const t=$("toast"),id=$("ficha").dataset.cli,con=val("contacto"),cs=caso(con),com=$("fCom").value.trim(),btn=$("form").querySelector("button[type=submit]");
   const falta=!con?["cómo fue la visita"]:cs==="reint"?(val("horario")?[]:["cuándo conviene volver"]):cs==="ef"?[["interes","nivel de interés"],["unidades","tamaño de flota"],["paso","siguiente paso"]].filter(([k])=>!val(k)).map(x=>x[1]):[];
@@ -905,17 +915,33 @@ $("form").addEventListener("submit",async e=>{e.preventDefault();
   if(cs==="ef"&&cel&&cel.length!==10)falta.push("celular a 10 dígitos");
   if(falta.length){t.textContent="Falta: "+falta.join(", ")+".";t.style.color="var(--st-esc)";t.hidden=false;return}
   btn.disabled=true;t.textContent="Guardando…";t.style.color="var(--muted)";t.hidden=false;
+  t.textContent="Verificando tu ubicación…";
   const g=await ubic(),tel=($("fTel").value||"").trim();
-  const row={cliente_id:id,contacto:con,comentario:[cs==="reint"&&tel?"Contacto: "+tel+".":"",com].filter(Boolean).join(" ")||null,latitud:g&&g.lat,longitud:g&&g.lng};
+  if(!g){btn.disabled=false;t.innerHTML="Para registrar la visita necesitas compartir tu ubicación. En iPhone: <b>Ajustes → Privacidad → Localización → Safari → Al usar la app</b>. Luego vuelve a tocar «Guardar visita».";t.style.color="var(--st-esc)";return}
+  const row={cliente_id:id,contacto:con,comentario:[cs==="reint"&&tel?"Contacto: "+tel+".":"",com].filter(Boolean).join(" ")||null,latitud:g.lat,longitud:g.lng,precision_m:Math.round(g.acc||0),ubicacion_incorrecta:forzarPin};
   if(cs==="reint")row.horario=val("horario");
   if(cs==="ef")Object.assign(row,{interes:val("interes"),unidades:val("unidades"),tipos_unidad:vals("tipos"),necesidades:vals("necesidades"),proveedor:val("proveedor")||null,
     siguiente_paso:val("paso"),contacto_nombre:$("fCNom").value.trim()||null,contacto_puesto:val("puesto")||null,contacto_celular:cel||null});
-  const{error}=await SB.from("visitas").insert(row);
-  btn.disabled=false;
-  if(error){t.textContent="No se guardó: "+(error.message||"revisa tu conexión")+". Intenta de nuevo.";t.style.color="var(--st-esc)";return}
+  const{data:nv,error}=await SB.from("visitas").insert(row).select("verificacion,distancia_m").single();
+  btn.disabled=false;forzarPin=false;
+  if(error){const fr=/FUERA_DE_RANGO:(\d+):(\d+)/.exec(error.message||"");
+    if(fr){t.innerHTML=`Estás a <b>${mts(+fr[1])}</b> de ${esc(cli(id).nombre)}. Para registrar la visita tienes que estar a menos de ${mts(+fr[2])} del cliente.<br><button class="btn" type="button" id="fPin" style="margin-top:8px">Estoy en el lugar: la ubicación del cliente está mal</button>`;
+      t.style.color="var(--st-esc)";$("fPin").onclick=()=>{forzarPin=true;$("form").requestSubmit()};return}
+    t.textContent=/UBICACION_REQUERIDA/.test(error.message||"")?"Para registrar la visita necesitas compartir tu ubicación.":"No se guardó: "+(error.message||"revisa tu conexión")+". Intenta de nuevo.";t.style.color="var(--st-esc)";return}
   await recargar(id);const c=cli(id);
-  t.textContent=c.st==="esc"?"Guardado. Pasó a telemarketing.":c.st==="reint"?`Guardado. Vuelve a tu lista la próxima semana · intento ${c.intentos+1} de ${MAX_INT}.`:c.st==="seg"?"Guardado. Queda en seguimiento.":"Visita guardada.";
+  const vt={en_sitio:` Verificada en sitio (a ${mts(nv&&nv.distancia_m)}).`,ubicacion_nueva:" Guardamos tu ubicación como la del cliente.",pin_reportado:" Se guardó sin verificar y avisamos a tu regional para corregir la ubicación."}[nv&&nv.verificacion]||"";
+  t.textContent=(c.st==="esc"?"Guardado. Pasó a telemarketing.":c.st==="reint"?`Guardado. Vuelve a tu lista la próxima semana · intento ${c.intentos+1} de ${MAX_INT}.`:c.st==="seg"?"Guardado. Queda en seguimiento.":"Visita guardada.")+vt;
   t.style.color="var(--st-vis)";$("form").reset();actualizarForm()});
+// ventas ganadas del periodo y la vista elegida, para cotejar con facturación
+$("csvVentas").onclick=()=>{if(!YO||!["regional","admin"].includes(YO.rol))return;
+  const v=$("vista").value,ids=new Set(CL.filter(c=>v==="all"||c.suc.id===v).map(c=>c.id));
+  const filas=COTS.filter(q=>ids.has(q.cli)&&q.estado==="ganada"&&q.cierre>=desde&&q.cierre<=hasta).sort((a,b)=>a.cierre.localeCompare(b.cierre));
+  const cab=["folio","factura","fecha_cierre","monto_ganado","monto_cotizado","fecha_cotizacion","cliente_id","empresa","codigo_erp","razon_social","sucursal","gerente"];
+  const q=x=>{const t=x==null?"":String(x);return /[",\n]/.test(t)?'"'+t.replace(/"/g,'""')+'"':t};
+  const csv=[cab,...filas.map(x=>{const c=cli(x.cli);return[x.id,x.factura,x.cierre,x.ganado,x.monto,x.fecha,c.id,c.nombre,c.erp,c.rs,c.suc.n,c.suc.g]})].map(r=>r.map(q).join(",")).join("\r\n");
+  const a=document.createElement("a");a.href=URL.createObjectURL(new Blob(["\ufeff"+csv],{type:"text/csv;charset=utf-8"})); // BOM: Excel respeta acentos
+  a.download=`ventas-flotillas-${desde}-a-${hasta}.csv`;document.body.appendChild(a);a.click();a.remove();
+  const t=$("csvVentas");t.textContent=`Descargadas ${filas.length} ventas`;setTimeout(()=>t.textContent="Descargar ventas (CSV)",2500)};
 $("cercaMi").onclick=async()=>{const b=$("cercaMi");b.disabled=true;b.textContent="Buscando tu ubicación…";
   YOPOS=await ubic();b.disabled=false;b.textContent=YOPOS?"Actualizar mi ubicación":"Ordenar por cercanía a mí";
   $("ordenHint").textContent=YOPOS?"Ordenados por cercanía a donde estás ahora":"No se pudo obtener tu ubicación. Revisa que el navegador tenga permiso de ubicación.";render()};
@@ -936,7 +962,7 @@ async function entrar(){
   if(error||!p){await SB.auth.signOut();$("loginForm").hidden=false;$("passForm").hidden=true;return msgLogin(error?"No se pudo leer tu perfil: "+error.message:`El correo ${user.email} no está dado de alta en perfiles. Pide que te den de alta.`)}
   YO=p;msgLogin("Cargando tu información…",true);
   try{await cargar()}catch(x){return msgLogin("No se pudo cargar la información: "+x.message)}
-  rol=p.rol==="gerente"?p.id_sucursal:"reg";
+  rol=p.rol==="gerente"?p.id_sucursal:"reg";$("csvVentas").hidden=!["regional","admin"].includes(p.rol);
   if(!GM)await cargarMaps();
   const nm=p.nombre||nombreDe(p.correo);
   $("quien").textContent=nm;$("rolTxt").textContent={gerente:"Gerente de sucursal",regional:"Regional",admin:"Administrador",telemarketing:"Telemarketing"}[p.rol];$("avatar").textContent=iniciales(nm);
