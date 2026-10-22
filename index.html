@@ -109,6 +109,8 @@ h2{font-family:var(--display);font-variation-settings:"wdth" 110;font-weight:700
 
 /* mapa */
 .map{position:relative;border-radius:10px;overflow:hidden;background:var(--soft)}
+.gmap{width:100%;aspect-ratio:16/10;min-height:300px;max-width:100%}
+.yo{font-size:12px;color:var(--st-asig);font-weight:600}
 .map svg{display:block;width:100%;height:auto}
 .map-badge{position:absolute;left:12px;bottom:12px;background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:8px 10px;font-size:12px;box-shadow:var(--shadow);display:grid;gap:2px}
 .map-badge b{font-size:18px}
@@ -387,7 +389,8 @@ textarea{width:100%;font:inherit;padding:10px;border-radius:10px;border:1px soli
         <div id="gCots"></div>
       </section>
       <section class="c12" style="display:grid;gap:12px">
-        <div class="mod-h"><h2>Tus visitas de esta semana</h2><span class="hint">Arrastrados primero, luego por cercanía</span></div>
+        <div class="mod-h"><h2>Tus visitas de esta semana</h2><button class="btn" type="button" id="cercaMi">Ordenar por cercanía a mí</button></div>
+        <span class="hint" id="ordenHint">Reintentos y arrastrados primero, luego por cercanía a tu sucursal</span>
         <div class="cards" id="gCards"></div>
       </section>
       <section class="mod c7" id="gMapaSec">
@@ -487,6 +490,15 @@ const habilesRestantes=()=>{const d=new Date(HOY+"T12:00:00").getDay();return d=
 const nombreDe=e=>e&&e.split("@")[0].includes(".")?e.split("@")[0].split(".").map(w=>w[0].toUpperCase()+w.slice(1)).join(" "):(e||"").split("@")[0];
 const corta=n=>n.replace(/^(Michelin Car Service - |BFGOODRICH )?(TERSA Llantas|TERSA|Tersa Llantas)\s*/i,"").replace(/ TERSA LLANTAS$/i,"")||n;
 const fk=k=>k==null?"—":(+k).toFixed(1);
+const dist=(a,b)=>{const t=x=>x*Math.PI/180,h=Math.sin(t(b.lat-a.lat)/2)**2+Math.cos(t(a.lat))*Math.cos(t(b.lat))*Math.sin(t(b.lng-a.lng)/2)**2;return 2*6371*Math.asin(Math.sqrt(h))};
+let YOPOS=null; // ubicación del gerente cuando pide "ordenar por cercanía a mí"
+const MAPS_KEY="AIzaSyA4hOnicls42U71gVYeg3AcfuIDjFWoUa0"; // clave de navegador restringida a tersallantasoficial-beep.github.io y solo a Maps JavaScript API
+let GM=false;const GMI={};
+const cargarMaps=()=>new Promise(ok=>{if(!MAPS_KEY)return ok(false);
+  window.gm_authFailure=()=>{GM=false;render()}; // clave inválida o dominio no autorizado: vuelve al esquema
+  window.__gm=()=>{GM=true;ok(true)};const sc=document.createElement("script");
+  sc.src=`https://maps.googleapis.com/maps/api/js?key=${MAPS_KEY}&v=weekly&callback=__gm`;sc.async=true;sc.onerror=()=>ok(false);document.head.appendChild(sc)});
+const colorDe=v=>getComputedStyle(document.documentElement).getPropertyValue(v).trim();
 const ordKm=(a,b)=>(a.km??999)-(b.km??999);
 
 let SUC=[],CL=[],VISITAS=[],COTS=[],YO=null,IX={};
@@ -560,6 +572,9 @@ const visibles=new Set(Object.keys(ST));
 
 /* ---------- mapa ---------- */
 function mapa(svgId,pts,sucs,hi){
+  const svg=$(svgId);
+  if(GM&&window.google&&google.maps){svg.toggleAttribute("hidden",true);return gmapa(svgId,pts,sucs,hi)} // en SVG no existe .hidden
+  svg.toggleAttribute("hidden",false);if(GMI[svgId])GMI[svgId].div.hidden=true;
   pts=pts.filter(p=>p.lat!=null);sucs=sucs.filter(x=>x.lat!=null);
   if(!pts.length&&!sucs.length){$(svgId).innerHTML="";return}
   const W=640,H=400,all=[...pts,...sucs],la=all.map(p=>p.lat),lo=all.map(p=>p.lng);
@@ -581,6 +596,26 @@ function mapa(svgId,pts,sucs,hi){
       <text x="${px}" y="${py-16}" text-anchor="middle" font-size="12" font-weight="700" font-family="Instrument Sans,sans-serif" fill="var(--ink)" paint-order="stroke" stroke="var(--soft)" stroke-width="4">${x.n}</text></g>`}
   g+=`<g transform="translate(${W-96},${H-22})"><line x1="0" y1="0" x2="${R5}" y2="0" stroke="var(--muted)" stroke-width="2"/><line x1="0" y1="-4" x2="0" y2="4" stroke="var(--muted)" stroke-width="2"/><line x1="${R5}" y1="-4" x2="${R5}" y2="4" stroke="var(--muted)" stroke-width="2"/><text x="${R5/2}" y="-8" text-anchor="middle" font-size="11" font-family="IBM Plex Mono,monospace" fill="var(--muted)">5 km</text></g>`;
   $(svgId).innerHTML=g;
+}
+
+function gmapa(svgId,pts,sucs,hi){
+  let m=GMI[svgId];
+  if(!m){const div=document.createElement("div");div.className="gmap";$(svgId).after(div);
+    const map=new google.maps.Map(div,{mapTypeControl:false,streetViewControl:false,fullscreenControl:true,gestureHandling:"cooperative",clickableIcons:false});
+    map.data.addListener("click",e=>abrir(e.feature.getProperty("id")));
+    m=GMI[svgId]={div,map,extra:[]}}
+  m.div.hidden=false;
+  m.map.data.forEach(f=>m.map.data.remove(f));m.extra.forEach(x=>x.setMap(null));m.extra=[];
+  const P=pts.filter(c=>c.lat!=null&&visibles.has(c.st)),b=new google.maps.LatLngBounds();
+  m.map.data.addGeoJson({type:"FeatureCollection",features:P.map(c=>({type:"Feature",geometry:{type:"Point",coordinates:[c.lng,c.lat]},properties:{id:c.id,st:c.st,on:hi==="all"||c.suc.id===hi}}))});
+  m.map.data.setStyle(f=>({title:cli(f.getProperty("id")).nombre,icon:{path:google.maps.SymbolPath.CIRCLE,scale:f.getProperty("on")?6:4,fillColor:colorDe(ST[f.getProperty("st")].c),fillOpacity:f.getProperty("on")?1:.25,strokeColor:"#ffffff",strokeWeight:1.5}}));
+  P.forEach(c=>{if(hi==="all"||c.suc.id===hi)b.extend({lat:c.lat,lng:c.lng})});
+  for(const x of sucs.filter(x=>x.lat!=null)){const on=hi==="all"||x.id===hi;
+    m.extra.push(new google.maps.Marker({map:m.map,position:{lat:x.lat,lng:x.lng},title:"Sucursal "+x.n,zIndex:999,opacity:on?1:.45,
+      icon:{path:"M0,-9 9,0 0,9 -9,0z",fillColor:"#0f1b2d",fillOpacity:1,strokeColor:"#f2b705",strokeWeight:2.5,scale:1}}));
+    if(on){m.extra.push(new google.maps.Circle({map:m.map,center:{lat:x.lat,lng:x.lng},radius:5000,strokeColor:"#f2b705",strokeOpacity:.6,strokeWeight:1,fillColor:"#f2b705",fillOpacity:.07,clickable:false}));b.extend({lat:x.lat,lng:x.lng})}}
+  if(YOPOS&&svgId==="gMapa"){m.extra.push(new google.maps.Marker({map:m.map,position:YOPOS,title:"Tú estás aquí",zIndex:1000,icon:{path:google.maps.SymbolPath.CIRCLE,scale:8,fillColor:"#2d6fe0",fillOpacity:1,strokeColor:"#ffffff",strokeWeight:3}}));b.extend(YOPOS)}
+  if(!b.isEmpty())m.map.fitBounds(b,40);
 }
 
 /* ---------- tendencia ---------- */
@@ -682,7 +717,8 @@ function feed(vis,max,conGerente){
 function renderG(id){
   const suc=SUC.find(x=>x.id===id),mis=CL.filter(c=>c.suc.id===id),ids=new Set(mis.map(c=>c.id));
   const m=metaRango(),vis=visitasDe(ids),n=vis.length,[col,tag]=semaforo(n,m);
-  const sem=mis.filter(c=>c.st==="asig"||c.st==="reint").sort((a,b)=>(b.st==="reint")-(a.st==="reint")||b.arr-a.arr||ordKm(a,b));
+  const yo=c=>YOPOS&&c.lat!=null?dist(YOPOS,c):null;
+  const sem=mis.filter(c=>c.st==="asig"||c.st==="reint").sort(YOPOS?(a,b)=>(yo(a)??999)-(yo(b)??999):(a,b)=>(b.st==="reint")-(a.st==="reint")||b.arr-a.arr||ordKm(a,b));
   $("titulo").textContent="Mi semana";
   $("subTop").textContent=`Sucursal ${suc.n} · semana del ${fecha(LUNES)} al ${fecha(addDias(LUNES,5))}`;
   $("gRing").innerHTML=`<div style="color:var(--panel)">${ring(n,m,150,col,"color-mix(in srgb,var(--panel) 14%,transparent)")}</div>`;
@@ -700,7 +736,7 @@ function renderG(id){
   $("gNext").innerHTML=nx?`<span class="lbl">Siguiente parada</span><b>${esc(nx.nombre)}</b><span style="font-size:12px;opacity:.75">${nx.giro}${nx.flota?" · "+nx.flota+" unidades":""} · ${fk(nx.km)} km de tu sucursal</span><a class="btn pri" href="${maps(nx)}" target="_blank" rel="noopener">Cómo llegar ↗</a>`:`<span class="lbl">Siguiente parada</span><b>Semana completa</b>`;
   $("gCards").innerHTML=sem.length?sem.map(c=>`<div class="card${c.arr||c.st==="reint"?" arr":""}">
     <div class="card-h"><span class="lbl">${c.giro}</span>${c.st==="reint"?`<span class="chip" style="--c:var(--warn)">Intento ${c.intentos+1} de ${MAX_INT}</span>`:c.arr?'<span class="chip" style="--c:var(--warn)">2ª semana</span>':chip(c.st)}</div>
-    <h3>${esc(c.nombre)}</h3>
+    <h3>${esc(c.nombre)}</h3>${yo(c)!=null?`<span class="yo">A ${fk(yo(c))} km de ti</span>`:""}
     ${c.st==="reint"?`<div class="aviso">No estaba el encargado. Vuelve ${(c.horario||"en otro horario").toLowerCase()}.</div>`:""}
     <div class="facts"><span><b class="num">${c.flota??"—"}</b>unidades</span><span><b class="num">${fk(c.km)}</b>km de tu sucursal</span><span><b class="num">${VISITAS.filter(x=>x.cli===c.id).length}</b>visitas previas</span></div>
     <div class="acts"><a class="btn" href="${maps(c)}" target="_blank" rel="noopener">Cómo llegar ↗</a><button class="btn pri" type="button" data-id="${c.id}">Registrar visita</button></div>
@@ -809,6 +845,9 @@ $("form").addEventListener("submit",async e=>{e.preventDefault();
   await recargar(id);const c=cli(id);
   t.textContent=c.st==="esc"?"Guardado. Pasó a telemarketing.":c.st==="reint"?`Guardado. Vuelve a tu lista la próxima semana · intento ${c.intentos+1} de ${MAX_INT}.`:c.st==="seg"?"Guardado. Queda en seguimiento.":"Visita guardada.";
   t.style.color="var(--st-vis)";$("form").reset();actualizarForm()});
+$("cercaMi").onclick=async()=>{const b=$("cercaMi");b.disabled=true;b.textContent="Buscando tu ubicación…";
+  YOPOS=await ubic();b.disabled=false;b.textContent=YOPOS?"Actualizar mi ubicación":"Ordenar por cercanía a mí";
+  $("ordenHint").textContent=YOPOS?"Ordenados por cercanía a donde estás ahora":"No se pudo obtener tu ubicación. Revisa que el navegador tenga permiso de ubicación.";render()};
 $("verMas").onclick=()=>{mostrar=mostrar===10?Infinity:10;render()};
 $("vista").onchange=()=>{mostrar=10;render()};
 $("busca").oninput=e=>{busca=e.target.value;mostrar=10;render()};
@@ -827,6 +866,7 @@ async function entrar(){
   YO=p;msgLogin("Cargando tu información…",true);
   try{await cargar()}catch(x){return msgLogin("No se pudo cargar la información: "+x.message)}
   rol=p.rol==="gerente"?p.id_sucursal:"reg";
+  if(!GM)await cargarMaps();
   const nm=p.nombre||nombreDe(p.correo);
   $("quien").textContent=nm;$("rolTxt").textContent={gerente:"Gerente de sucursal",regional:"Regional",admin:"Administrador",telemarketing:"Telemarketing"}[p.rol];$("avatar").textContent=iniciales(nm);
   $("vista").innerHTML='<option value="all">Todas las sucursales</option>'+SUC.map(x=>`<option value="${x.id}">${esc(x.n)} · ${esc(x.g)}</option>`).join("");
