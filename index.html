@@ -1,3 +1,12 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#0f1b2d">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Ruta Flotillas">
 <title>Ruta Flotillas Tersa</title>
 <meta name="claude:viewport-fit-sides" content="cover">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,400..900&family=Instrument+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@500&display=swap">
@@ -24,6 +33,10 @@
   --st-disp:#7c879a; --st-asig:#5b93f0; --st-vis:#34c28a; --st-esc:#f06a6a; --warn:#f0a43a; --st-seg:#a487f5;
   --shadow:0 1px 2px rgba(0,0,0,.4),0 10px 28px -14px rgba(0,0,0,.7); color-scheme:dark}
 *{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%;text-size-adjust:100%}
+html,body{margin:0}
+:root{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+img{max-width:100%}
 [hidden]{display:none!important}
 body{background:var(--bg);color:var(--ink);font-family:var(--body);font-size:14px;line-height:1.45}
 button,input,select{font:inherit;color:inherit}
@@ -276,6 +289,28 @@ textarea{width:100%;font:inherit;padding:10px;border-radius:10px;border:1px soli
   .drawer{top:auto;width:100%;max-height:88vh;border-radius:16px 16px 0 0}
   .opts{grid-template-columns:1fr}
 }
+@media (max-width:900px){
+  input,select,textarea,.txt,.search,.fechas input,.sel{font-size:16px!important} /* iOS hace zoom si es menor a 16px */
+  .btn,.seg button,.pills label,.filters button{min-height:44px}
+  .btn,a.btn{display:inline-flex;align-items:center;justify-content:center}
+  .ctrls{width:100%}
+  .seg{width:100%;overflow-x:auto}.seg button{flex:1}
+  .sel,.search{width:100%}
+  #cercaMi{width:100%}
+  .acts .btn{flex:1 1 auto}
+  .mod-h{align-items:center}
+  .dr-h{padding:16px max(16px,env(safe-area-inset-left,0px)) 16px max(16px,env(safe-area-inset-right,0px))}
+  .dr-b{padding:16px max(16px,env(safe-area-inset-left,0px)) calc(24px + env(safe-area-inset-bottom,0px)) max(16px,env(safe-area-inset-right,0px))}
+}
+@media (max-width:640px){
+  .nav{display:none} /* en celular la página se recorre hacia abajo; el menú sobra */
+  .ghero{grid-template-columns:auto minmax(0,1fr);gap:14px 16px;padding:16px}
+  #gRing svg{width:92px;height:92px}
+  .ghero h2{font-size:20px}
+  .gstats{gap:12px 18px;margin-top:8px}.gstats b{font-size:20px}
+  .next{grid-column:1/-1}
+  h1{font-size:26px}
+}
 @media (prefers-reduced-motion:reduce){.live i{animation:none}}
 </style>
 
@@ -351,7 +386,7 @@ textarea{width:100%;font:inherit;padding:10px;border-radius:10px;border:1px soli
       </section>
 
       <section class="mod c5">
-        <div class="mod-h"><h2>Requieren tu atención</h2><span class="hint">2 semanas sin visita</span></div>
+        <div class="mod-h"><h2>Requieren tu atención</h2><span class="hint">Toca un cliente para reasignarlo o regresarlo a la lista</span></div>
         <div class="feed" id="alertas"></div>
       </section>
       <section class="mod c7" id="actividad">
@@ -384,14 +419,14 @@ textarea{width:100%;font:inherit;padding:10px;border-radius:10px;border:1px soli
         </div>
         <div class="next" id="gNext"></div>
       </section>
-      <section class="mod c12" id="gCotSec">
-        <div class="mod-h"><h2>Tus cotizaciones</h2><span class="hint">Sin respuesta en 14 días se marcan como perdidas</span></div>
-        <div id="gCots"></div>
-      </section>
       <section class="c12" style="display:grid;gap:12px">
         <div class="mod-h"><h2>Tus visitas de esta semana</h2><button class="btn" type="button" id="cercaMi">Ordenar por cercanía a mí</button></div>
         <span class="hint" id="ordenHint">Reintentos y arrastrados primero, luego por cercanía a tu sucursal</span>
         <div class="cards" id="gCards"></div>
+      </section>
+      <section class="mod c12" id="gCotSec">
+        <div class="mod-h"><h2>Tus cotizaciones</h2><span class="hint">Sin respuesta en 14 días se marcan como perdidas</span></div>
+        <div id="gCots"></div>
       </section>
       <section class="mod c7" id="gMapaSec">
         <div class="mod-h"><h2>Tu zona</h2><span class="hint">Anillo de 5 km alrededor de tu sucursal</span></div>
@@ -415,6 +450,7 @@ textarea{width:100%;font:inherit;padding:10px;border-radius:10px;border:1px soli
     <div class="acts" id="fActs"></div>
   </div>
   <div class="dr-b">
+    <div class="cotbox" id="fReg" hidden></div>
     <div class="cotbox" id="fCot" hidden></div>
     <form id="form" style="display:grid;gap:12px">
       <div class="lbl">Registrar visita</div>
@@ -441,6 +477,7 @@ textarea{width:100%;font:inherit;padding:10px;border-radius:10px;border:1px soli
       <label for="lPass">Contraseña<input id="lPass" type="password" autocomplete="current-password" required></label>
       <button class="btn pri" type="submit" style="padding:12px">Entrar</button>
       <span class="toast" id="lErr" style="color:var(--st-esc)" hidden></span>
+      <span class="hint" style="font-size:11px">Versión 22 oct · celular</span>
       <button type="button" class="btn" id="olvide" style="border:0;background:none;color:var(--muted);text-decoration:underline;padding:0;justify-self:start">Olvidé mi contraseña</button>
     </form>
     <form class="lg-card" id="passForm" hidden>
@@ -771,7 +808,7 @@ function abrir(id){const c=cli(id);if(!c)return;
   $("fChip").innerHTML=chip(c.st);$("fNombre").textContent=c.nombre;
   $("fFacts").innerHTML=`<span><b class="num">${c.flota??"—"}</b>unidades</span><span><b class="num">${fk(c.km)}</b>km de ${c.suc.n}</span><span><b>${c.giro}</b>giro</span>`;
   $("fActs").innerHTML=`<a class="btn" href="${maps(c)}" target="_blank" rel="noopener">Abrir en Google Maps ↗</a>`;
-  $("form").reset();actualizarForm();$("toast").hidden=true;$("ficha").dataset.cli=id;historial(id);cotModo=null;cotBlock(id);
+  $("form").reset();actualizarForm();$("toast").hidden=true;$("ficha").dataset.cli=id;historial(id);cotModo=null;cotBlock(id);regBlock(id);
   $("ficha").hidden=$("scrim").hidden=false;$("cerrar").focus()}
 function cerrar(){$("ficha").hidden=$("scrim").hidden=true}
 function historial(id){const h=[...VISITAS].reverse().filter(x=>x.cli===id).sort((a,b)=>b.fecha.localeCompare(a.fecha));
@@ -792,6 +829,34 @@ function cotBlock(id){
   if(cer.length)h+=`<div class="lbl">Cotizaciones cerradas</div>`+cer.map(x=>`<div class="hi" style="--c:var(${x.estado==="ganada"?"--st-vis":"--st-esc"})"><div class="hi-h"><span>${x.id} · ${fecha(x.cierre)}</span><span>${x.estado==="ganada"?"Ganada":"Perdida"}</span></div><p>${x.estado==="ganada"?`Cotizado ${mxn(x.monto)} · cerrado ${mxn(x.ganado)}`:`${mxn(x.monto)} · ${x.motivo}`}</p></div>`).join("");
   el.innerHTML=h+'<span class="toast" id="qMsg" hidden></span>';el.hidden=!h;
 }
+/* ---------- acciones de regional sobre clientes escalados ---------- */
+const esRegional=()=>YO&&["regional","admin","telemarketing"].includes(YO.rol);
+function regBlock(id){
+  const c=cli(id),el=$("fReg");
+  if(!esRegional()){el.hidden=true;el.innerHTML="";return}
+  const otras=SUC.filter(x=>x.id!==c.suc.id).sort((a,b)=>(c.lat!=null&&a.lat!=null&&b.lat!=null)?dist(c,a)-dist(c,b):a.n.localeCompare(b.n));
+  el.innerHTML=`<div class="lbl">Acciones de regional</div>
+    <div class="hint">${c.st==="esc"?esc(c.motivo||"Escalado")+". ":"Estatus: "+ST[c.st].t+". "}Gerente actual: ${esc(c.suc.g)} (${esc(c.suc.n)}).</div>
+    <div class="acts"><button class="btn pri" type="button" data-reg="lista">${c.st==="asig"||c.st==="reint"?"Reiniciar intentos y dejar en la lista":"Poner en la lista de esta semana"}</button><button class="btn" type="button" data-reg="cartera">Devolver a la cartera</button></div>
+    <label class="qlab" for="rSuc">Reasignar a otra sucursal<select class="txt" id="rSuc">${otras.map(x=>`<option value="${x.id}">${esc(x.n)} · ${esc(x.g)}${c.lat!=null&&x.lat!=null?" · "+fk(dist(c,x))+" km":""}</option>`).join("")}</select></label>
+    <div class="acts"><button class="btn" type="button" data-reg="mover">Reasignar y poner en su lista de esta semana</button></div>
+    <span class="toast" id="rMsg" hidden></span>`;
+  el.hidden=false;
+}
+async function regAccion(a){
+  const id=$("ficha").dataset.cli,c=cli(id),m=$("rMsg");
+  const base={intentos:0,semanas_arrastre:0,motivo_escalado:null,horario_sugerido:null,actualizado_en:new Date().toISOString()};
+  let cambios,msg;
+  if(a==="lista"){cambios={...base,estatus:"asignado",asignado_en:HOY};msg=`Regresó a la lista de ${c.suc.g}.`}
+  else if(a==="cartera"){cambios={...base,estatus:"disponible",asignado_en:null};msg="Regresó a la cartera; se volverá a asignar más adelante."}
+  else{const dest=SUC.find(x=>x.id===$("rSuc").value);if(!dest)return;
+    cambios={...base,estatus:"asignado",asignado_en:HOY,id_sucursal:dest.id,km_sucursal:c.lat!=null&&dest.lat!=null?Math.round(dist(c,dest)*10)/10:null};
+    msg=`Reasignado a ${dest.n} (${dest.g}). Ya está en su lista de esta semana.`}
+  $("fReg").querySelectorAll("button,select").forEach(b=>b.disabled=true);
+  const{error}=await SB.from("clientes").update(cambios).eq("id",id);
+  if(error){regBlock(id);const m2=$("rMsg");m2.textContent="No se guardó: "+error.message;m2.style.color="var(--st-esc)";m2.hidden=false;return}
+  await recargar(id);const t=$("toast");t.textContent=msg;t.style.color="var(--st-vis)";t.hidden=false;
+}
 async function cotAccion(a){
   const id=$("ficha").dataset.cli,q=COTS.find(x=>x.cli===id&&x.estado==="abierta");
   const err=t=>{const m=$("qMsg");m.textContent=t;m.style.color="var(--st-esc)";m.hidden=false};
@@ -807,6 +872,7 @@ async function cotAccion(a){
 }
 document.addEventListener("click",e=>{
   const qa=e.target.closest("[data-cot]");if(qa){cotAccion(qa.dataset.cot);return}
+  const ra=e.target.closest("[data-reg]");if(ra){regAccion(ra.dataset.reg);return}
   const st=e.target.closest("[data-st]");if(st){const k=st.dataset.st,on=visibles.has(k);on?visibles.delete(k):visibles.add(k);st.setAttribute("aria-pressed",!on);render();return}
   const ft=e.target.closest("[data-ft]");if(ft){filtroT=ft.dataset.ft;mostrar=10;document.querySelectorAll("[data-ft]").forEach(b=>b.setAttribute("aria-pressed",b===ft));render();return}
   const sc=e.target.closest("[data-suc]");if(sc){$("vista").value=$("vista").value===sc.dataset.suc?"all":sc.dataset.suc;mostrar=10;render();return}
@@ -831,7 +897,7 @@ $("form").addEventListener("change",actualizarForm);
 // ubicación del celular al guardar (opcional: si la niega o no hay señal, se guarda sin ella)
 const ubic=()=>new Promise(ok=>{if(!navigator.geolocation)return ok(null);
   navigator.geolocation.getCurrentPosition(p=>ok({lat:p.coords.latitude,lng:p.coords.longitude}),()=>ok(null),{enableHighAccuracy:true,timeout:8000,maximumAge:60000})});
-async function recargar(id){await cargar();render();if(id&&!$("ficha").hidden){const c=cli(id);if(c){$("fChip").innerHTML=chip(c.st);historial(id);cotBlock(id)}}}
+async function recargar(id){await cargar();render();if(id&&!$("ficha").hidden){const c=cli(id);if(c){$("fChip").innerHTML=chip(c.st);historial(id);cotBlock(id);regBlock(id)}}}
 $("form").addEventListener("submit",async e=>{e.preventDefault();
   const t=$("toast"),id=$("ficha").dataset.cli,con=val("contacto"),cs=caso(con),com=$("fCom").value.trim(),btn=$("form").querySelector("button[type=submit]");
   const falta=!con?["cómo fue la visita"]:cs==="reint"?(val("horario")?[]:["cuándo conviene volver"]):cs==="ef"?[["interes","nivel de interés"],["unidades","tamaño de flota"],["paso","siguiente paso"]].filter(([k])=>!val(k)).map(x=>x[1]):[];
@@ -898,3 +964,5 @@ document.addEventListener("visibilitychange",()=>{if(!document.hidden&&YO)recarg
   if(session&&tipoLink){$("loginForm").hidden=true;$("passForm").hidden=false;return} // viene de invitación o de "olvidé mi contraseña"
   if(session)entrar()})();
 </script>
+</body>
+</html>
