@@ -571,8 +571,12 @@ let rol="reg",mostrar=10,busca="",filtroT="todos";
 const visibles=new Set(Object.keys(ST));
 
 /* ---------- mapa ---------- */
+const MAX_PUNTOS=1500; // más puntos congelan el celular; arriba de esto se ocultan los disponibles
+let ocultos=0;
 function mapa(svgId,pts,sucs,hi){
   const svg=$(svgId);
+  pts=pts.filter(c=>c.lat!=null&&(hi==="all"||c.suc.id===hi));
+  ocultos=0;if(pts.length>MAX_PUNTOS){const n=pts.length;pts=pts.filter(c=>c.st!=="disp");ocultos=n-pts.length}
   if(GM&&window.google&&google.maps){svg.toggleAttribute("hidden",true);return gmapa(svgId,pts,sucs,hi)} // en SVG no existe .hidden
   svg.toggleAttribute("hidden",false);if(GMI[svgId])GMI[svgId].div.hidden=true;
   pts=pts.filter(p=>p.lat!=null);sucs=sucs.filter(x=>x.lat!=null);
@@ -608,7 +612,8 @@ function gmapa(svgId,pts,sucs,hi){
   m.map.data.forEach(f=>m.map.data.remove(f));m.extra.forEach(x=>x.setMap(null));m.extra=[];
   const P=pts.filter(c=>c.lat!=null&&visibles.has(c.st)),b=new google.maps.LatLngBounds();
   m.map.data.addGeoJson({type:"FeatureCollection",features:P.map(c=>({type:"Feature",geometry:{type:"Point",coordinates:[c.lng,c.lat]},properties:{id:c.id,st:c.st,on:hi==="all"||c.suc.id===hi}}))});
-  m.map.data.setStyle(f=>({title:cli(f.getProperty("id")).nombre,icon:{path:google.maps.SymbolPath.CIRCLE,scale:f.getProperty("on")?6:4,fillColor:colorDe(ST[f.getProperty("st")].c),fillOpacity:f.getProperty("on")?1:.25,strokeColor:"#ffffff",strokeWeight:1.5}}));
+  const COL=Object.fromEntries(Object.keys(ST).map(k=>[k,colorDe(ST[k].c)]));
+  m.map.data.setStyle(f=>({title:cli(f.getProperty("id")).nombre,icon:{path:google.maps.SymbolPath.CIRCLE,scale:f.getProperty("on")?6:4,fillColor:COL[f.getProperty("st")],fillOpacity:f.getProperty("on")?1:.25,strokeColor:"#ffffff",strokeWeight:1.5}}));
   P.forEach(c=>{if(hi==="all"||c.suc.id===hi)b.extend({lat:c.lat,lng:c.lng})});
   for(const x of sucs.filter(x=>x.lat!=null)){const on=hi==="all"||x.id===hi;
     m.extra.push(new google.maps.Marker({map:m.map,position:{lat:x.lat,lng:x.lng},title:"Sucursal "+x.n,zIndex:999,opacity:on?1:.45,
@@ -672,7 +677,7 @@ function renderR(){
 
   mapa("mapa",CL,SUC,v);
   const unid=list.filter(c=>c.st==="vis"||c.st==="seg").reduce((a,c)=>a+(c.flota||0),0);
-  $("mapBadge").innerHTML=`<span class="lbl">Unidades registradas en visitas</span><b class="num">${unid.toLocaleString("es-MX")}</b>`;
+  $("mapBadge").innerHTML=ocultos?`<span class="lbl">${ocultos.toLocaleString("es-MX")} disponibles ocultos</span><span style="font-size:12px">Elige una sucursal para verlos</span>`:`<span class="lbl">Unidades registradas en visitas</span><b class="num">${unid.toLocaleString("es-MX")}</b>`;
 
   $("rankHint").textContent=`Meta ${m} · ${rangoTxt()}`;
   const rk=SUC.map(x=>{const nn=visitasDe(new Set(CL.filter(c=>c.suc.id===x.id).map(c=>c.id))).length;return{x,nn}}).sort((a,b)=>b.nn-a.nn);
