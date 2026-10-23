@@ -373,6 +373,7 @@ textarea{width:100%;font:inherit;padding:10px;border-radius:10px;border:1px soli
           <div><div class="lbl">Abiertas · las más cerca de vencer primero</div><div id="cotList"></div></div>
           <div><div class="lbl">Por qué se pierden · histórico</div><div class="bars" id="cotPerd"></div></div>
         </div>
+        <div id="cotTram"></div>
       </section>
 
       <section class="mod c8" id="mapaSec">
@@ -387,6 +388,7 @@ textarea{width:100%;font:inherit;padding:10px;border-radius:10px;border:1px soli
       <section class="mod c5">
         <div class="mod-h"><h2>Visitas por semana</h2><span class="hint">Últimas 8 semanas</span></div>
         <div class="chart" id="trend"></div>
+        <div class="legend" id="trendLeg"></div>
       </section>
       <section class="mod c4">
         <div class="mod-h"><h2>Embudo de cartera</h2><span class="hint">Acumulado</span></div>
@@ -453,7 +455,7 @@ textarea{width:100%;font:inherit;padding:10px;border-radius:10px;border:1px soli
         <div id="gActTabla"></div>
       </section>
       <section class="mod c12" id="gCotSec">
-        <div class="mod-h"><h2>Tus cotizaciones</h2><span class="hint">Sin respuesta en 14 días se marcan como perdidas</span></div>
+        <div class="mod-h"><h2>Tus cotizaciones</h2><span class="hint">Sin respuesta en 7 días se marcan como perdidas; en trámite de crédito no vencen</span></div>
         <div id="gCots"></div>
       </section>
       <section class="mod c7" id="gMapaSec">
@@ -554,7 +556,7 @@ textarea{width:100%;font:inherit;padding:10px;border-radius:10px;border:1px soli
       <label for="lPass">Contraseña<input id="lPass" type="password" autocomplete="current-password" required></label>
       <button class="btn pri" type="submit" style="padding:12px">Entrar</button>
       <span class="toast" id="lErr" style="color:var(--st-esc)" hidden></span>
-      <span class="hint" style="font-size:11px">Versión 23 oct · alta de clientes (3)</span>
+      <span class="hint" style="font-size:11px">Versión 23 oct · trámite de crédito</span>
       <button type="button" class="btn" id="olvide" style="border:0;background:none;color:var(--muted);text-decoration:underline;padding:0;justify-self:start">Olvidé mi contraseña</button>
     </form>
     <form class="lg-card" id="passForm" hidden>
@@ -640,13 +642,19 @@ async function cargar(){
     suc:SI[x.id_sucursal],km:x.km_sucursal==null?null:+x.km_sucursal,st:STMAP[x.estatus]||"disp",arr:x.estatus==="asignado"&&x.semanas_arrastre>0?1:0,intentos:x.intentos||0,horario:x.horario_sugerido,motivo:x.motivo_escalado,tipo:x.tipo,revisar:!!x.revisar_ubicacion,erp:x.codigo_erp,rs:x.razon_social,ult:x.ultima_compra,cob:x.areas_cobertura||[]}));
   IX=Object.fromEntries(CL.map(x=>[x.id,x]));
   VISITAS=v.filter(x=>IX[x.cliente_id]).map(x=>({cli:x.cliente_id,fecha:new Date(x.fecha).toLocaleDateString("en-CA"),res:resDe(x),com:resumenDe(x),ver:x.verificacion,dist:x.distancia_m,tipoV:x.tipo_visita,correo:x.correo}));
-  COTS=q.filter(x=>IX[x.cliente_id]).map(x=>({dbid:x.id,id:x.folio,factura:x.factura,cli:x.cliente_id,fecha:x.fecha,monto:+x.monto,estado:x.estado,ganado:x.monto_ganado==null?0:+x.monto_ganado,motivo:x.motivo,cierre:x.cerrada_en}));
+  COTS=q.filter(x=>IX[x.cliente_id]).map(x=>({dbid:x.id,id:x.folio,factura:x.factura,cli:x.cliente_id,fecha:x.fecha,monto:+x.monto,estado:x.estado,ganado:x.monto_ganado==null?0:+x.monto_ganado,motivo:x.motivo,cierre:x.cerrada_en,pago:x.forma_pago,ini:x.tramite_inicio,docsOk:x.docs_completos,fin:x.tramite_fin,res:x.credito_result,docs:x.documentos||{}}));
   // pidió cotización en su última visita con interés y todavía no se le registra una
   for(const x of VISITAS)if(x.res==="Pidió cotización"&&!COTS.some(q=>q.cli===x.cli&&q.fecha>=x.fecha))IX[x.cli].pideCot=true;
 }
 
 /* cotizaciones: pedida en visita → cotizada (monto) → ganada (monto cerrado) o perdida (motivo) */
-const DIAS_SIN_RESP=14,MOTIVOS=["Precio","Eligió otro proveedor","Ya no la necesita","Sin respuesta"];
+// mismos valores que config en Supabase (vigencia_cotizacion, dias_credito)
+const VIG=7,DCRED=3,DOCS=[["csf","Constancia de situación fiscal"],["domicilio","Comprobante de domicilio (no mayor a 3 meses)"],["ingresos","Comprobante de ingresos: 3 últimos estados de cuenta y/o declaración anual"],["solicitud","Solicitud de crédito llenada y firmada"],["acta","Acta constitutiva y poder del representante legal (actos de dominio o para suscribir títulos de crédito)"],["id_rep","Identificación oficial del representante legal y/o aval"],["firmas","Registro de firmas autorizadas con ID vigente de los autorizados"],["circulo","Carta de autorización para consultar Círculo de Crédito"]];
+const entre=(a,b)=>Math.round((new Date(b)-new Date(a))/864e5);
+const enTram=q=>!!q.ini&&!q.fin;
+const diasTram=q=>q.ini?entre(q.ini,q.fin||HOY):0;
+const vence=q=>addDias(q.fecha,VIG+diasTram(q));
+const MOTIVOS=["Precio","Eligió otro proveedor","Ya no la necesita","Sin respuesta"];
 const mxn=n=>n.toLocaleString("es-MX",{style:"currency",currency:"MXN",maximumFractionDigits:0});
 const corto=n=>n>=1e6?`$${(n/1e6).toFixed(1)} M`:n>=1e3?`$${Math.round(n/1e3)} k`:`$${n}`;
 const ACT="Cliente activo",prosp=c=>c.tipo!==ACT;
@@ -656,8 +664,8 @@ const tipoTag=c=>{if(c.tipo!==ACT&&c.tipo!=="Cliente inactivo")return"";const d=
 const atendida=x=>x.res!=="No se encontró"&&x.res!=="Dirección no existe";
 function mesDe(c){const u=VISITAS.filter(x=>x.cli===c.id&&atendida(x)).map(x=>x.fecha).sort().pop(),d=u?diasDesde(u):null;return{u,d,ok:d!=null&&d<30}}
 const diasDesde=f=>Math.round((new Date(HOY)-new Date(f))/864e5);
-const restan=q=>Math.max(0,DIAS_SIN_RESP-diasDesde(q.fecha));
-const qrow=q=>{const c=cli(q.cli),rs=restan(q);return `<div class="qrow" data-id="${c.id}"><div style="min-width:0"><b>${esc(c.nombre)}</b><span class="sub">${q.id} · ${fecha(q.fecha)} · ${c.suc.n}</span></div><b class="num">${corto(q.monto)}</b><span class="chip" style="--c:var(${rs<=4?"--st-esc":"--warn"})">Vence en ${rs} d</span></div>`};
+const restan=q=>Math.max(0,-diasDesde(vence(q)));
+const qrow=q=>{const c=cli(q.cli),rs=restan(q);return `<div class="qrow" data-id="${c.id}"><div style="min-width:0"><b>${esc(c.nombre)}</b><span class="sub">${q.id} · ${fecha(q.fecha)} · ${c.suc.n}</span></div><b class="num">${corto(q.monto)}</b>${enTram(q)?`<span class="chip" style="--c:var(--st-asig)">${q.docsOk?"En Crédito y Cobranza":"Esperando documentos"}</span>`:`<span class="chip" style="--c:var(${rs<=2?"--st-esc":"--warn"})">Vence en ${rs} d</span>`}</div>`};
 $("fDesde").value=RANGOS.mes[0];$("fHasta").value=HOY;
 let modo="semana",desde=RANGOS.semana[0],hasta=RANGOS.semana[1]; // la meta es semanal: se abre en la semana
 function addDias(f,n){const d=new Date(f+"T12:00:00");d.setDate(d.getDate()+n);return d.toISOString().slice(0,10)}
@@ -746,19 +754,20 @@ function gmapa(svgId,pts,sucs,hi){
 
 /* ---------- tendencia ---------- */
 function tendencia(ids){
-  const sem=[];for(let i=7;i>=0;i--){const a=addDias(LUNES,-7*i);sem.push({a,n:visitasDe(ids,a,addDias(a,6)).length})}
-  const W=520,H=190,L=28,Rr=14,T=22,B=26,mx=Math.max(4,Math.ceil(Math.max(...sem.map(x=>x.n))/4)*4);
+  // una línea por tipo de cliente (según su tipo actual)
+  const SER=[["Prospectos",c=>c.tipo==="Prospecto","--st-asig"],["Inactivos",c=>c.tipo==="Cliente inactivo","--st-esc"],["Activos",c=>c.tipo===ACT,"--st-act"]];
+  const sem=[];for(let i=7;i>=0;i--){const a=addDias(LUNES,-7*i),vv=visitasDe(ids,a,addDias(a,6));sem.push({a,v:SER.map(([,f])=>vv.filter(x=>f(cli(x.cli))).length)})}
+  const W=520,H=190,L=28,Rr=14,T=22,B=26,mx=Math.max(4,Math.ceil(Math.max(...sem.flatMap(x=>x.v))/4)*4);
   const X=i=>L+i*(W-L-Rr)/(sem.length-1),Y=v=>T+(1-v/mx)*(H-T-B);
   let g="";for(let v=0;v<=mx;v+=mx/4)g+=`<line x1="${L}" x2="${W-Rr}" y1="${Y(v)}" y2="${Y(v)}" stroke="var(--line)"/><text x="${L-8}" y="${Y(v)+4}" text-anchor="end">${v}</text>`;
-  const pts=sem.map((x,i)=>`${X(i).toFixed(1)},${Y(x.n).toFixed(1)}`);
-  g+=`<defs><linearGradient id="ga" x1="0" x2="0" y1="0" y2="1"><stop offset="0" stop-color="var(--accent)" stop-opacity=".35"/><stop offset="1" stop-color="var(--accent)" stop-opacity="0"/></linearGradient></defs>`;
-  g+=`<path d="M${pts.join("L")}L${X(sem.length-1)},${Y(0)}L${X(0)},${Y(0)}Z" fill="url(#ga)"/>`;
-  g+=`<polyline points="${pts.join(" ")}" fill="none" stroke="var(--accent)" stroke-width="2.5" stroke-linejoin="round" stroke-linecap="round"/>`;
-  sem.forEach((x,i)=>{const last=i===sem.length-1;
-    g+=`<g><circle cx="${X(i)}" cy="${Y(x.n)}" r="12" fill="transparent"><title>Semana del ${fecha(x.a)}: ${x.n} visitas${last?" (en curso)":""}</title></circle><circle cx="${X(i)}" cy="${Y(x.n)}" r="${last?5.5:3.5}" fill="${last?"var(--accent)":"var(--panel)"}" stroke="var(--accent)" stroke-width="2" pointer-events="none"/></g>`;
-    g+=`<text x="${X(i)}" y="${H-6}" text-anchor="middle">${fecha(x.a)}</text>`;
-    if(last)g+=`<text x="${X(i)}" y="${Y(x.n)-12}" text-anchor="end" style="fill:var(--ink);font-weight:700;font-size:12px">${x.n} en curso</text>`});
-  $("trend").innerHTML=`<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="Visitas por semana, últimas 8 semanas">${g}</svg>`;
+  sem.forEach((x,i)=>g+=`<text x="${X(i)}" y="${H-6}" text-anchor="middle">${fecha(x.a)}</text>`);
+  SER.forEach(([nom,,c],k)=>{const pts=sem.map((x,i)=>`${X(i).toFixed(1)},${Y(x.v[k]).toFixed(1)}`);
+    g+=`<polyline points="${pts.join(" ")}" fill="none" stroke="var(${c})" stroke-width="2.5" stroke-linejoin="round" stroke-linecap="round"/>`;
+    sem.forEach((x,i)=>{const last=i===sem.length-1;
+      g+=`<g><circle cx="${X(i)}" cy="${Y(x.v[k])}" r="10" fill="transparent"><title>${nom} · semana del ${fecha(x.a)}: ${x.v[k]} visitas${last?" (en curso)":""}</title></circle><circle cx="${X(i)}" cy="${Y(x.v[k])}" r="${last?5:3}" fill="${last?`var(${c})`:"var(--panel)"}" stroke="var(${c})" stroke-width="2" pointer-events="none"/></g>`})});
+  const ult=sem.at(-1).v,tot=ult.reduce((a,b)=>a+b,0);
+  $("trend").innerHTML=`<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="Visitas por semana por tipo de cliente, últimas 8 semanas">${g}</svg>`;
+  $("trendLeg").innerHTML=SER.map(([nom,,c],k)=>`<span style="--c:var(${c})"><i></i>${nom} <b class="num">${ult[k]}</b></span>`).join("")+`<span class="hint">Semana en curso: ${tot} visitas</span>`;
 }
 
 /* ---------- regional ---------- */
@@ -792,6 +801,7 @@ function renderR(){
     ["Tasa de cierre",cerr.length?Math.round(gan.length/cerr.length*100)+"%":"—",`${gan.length} ganadas de ${cerr.length} cerradas en el periodo`],
     ["Cotizaciones sin cerrar (histórico)",corto(sum(ab,"monto")),`${ab.length} abiertas de cualquier fecha`]
   ].map(([l,v2,s2])=>`<div class="mstat"><span class="lbl">${l}</span><b class="num">${v2}</b><span>${s2}</span></div>`).join("");
+  tramPanel(qs);
   $("cotList").innerHTML=ab.length?ab.slice(0,5).map(qrow).join(""):'<div class="empty">No hay cotizaciones abiertas.</div>';
   const per=qs.filter(q=>q.estado==="perdida"),pm=Math.max(1,...MOTIVOS.map(m=>per.filter(q=>q.motivo===m).length));
   $("cotPerd").innerHTML=per.length?MOTIVOS.map(m=>{const n2=per.filter(q=>q.motivo===m).length;return `<div class="br"><div class="br-top"><span>${m}</span><span class="tn">${n2}</span></div><div class="br-track"><i style="width:${n2/pm*100}%;background:var(${m==="Sin respuesta"?"--st-esc":"--st-disp"})"></i></div></div>`}).join(""):'<div class="empty">Sin cotizaciones perdidas.</div>';
@@ -850,6 +860,15 @@ function actTabla(arr){
   const est=m=>m.ok?["Al corriente","--st-act"]:m.d==null?["Sin visita","--st-asig"]:["Toca visita","--warn"];
   return `<div class="tbl seg"><table><thead><tr><th>Cliente</th><th>Última compra</th><th>Última visita</th><th>Visitó</th><th>Resultado</th><th>Estado del mes</th></tr></thead><tbody>${filas.map(({c,m,u})=>{const[t,col]=est(m);
     return `<tr data-id="${c.id}"><td><b>${esc(c.nombre)}</b><span class="sub">${esc(c.erp||c.id)}</span></td><td data-l="Última compra">${c.ult?`${fecha(c.ult)}<span class="sub">hace ${diasDesde(c.ult)} días</span>`:"—"}</td><td data-l="Última visita">${u?`${fecha(u.fecha)}<span class="sub">hace ${diasDesde(u.fecha)} días</span>`:"—"}</td><td data-l="Visitó">${u?esc(quien(u.correo)):"—"}</td><td data-l="Resultado">${u?`<span class="chip" style="--c:var(${RES[u.res]})">${u.res}</span>`:"—"}</td><td data-l="Estado"><span class="chip" style="--c:var(${col})">${t}</span></td></tr>`}).join("")}</tbody></table></div>`}
+function tramPanel(qs){
+  const cur=qs.filter(q=>q.estado==="abierta"&&enTram(q)),doc=cur.filter(q=>!q.docsOk),ver=cur.filter(q=>q.docsOk),fuera=ver.filter(q=>entre(q.docsOk,HOY)>DCRED);
+  const con=qs.filter(q=>q.fin&&q.fin>=desde&&q.fin<=hasta),avg=a=>a.length?(a.reduce((s,x)=>s+x,0)/a.length).toFixed(1):"—";
+  const dT=avg(con.map(diasTram)),dV=avg(con.filter(q=>q.docsOk).map(q=>entre(q.docsOk,q.fin))),pV=con.length?Math.round(con.reduce((s,q)=>s+diasTram(q),0)/con.length/VIG*100)+"%":"—";
+  const st=[["En trámite hoy",cur.length,`${corto(cur.reduce((s,q)=>s+q.monto,0))} detenidos`],["Esperando documentos",doc.length,doc.length?`promedio ${avg(doc.map(q=>entre(q.ini,HOY)))} días`:"del cliente"],["En Crédito y Cobranza",ver.length,`${fuera.length} fuera del plazo de ${DCRED} días`],
+    ["Trámites concluidos",con.length,rangoTxt()],["Duración promedio",dT==="—"?"—":dT+" d",`verificación ${dV==="—"?"—":dV+" d"} · meta ${DCRED} d`],["Vigencia consumida",pV,`promedio, de ${VIG} días`]];
+  $("cotTram").innerHTML=(cur.length||con.length)?`<div class="lbl" style="margin-top:6px">Trámite de crédito · tiempo en procesos internos (la vigencia se pausa)</div>
+    <div class="money">${st.map(([l,v,s2])=>`<div class="mstat"><span class="lbl">${l}</span><b class="num">${v}</b><span>${s2}</span></div>`).join("")}</div>
+    ${cur.sort((a,b)=>(!!b.docsOk-!!a.docsOk)||diasTram(b)-diasTram(a)).map(qrow).join("")}`:'<div class="hint">Sin cotizaciones en trámite de crédito.</div>'}
 function cartera(list){
   const a=list.filter(c=>c.tipo===ACT);$("actSec").hidden=!a.length;if(!a.length)return;
   const ok=a.filter(c=>mesDe(c).ok).length;
@@ -927,16 +946,28 @@ function historial(id){const h=[...VISITAS].reverse().filter(x=>x.cli===id).sort
   $("fHist").innerHTML=`<div class="lbl">Historial · ${h.length} ${h.length===1?"visita":"visitas"}</div>`+(h.length?h.map(x=>`<div class="hi" style="--c:var(${RES[x.res]})"><div class="hi-h"><span>${fecha(x.fecha)}${x.tipoV?" · "+x.tipoV:""} · ${esc(quien(x.correo))}</span><span>${x.res}</span></div><p>${verif(x)} ${esc(x.com)}</p></div>`).join(""):'<div class="empty" style="padding:0">Aún no hay visitas registradas.</div>')}
 
 let cotModo=null;
+function tramBlock(q){
+  if(!q.ini)return"";
+  const dd=entre(q.ini,q.docsOk||q.fin||HOY),dv=q.docsOk?entre(q.docsOk,q.fin||HOY):null,dt=diasTram(q),pct=Math.round(dt/VIG*100);
+  const res=`<div class="hint">Trámite: ${dt} ${dt===1?"día":"días"} (${dd} esperando documentos${dv!=null?` · ${dv} en Crédito y Cobranza`:""}) = ${pct}% de la vigencia de ${VIG} días${enTram(q)?". La vigencia está en pausa.":"."}</div>`;
+  if(!enTram(q))return `<div class="aviso" style="--c:var(${q.res==="aprobado"?"--st-vis":"--st-esc"})">Crédito ${q.res} el ${fecha(q.fin)}.</div>`+res;
+  if(!q.docsOk){const n=DOCS.filter(([k])=>q.docs[k]).length;
+    return `<div class="lbl" style="margin-top:6px">Trámite de crédito · esperando documentos (${n} de ${DOCS.length})</div>
+    <div style="display:grid;gap:6px">${DOCS.map(([k,t])=>`<button type="button" class="btn" data-cot="doc:${k}" style="justify-content:flex-start;text-align:left;${q.docs[k]?"border-color:var(--st-vis)":""}"><span aria-hidden="true" style="color:var(${q.docs[k]?"--st-vis":"--muted"})">${q.docs[k]?"✔":"○"}</span>&nbsp;${t}</button>`).join("")}</div>
+    <div class="acts"><button class="btn pri" type="button" data-cot="tram-env"${n<DOCS.length?" disabled":""}>Entregar a Crédito y Cobranza</button></div>`+res}
+  const tarde=dv>DCRED;
+  return `<div class="aviso" style="--c:var(${tarde?"--st-esc":"--st-asig"})">En Crédito y Cobranza: día ${dv} de ${DCRED}${tarde?" · fuera de plazo":""}. Documentos entregados el ${fecha(q.docsOk)}.</div>
+    <div class="acts"><button class="btn pri" type="button" data-cot="tram-ok">Crédito aprobado</button><button class="btn" type="button" data-cot="tram-no">Crédito rechazado</button><button class="btn" type="button" data-cot="tram-falta">Faltó información</button></div>`+res}
 function cotBlock(id){
   const c=cli(id),qs=COTS.filter(x=>x.cli===id),q=qs.find(x=>x.estado==="abierta"),cer=qs.filter(x=>x.estado!=="abierta"),el=$("fCot");
   let h="";
   if(q){const d=diasDesde(q.fecha),rs=restan(q);
-    h=`<div class="lbl">Cotización abierta · ${q.id}</div><div class="qbig"><b class="num">${mxn(q.monto)}</b><span>cotizada el ${fecha(q.fecha)}</span></div>
-    <div class="meter" style="--c:var(${rs<=4?"--st-esc":"--warn"})"><i style="width:${Math.min(d/DIAS_SIN_RESP,1)*100}%"></i></div>
-    <div class="hint">Si no hay respuesta, se marca como perdida en ${rs} ${rs===1?"día":"días"} (${fecha(addDias(q.fecha,DIAS_SIN_RESP))}).</div>`;
+    h=`<div class="lbl">Cotización abierta · ${q.id}</div><div class="qbig"><b class="num">${mxn(q.monto)}</b><span>cotizada el ${fecha(q.fecha)}</span></div>`+tramBlock(q);
+    if(!enTram(q))h+=`<div class="meter" style="--c:var(${rs<=2?"--st-esc":"--warn"})"><i style="width:${Math.min((VIG-rs)/VIG,1)*100}%"></i></div>
+    <div class="hint">Si no hay respuesta, se marca como perdida en ${rs} ${rs===1?"día":"días"} (${fecha(vence(q))}).${q.ini?"":" Si el cliente pagará a crédito, inicia el trámite: la vigencia se pausa mientras dura."}</div>`;
     if(cotModo==="ganar")h+=`<label class="qlab" for="qGan">Monto cerrado: lo que realmente se facturó<input class="txt" id="qGan" type="number" inputmode="numeric" min="1" value="${q.monto}"></label><label class="qlab" for="qFac">Número de factura (obligatorio)<input class="txt" id="qFac" autocomplete="off" placeholder="Ej. A-12345"></label><div class="acts"><button class="btn pri" type="button" data-cot="ok-ganar">Confirmar venta</button><button class="btn" type="button" data-cot="cancelar">Cancelar</button></div>`;
     else if(cotModo==="perder")h+=`<div class="qlab">¿Por qué se perdió?</div><div class="pills">${MOTIVOS.map((m,i)=>`<label><input type="radio" name="motivo" value="${m}" id="mot${i}">${m}</label>`).join("")}</div><div class="acts"><button class="btn pri" type="button" data-cot="ok-perder">Marcar como perdida</button><button class="btn" type="button" data-cot="cancelar">Cancelar</button></div>`;
-    else h+=`<div class="acts"><button class="btn pri" type="button" data-cot="ganar">Se ganó</button><button class="btn" type="button" data-cot="perder">Se perdió</button></div>`;
+    else h+=`<div class="acts"><button class="btn pri" type="button" data-cot="ganar">Se ganó</button><button class="btn" type="button" data-cot="perder">Se perdió</button>${q.ini?"":'<button class="btn" type="button" data-cot="tram-ini">Iniciar trámite de crédito</button>'}</div>`;
   }else if(c.pideCot)h=`<div class="lbl">Pidió cotización</div><label class="qlab" for="qMonto">Monto cotizado en pesos, con IVA<input class="txt" id="qMonto" type="number" inputmode="numeric" min="1" placeholder="Ej. 85000"></label><div class="acts"><button class="btn pri" type="button" data-cot="nueva">Registrar cotización</button></div>`;
   if(cer.length)h+=`<div class="lbl">Cotizaciones cerradas</div>`+cer.map(x=>`<div class="hi" style="--c:var(${x.estado==="ganada"?"--st-vis":"--st-esc"})"><div class="hi-h"><span>${x.id} · ${fecha(x.cierre)}</span><span>${x.estado==="ganada"?"Ganada":"Perdida"}</span></div><p>${x.estado==="ganada"?`Cotizado ${mxn(x.monto)} · cerrado ${mxn(x.ganado)}${x.factura?" · factura "+esc(x.factura):""}`:`${mxn(x.monto)} · ${x.motivo}`}</p></div>`).join("");
   el.innerHTML=h+'<span class="toast" id="qMsg" hidden></span>';el.hidden=!h;
@@ -980,6 +1011,11 @@ async function cotAccion(a){
   let r=null;
   if(a==="nueva"){const m=+$("qMonto").value;if(!(m>0))return err("Escribe el monto cotizado.");r=SB.from("cotizaciones").insert({cliente_id:id,monto:m})}
   else if(a==="ok-ganar"){const m=+$("qGan").value,f=$("qFac").value.trim();if(!(m>0))return err("Escribe el monto cerrado.");if(!f)return err("Escribe el número de factura.");r=SB.from("cotizaciones").update({estado:"ganada",monto_ganado:m,factura:f}).eq("id",q.dbid)}
+  else if(a==="tram-ini")r=SB.from("cotizaciones").update({tramite_inicio:HOY,forma_pago:"Crédito"}).eq("id",q.dbid);
+  else if(a.startsWith("doc:")){const k=a.slice(4),d={...q.docs};if(d[k])delete d[k];else d[k]=HOY;r=SB.from("cotizaciones").update({documentos:d}).eq("id",q.dbid)}
+  else if(a==="tram-env")r=SB.from("cotizaciones").update({docs_completos:HOY}).eq("id",q.dbid);
+  else if(a==="tram-falta")r=SB.from("cotizaciones").update({docs_completos:null}).eq("id",q.dbid);
+  else if(a==="tram-ok"||a==="tram-no")r=SB.from("cotizaciones").update({tramite_fin:HOY,credito_result:a==="tram-ok"?"aprobado":"rechazado"}).eq("id",q.dbid);
   else if(a==="ok-perder"){const mo=($("fCot").querySelector("input[name=motivo]:checked")||{}).value;if(!mo)return err("Elige el motivo.");r=SB.from("cotizaciones").update({estado:"perdida",motivo:mo}).eq("id",q.dbid)}
   else{cotModo=a==="cancelar"?null:a;return cotBlock(id)}
   $("fCot").querySelectorAll("button").forEach(b=>b.disabled=true);
@@ -1091,9 +1127,9 @@ $("form").addEventListener("submit",async e=>{e.preventDefault();
 $("csvVentas").onclick=()=>{if(!YO||!["regional","admin"].includes(YO.rol))return;
   const v=$("vista").value,ids=new Set(CL.filter(c=>v==="all"||c.suc.id===v).map(c=>c.id));
   const filas=COTS.filter(q=>ids.has(q.cli)&&q.estado==="ganada"&&q.cierre>=desde&&q.cierre<=hasta).sort((a,b)=>a.cierre.localeCompare(b.cierre));
-  const cab=["folio","factura","fecha_cierre","monto_ganado","monto_cotizado","fecha_cotizacion","cliente_id","empresa","codigo_erp","razon_social","sucursal","gerente"];
+  const cab=["folio","factura","fecha_cierre","monto_ganado","monto_cotizado","fecha_cotizacion","cliente_id","empresa","codigo_erp","razon_social","sucursal","gerente","forma_pago","dias_tramite_credito"];
   const q=x=>{const t=x==null?"":String(x);return /[",\n]/.test(t)?'"'+t.replace(/"/g,'""')+'"':t};
-  const csv=[cab,...filas.map(x=>{const c=cli(x.cli);return[x.id,x.factura,x.cierre,x.ganado,x.monto,x.fecha,c.id,c.nombre,c.erp,c.rs,c.suc.n,c.suc.g]})].map(r=>r.map(q).join(",")).join("\r\n");
+  const csv=[cab,...filas.map(x=>{const c=cli(x.cli);return[x.id,x.factura,x.cierre,x.ganado,x.monto,x.fecha,c.id,c.nombre,c.erp,c.rs,c.suc.n,c.suc.g,x.pago||"",x.ini?diasTram(x):""]})].map(r=>r.map(q).join(",")).join("\r\n");
   const a=document.createElement("a");a.href=URL.createObjectURL(new Blob(["\ufeff"+csv],{type:"text/csv;charset=utf-8"})); // BOM: Excel respeta acentos
   a.download=`ventas-flotillas-${desde}-a-${hasta}.csv`;document.body.appendChild(a);a.click();a.remove();
   const t=$("csvVentas");t.textContent=`Descargadas ${filas.length} ventas`;setTimeout(()=>t.textContent="Descargar ventas (CSV)",2500)};
