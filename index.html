@@ -490,7 +490,7 @@ textarea{width:100%;font:inherit;padding:10px;border-radius:10px;border:1px soli
       <label for="lPass">Contraseña<input id="lPass" type="password" autocomplete="current-password" required></label>
       <button class="btn pri" type="submit" style="padding:12px">Entrar</button>
       <span class="toast" id="lErr" style="color:var(--st-esc)" hidden></span>
-      <span class="hint" style="font-size:11px">Versión 22 oct · clientes activos</span>
+      <span class="hint" style="font-size:11px">Versión 22 oct · clientes activos (3)</span>
       <button type="button" class="btn" id="olvide" style="border:0;background:none;color:var(--muted);text-decoration:underline;padding:0;justify-self:start">Olvidé mi contraseña</button>
     </form>
     <form class="lg-card" id="passForm" hidden>
@@ -784,7 +784,7 @@ function cartera(list){
   const ok=a.filter(c=>mesDe(c).ok).length;
   $("actSecHint").textContent=`${ok} de ${a.length} visitados en los últimos 30 días`;
   const filas=SUC.map(x=>{const t=a.filter(c=>c.suc.id===x.id);return{x,t:t.length,v:t.filter(c=>mesDe(c).ok).length}}).filter(r=>r.t).sort((p,q)=>p.v/p.t-q.v/q.t||q.t-p.t);
-  $("actBars").innerHTML=filas.map(({x,t,v})=>`<button type="button" class="br" data-suc="${x.id}" style="all:unset;display:grid;gap:4px;cursor:pointer"><div class="br-top"><span>${esc(x.g)} · ${esc(x.n)}</span><span class="tn">${v}/${t}</span></div><div class="br-track"><i style="width:100%;background:var(--soft2)"></i><i style="width:${v/t*100}%;background:var(--st-act)"></i></div></button>`).join("")}
+  $("actBars").innerHTML=filas.map(({x,t,v})=>`<button type="button" class="br" data-suc="${x.id}" style="all:unset;display:grid;gap:4px;cursor:pointer"><div class="br-top"><span>${esc(x.g.startsWith("Sin gerente")?x.g:x.g+" · "+x.n)}</span><span class="tn">${v}/${t}</span></div><div class="br-track"><i style="width:100%;background:var(--soft2)"></i><i style="width:${v/t*100}%;background:var(--st-act)"></i></div></button>`).join("")}
 
 /* ---------- gerente ---------- */
 function renderG(id){
@@ -935,8 +935,8 @@ function actualizarForm(){
   const fallas=((c&&c.intentos)||0)+1;
   av.hidden=cs!=="reint"&&cs!=="dir";
   if(cs==="reint"){av.style.setProperty("--c",fallas>=MAX_INT?"var(--st-esc)":"var(--warn)");
-    av.textContent=fallas>=MAX_INT?`Es el intento ${fallas} de ${MAX_INT} sin contacto. Se pasa a telemarketing para conseguir una cita.`:`Intento ${fallas} de ${MAX_INT}. El cliente vuelve a tu lista la próxima semana en el horario que elijas.`}
-  if(cs==="dir"){av.style.setProperty("--c","var(--st-esc)");av.textContent="Se pasa a telemarketing para validar la dirección con el cliente."}
+    av.textContent=fallas>=MAX_INT?`Es el intento ${fallas} de ${MAX_INT} sin contacto. Se pasa a tu regional para conseguir una cita.`:`Intento ${fallas} de ${MAX_INT}. El cliente vuelve a tu lista la próxima semana en el horario que elijas.`}
+  if(cs==="dir"){av.style.setProperty("--c","var(--st-esc)");av.textContent="Se pasa a tu regional para validar la dirección con el cliente."}
 }
 $("form").addEventListener("change",actualizarForm);
 // ubicación del celular al guardar (opcional: si la niega o no hay señal, se guarda sin ella)
@@ -966,7 +966,7 @@ $("form").addEventListener("submit",async e=>{e.preventDefault();
     t.textContent=/UBICACION_REQUERIDA/.test(error.message||"")?"Para registrar la visita necesitas compartir tu ubicación.":"No se guardó: "+(error.message||"revisa tu conexión")+". Intenta de nuevo.";t.style.color="var(--st-esc)";return}
   await recargar(id);const c=cli(id);
   const vt={en_sitio:` Verificada en sitio (a ${mts(nv&&nv.distancia_m)}).`,ubicacion_nueva:" Guardamos tu ubicación como la del cliente.",pin_reportado:" Se guardó sin verificar y avisamos a tu regional para corregir la ubicación."}[nv&&nv.verificacion]||"";
-  t.textContent=(c.st==="esc"?"Guardado. Pasó a telemarketing.":c.st==="reint"?`Guardado. Vuelve a tu lista la próxima semana · intento ${c.intentos+1} de ${MAX_INT}.`:c.st==="seg"?"Guardado. Queda en seguimiento.":"Visita guardada.")+vt;
+  t.textContent=(c.st==="esc"?"Guardado. Pasó a tu regional.":c.st==="reint"?`Guardado. Vuelve a tu lista la próxima semana · intento ${c.intentos+1} de ${MAX_INT}.`:c.st==="seg"?"Guardado. Queda en seguimiento.":"Visita guardada.")+vt;
   t.style.color="var(--st-vis)";$("form").reset();actualizarForm()});
 // ventas ganadas del periodo y la vista elegida, para cotejar con facturación
 $("csvVentas").onclick=()=>{if(!YO||!["regional","admin"].includes(YO.rol))return;
