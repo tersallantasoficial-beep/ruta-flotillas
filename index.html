@@ -455,7 +455,7 @@ textarea{width:100%;font:inherit;padding:10px;border-radius:10px;border:1px soli
         <div id="gActTabla"></div>
       </section>
       <section class="mod c12" id="gCotSec">
-        <div class="mod-h"><h2>Tus cotizaciones</h2><span class="hint">Sin respuesta en 7 días se marcan como perdidas; en trámite de crédito no vencen</span></div>
+        <div class="mod-h"><h2>Tus cotizaciones</h2><span class="hint">Vigencia de 7 días; solo se pausa mientras Crédito y Cobranza verifica</span></div>
         <div id="gCots"></div>
       </section>
       <section class="mod c7" id="gMapaSec">
@@ -556,7 +556,7 @@ textarea{width:100%;font:inherit;padding:10px;border-radius:10px;border:1px soli
       <label for="lPass">Contraseña<input id="lPass" type="password" autocomplete="current-password" required></label>
       <button class="btn pri" type="submit" style="padding:12px">Entrar</button>
       <span class="toast" id="lErr" style="color:var(--st-esc)" hidden></span>
-      <span class="hint" style="font-size:11px">Versión 23 oct · trámite de crédito</span>
+      <span class="hint" style="font-size:11px">Versión 23 oct · vigencia con documentos</span>
       <button type="button" class="btn" id="olvide" style="border:0;background:none;color:var(--muted);text-decoration:underline;padding:0;justify-self:start">Olvidé mi contraseña</button>
     </form>
     <form class="lg-card" id="passForm" hidden>
@@ -642,7 +642,7 @@ async function cargar(){
     suc:SI[x.id_sucursal],km:x.km_sucursal==null?null:+x.km_sucursal,st:STMAP[x.estatus]||"disp",arr:x.estatus==="asignado"&&x.semanas_arrastre>0?1:0,intentos:x.intentos||0,horario:x.horario_sugerido,motivo:x.motivo_escalado,tipo:x.tipo,revisar:!!x.revisar_ubicacion,erp:x.codigo_erp,rs:x.razon_social,ult:x.ultima_compra,cob:x.areas_cobertura||[]}));
   IX=Object.fromEntries(CL.map(x=>[x.id,x]));
   VISITAS=v.filter(x=>IX[x.cliente_id]).map(x=>({cli:x.cliente_id,fecha:new Date(x.fecha).toLocaleDateString("en-CA"),res:resDe(x),com:resumenDe(x),ver:x.verificacion,dist:x.distancia_m,tipoV:x.tipo_visita,correo:x.correo}));
-  COTS=q.filter(x=>IX[x.cliente_id]).map(x=>({dbid:x.id,id:x.folio,factura:x.factura,cli:x.cliente_id,fecha:x.fecha,monto:+x.monto,estado:x.estado,ganado:x.monto_ganado==null?0:+x.monto_ganado,motivo:x.motivo,cierre:x.cerrada_en,pago:x.forma_pago,ini:x.tramite_inicio,docsOk:x.docs_completos,fin:x.tramite_fin,res:x.credito_result,docs:x.documentos||{}}));
+  COTS=q.filter(x=>IX[x.cliente_id]).map(x=>({dbid:x.id,id:x.folio,factura:x.factura,cli:x.cliente_id,fecha:x.fecha,monto:+x.monto,estado:x.estado,ganado:x.monto_ganado==null?0:+x.monto_ganado,motivo:x.motivo,cierre:x.cerrada_en,pago:x.forma_pago,linea:!!x.linea_autorizada,ini:x.tramite_inicio,docsOk:x.docs_completos,fin:x.tramite_fin,res:x.credito_result,docs:x.documentos||{}}));
   // pidió cotización en su última visita con interés y todavía no se le registra una
   for(const x of VISITAS)if(x.res==="Pidió cotización"&&!COTS.some(q=>q.cli===x.cli&&q.fecha>=x.fecha))IX[x.cli].pideCot=true;
 }
@@ -653,8 +653,9 @@ const VIG=7,DCRED=3,DOCS=[["csf","Constancia de situación fiscal"],["domicilio"
 const entre=(a,b)=>Math.round((new Date(b)-new Date(a))/864e5);
 const enTram=q=>!!q.ini&&!q.fin;
 const diasTram=q=>q.ini?entre(q.ini,q.fin||HOY):0;
-const vence=q=>addDias(q.fecha,VIG+diasTram(q));
-const MOTIVOS=["Precio","Eligió otro proveedor","Ya no la necesita","Sin respuesta"];
+const enVerif=q=>!!q.docsOk&&!q.fin;
+const vence=q=>addDias(q.fecha,VIG+(q.docsOk?entre(q.docsOk,q.fin||HOY):0)); // la vigencia solo se pausa en Crédito y Cobranza
+const MOTIVOS=["Precio","Eligió otro proveedor","Ya no la necesita","Sin respuesta"],MOTIVOS_TODOS=[...MOTIVOS,"Venció esperando documentos"];
 const mxn=n=>n.toLocaleString("es-MX",{style:"currency",currency:"MXN",maximumFractionDigits:0});
 const corto=n=>n>=1e6?`$${(n/1e6).toFixed(1)} M`:n>=1e3?`$${Math.round(n/1e3)} k`:`$${n}`;
 const ACT="Cliente activo",prosp=c=>c.tipo!==ACT;
@@ -665,7 +666,7 @@ const atendida=x=>x.res!=="No se encontró"&&x.res!=="Dirección no existe";
 function mesDe(c){const u=VISITAS.filter(x=>x.cli===c.id&&atendida(x)).map(x=>x.fecha).sort().pop(),d=u?diasDesde(u):null;return{u,d,ok:d!=null&&d<30}}
 const diasDesde=f=>Math.round((new Date(HOY)-new Date(f))/864e5);
 const restan=q=>Math.max(0,-diasDesde(vence(q)));
-const qrow=q=>{const c=cli(q.cli),rs=restan(q);return `<div class="qrow" data-id="${c.id}"><div style="min-width:0"><b>${esc(c.nombre)}</b><span class="sub">${q.id} · ${fecha(q.fecha)} · ${c.suc.n}</span></div><b class="num">${corto(q.monto)}</b>${enTram(q)?`<span class="chip" style="--c:var(--st-asig)">${q.docsOk?"En Crédito y Cobranza":"Esperando documentos"}</span>`:`<span class="chip" style="--c:var(${rs<=2?"--st-esc":"--warn"})">Vence en ${rs} d</span>`}</div>`};
+const qrow=q=>{const c=cli(q.cli),rs=restan(q);return `<div class="qrow" data-id="${c.id}"><div style="min-width:0"><b>${esc(c.nombre)}</b><span class="sub">${q.id} · ${fecha(q.fecha)} · ${c.suc.n}</span></div><b class="num">${corto(q.monto)}</b>${enVerif(q)?'<span class="chip" style="--c:var(--st-asig)">En Crédito y Cobranza</span>':enTram(q)?`<span class="chip" style="--c:var(${rs<=2?"--st-esc":"--warn"})">Faltan documentos · vence en ${rs} d</span>`:`<span class="chip" style="--c:var(${rs<=2?"--st-esc":"--warn"})">Vence en ${rs} d</span>`}</div>`};
 $("fDesde").value=RANGOS.mes[0];$("fHasta").value=HOY;
 let modo="semana",desde=RANGOS.semana[0],hasta=RANGOS.semana[1]; // la meta es semanal: se abre en la semana
 function addDias(f,n){const d=new Date(f+"T12:00:00");d.setDate(d.getDate()+n);return d.toISOString().slice(0,10)}
@@ -803,8 +804,8 @@ function renderR(){
   ].map(([l,v2,s2])=>`<div class="mstat"><span class="lbl">${l}</span><b class="num">${v2}</b><span>${s2}</span></div>`).join("");
   tramPanel(qs);
   $("cotList").innerHTML=ab.length?ab.slice(0,5).map(qrow).join(""):'<div class="empty">No hay cotizaciones abiertas.</div>';
-  const per=qs.filter(q=>q.estado==="perdida"),pm=Math.max(1,...MOTIVOS.map(m=>per.filter(q=>q.motivo===m).length));
-  $("cotPerd").innerHTML=per.length?MOTIVOS.map(m=>{const n2=per.filter(q=>q.motivo===m).length;return `<div class="br"><div class="br-top"><span>${m}</span><span class="tn">${n2}</span></div><div class="br-track"><i style="width:${n2/pm*100}%;background:var(${m==="Sin respuesta"?"--st-esc":"--st-disp"})"></i></div></div>`}).join(""):'<div class="empty">Sin cotizaciones perdidas.</div>';
+  const per=qs.filter(q=>q.estado==="perdida"),pm=Math.max(1,...MOTIVOS_TODOS.map(m=>per.filter(q=>q.motivo===m).length));
+  $("cotPerd").innerHTML=per.length?MOTIVOS_TODOS.map(m=>{const n2=per.filter(q=>q.motivo===m).length;return `<div class="br"><div class="br-top"><span>${m}</span><span class="tn">${n2}</span></div><div class="br-track"><i style="width:${n2/pm*100}%;background:var(${m==="Sin respuesta"?"--st-esc":"--st-disp"})"></i></div></div>`}).join(""):'<div class="empty">Sin cotizaciones perdidas.</div>';
 
   mapa("mapa",CL,SUC,v);
   const unid=list.filter(c=>c.st==="vis"||c.st==="seg").reduce((a,c)=>a+(c.flota||0),0);
@@ -866,7 +867,7 @@ function tramPanel(qs){
   const dT=avg(con.map(diasTram)),dV=avg(con.filter(q=>q.docsOk).map(q=>entre(q.docsOk,q.fin))),pV=con.length?Math.round(con.reduce((s,q)=>s+diasTram(q),0)/con.length/VIG*100)+"%":"—";
   const st=[["En trámite hoy",cur.length,`${corto(cur.reduce((s,q)=>s+q.monto,0))} detenidos`],["Esperando documentos",doc.length,doc.length?`promedio ${avg(doc.map(q=>entre(q.ini,HOY)))} días`:"del cliente"],["En Crédito y Cobranza",ver.length,`${fuera.length} fuera del plazo de ${DCRED} días`],
     ["Trámites concluidos",con.length,rangoTxt()],["Duración promedio",dT==="—"?"—":dT+" d",`verificación ${dV==="—"?"—":dV+" d"} · meta ${DCRED} d`],["Vigencia consumida",pV,`promedio, de ${VIG} días`]];
-  $("cotTram").innerHTML=(cur.length||con.length)?`<div class="lbl" style="margin-top:6px">Trámite de crédito · tiempo en procesos internos (la vigencia se pausa)</div>
+  $("cotTram").innerHTML=(cur.length||con.length)?`<div class="lbl" style="margin-top:6px">Trámite de crédito · documentos del cliente (la vigencia corre) y Crédito y Cobranza (la vigencia se pausa)</div>
     <div class="money">${st.map(([l,v,s2])=>`<div class="mstat"><span class="lbl">${l}</span><b class="num">${v}</b><span>${s2}</span></div>`).join("")}</div>
     ${cur.sort((a,b)=>(!!b.docsOk-!!a.docsOk)||diasTram(b)-diasTram(a)).map(qrow).join("")}`:'<div class="hint">Sin cotizaciones en trámite de crédito.</div>'}
 function cartera(list){
@@ -949,12 +950,13 @@ let cotModo=null;
 function tramBlock(q){
   if(!q.ini)return"";
   const dd=entre(q.ini,q.docsOk||q.fin||HOY),dv=q.docsOk?entre(q.docsOk,q.fin||HOY):null,dt=diasTram(q),pct=Math.round(dt/VIG*100);
-  const res=`<div class="hint">Trámite: ${dt} ${dt===1?"día":"días"} (${dd} esperando documentos${dv!=null?` · ${dv} en Crédito y Cobranza`:""}) = ${pct}% de la vigencia de ${VIG} días${enTram(q)?". La vigencia está en pausa.":"."}</div>`;
+  const res=`<div class="hint">Trámite: ${dt} ${dt===1?"día":"días"} (${dd} esperando documentos${dv!=null?` · ${dv} en Crédito y Cobranza`:""}) = ${pct}% de la vigencia de ${VIG} días.${enVerif(q)?" En Crédito y Cobranza la vigencia está en pausa.":""}</div>`;
   if(!enTram(q))return `<div class="aviso" style="--c:var(${q.res==="aprobado"?"--st-vis":"--st-esc"})">Crédito ${q.res} el ${fecha(q.fin)}.</div>`+res;
   if(!q.docsOk){const n=DOCS.filter(([k])=>q.docs[k]).length;
     return `<div class="lbl" style="margin-top:6px">Trámite de crédito · esperando documentos (${n} de ${DOCS.length})</div>
     <div style="display:grid;gap:6px">${DOCS.map(([k,t])=>`<button type="button" class="btn" data-cot="doc:${k}" style="justify-content:flex-start;text-align:left;${q.docs[k]?"border-color:var(--st-vis)":""}"><span aria-hidden="true" style="color:var(${q.docs[k]?"--st-vis":"--muted"})">${q.docs[k]?"✔":"○"}</span>&nbsp;${t}</button>`).join("")}</div>
     <div class="acts"><button class="btn pri" type="button" data-cot="tram-env"${n<DOCS.length?" disabled":""}>Entregar a Crédito y Cobranza</button></div>`+res}
+
   const tarde=dv>DCRED;
   return `<div class="aviso" style="--c:var(${tarde?"--st-esc":"--st-asig"})">En Crédito y Cobranza: día ${dv} de ${DCRED}${tarde?" · fuera de plazo":""}. Documentos entregados el ${fecha(q.docsOk)}.</div>
     <div class="acts"><button class="btn pri" type="button" data-cot="tram-ok">Crédito aprobado</button><button class="btn" type="button" data-cot="tram-no">Crédito rechazado</button><button class="btn" type="button" data-cot="tram-falta">Faltó información</button></div>`+res}
@@ -962,13 +964,18 @@ function cotBlock(id){
   const c=cli(id),qs=COTS.filter(x=>x.cli===id),q=qs.find(x=>x.estado==="abierta"),cer=qs.filter(x=>x.estado!=="abierta"),el=$("fCot");
   let h="";
   if(q){const d=diasDesde(q.fecha),rs=restan(q);
-    h=`<div class="lbl">Cotización abierta · ${q.id}</div><div class="qbig"><b class="num">${mxn(q.monto)}</b><span>cotizada el ${fecha(q.fecha)}</span></div>`+tramBlock(q);
-    if(!enTram(q))h+=`<div class="meter" style="--c:var(${rs<=2?"--st-esc":"--warn"})"><i style="width:${Math.min((VIG-rs)/VIG,1)*100}%"></i></div>
-    <div class="hint">Si no hay respuesta, se marca como perdida en ${rs} ${rs===1?"día":"días"} (${fecha(vence(q))}).${q.ini?"":" Si el cliente pagará a crédito, inicia el trámite: la vigencia se pausa mientras dura."}</div>`;
+    h=`<div class="lbl">Cotización abierta · ${q.id}</div><div class="qbig"><b class="num">${mxn(q.monto)}</b><span>cotizada el ${fecha(q.fecha)}${q.pago?` · ${q.pago}${q.linea?" con línea autorizada":""}`:""}</span></div>`+tramBlock(q);
+    if(!enVerif(q))h+=`<div class="meter" style="--c:var(${rs<=2?"--st-esc":"--warn"})"><i style="width:${Math.min((VIG-rs)/VIG,1)*100}%"></i></div>
+    <div class="hint">${enTram(q)?`Si no se completan los documentos, se pierde en ${rs} ${rs===1?"día":"días"} (${fecha(vence(q))}). La vigencia solo se pausa cuando los entregues a Crédito y Cobranza.`:`Si no hay respuesta, se marca como perdida en ${rs} ${rs===1?"día":"días"} (${fecha(vence(q))}).`}</div>`;
     if(cotModo==="ganar")h+=`<label class="qlab" for="qGan">Monto cerrado: lo que realmente se facturó<input class="txt" id="qGan" type="number" inputmode="numeric" min="1" value="${q.monto}"></label><label class="qlab" for="qFac">Número de factura (obligatorio)<input class="txt" id="qFac" autocomplete="off" placeholder="Ej. A-12345"></label><div class="acts"><button class="btn pri" type="button" data-cot="ok-ganar">Confirmar venta</button><button class="btn" type="button" data-cot="cancelar">Cancelar</button></div>`;
     else if(cotModo==="perder")h+=`<div class="qlab">¿Por qué se perdió?</div><div class="pills">${MOTIVOS.map((m,i)=>`<label><input type="radio" name="motivo" value="${m}" id="mot${i}">${m}</label>`).join("")}</div><div class="acts"><button class="btn pri" type="button" data-cot="ok-perder">Marcar como perdida</button><button class="btn" type="button" data-cot="cancelar">Cancelar</button></div>`;
-    else h+=`<div class="acts"><button class="btn pri" type="button" data-cot="ganar">Se ganó</button><button class="btn" type="button" data-cot="perder">Se perdió</button>${q.ini?"":'<button class="btn" type="button" data-cot="tram-ini">Iniciar trámite de crédito</button>'}</div>`;
-  }else if(c.pideCot)h=`<div class="lbl">Pidió cotización</div><label class="qlab" for="qMonto">Monto cotizado en pesos, con IVA<input class="txt" id="qMonto" type="number" inputmode="numeric" min="1" placeholder="Ej. 85000"></label><div class="acts"><button class="btn pri" type="button" data-cot="nueva">Registrar cotización</button></div>`;
+    else h+=`<div class="acts"><button class="btn pri" type="button" data-cot="ganar">Se ganó</button><button class="btn" type="button" data-cot="perder">Se perdió</button>${q.ini||q.linea?"":`<button class="btn" type="button" data-cot="tram-ini">${q.pago==="Contado"?"Cambiar a crédito (pedir documentos)":"Iniciar trámite de crédito"}</button>`}</div>`;
+  }else if(c.pideCot){const pc=VISITAS.some(x=>x.cli===id&&/Crédito/.test(x.com));
+    h=`<div class="lbl">Pidió cotización</div><label class="qlab" for="qMonto">Monto cotizado en pesos, con IVA<input class="txt" id="qMonto" type="number" inputmode="numeric" min="1" placeholder="Ej. 85000"></label>
+    <div class="qlab">Forma de pago</div><div class="pills"><label><input type="radio" name="qPago" value="Contado"${pc?"":" checked"}>Contado</label><label><input type="radio" name="qPago" value="Crédito"${pc?" checked":""}>Crédito</label></div>
+    <div id="qLinea"${pc?"":" hidden"}><div class="qlab">¿Ya tiene línea de crédito autorizada con Tersa?</div><div class="pills"><label><input type="radio" name="qLin" value="si">Sí, ya tiene línea</label><label><input type="radio" name="qLin" value="no">No: hay que pedir documentos</label></div>
+    <div class="hint" style="margin-top:6px">Si no tiene línea, empieza el trámite de documentos. La vigencia de ${VIG} días sigue corriendo mientras el cliente los junta; solo se pausa cuando los entregas a Crédito y Cobranza.</div></div>
+    <div class="acts"><button class="btn pri" type="button" data-cot="nueva">Registrar cotización</button></div>`}
   if(cer.length)h+=`<div class="lbl">Cotizaciones cerradas</div>`+cer.map(x=>`<div class="hi" style="--c:var(${x.estado==="ganada"?"--st-vis":"--st-esc"})"><div class="hi-h"><span>${x.id} · ${fecha(x.cierre)}</span><span>${x.estado==="ganada"?"Ganada":"Perdida"}</span></div><p>${x.estado==="ganada"?`Cotizado ${mxn(x.monto)} · cerrado ${mxn(x.ganado)}${x.factura?" · factura "+esc(x.factura):""}`:`${mxn(x.monto)} · ${x.motivo}`}</p></div>`).join("");
   el.innerHTML=h+'<span class="toast" id="qMsg" hidden></span>';el.hidden=!h;
 }
@@ -1009,7 +1016,9 @@ async function cotAccion(a){
   const id=$("ficha").dataset.cli,q=COTS.find(x=>x.cli===id&&x.estado==="abierta");
   const err=t=>{const m=$("qMsg");m.textContent=t;m.style.color="var(--st-esc)";m.hidden=false};
   let r=null;
-  if(a==="nueva"){const m=+$("qMonto").value;if(!(m>0))return err("Escribe el monto cotizado.");r=SB.from("cotizaciones").insert({cliente_id:id,monto:m})}
+  if(a==="nueva"){const m=+$("qMonto").value,v=n=>($("fCot").querySelector(`input[name=${n}]:checked`)||{}).value,pago=v("qPago"),lin=v("qLin");
+    if(!(m>0))return err("Escribe el monto cotizado.");if(!pago)return err("Elige la forma de pago.");if(pago==="Crédito"&&!lin)return err("Indica si ya tiene línea de crédito autorizada.");
+    r=SB.from("cotizaciones").insert({cliente_id:id,monto:m,forma_pago:pago,linea_autorizada:lin==="si",tramite_inicio:pago==="Crédito"&&lin==="no"?HOY:null})}
   else if(a==="ok-ganar"){const m=+$("qGan").value,f=$("qFac").value.trim();if(!(m>0))return err("Escribe el monto cerrado.");if(!f)return err("Escribe el número de factura.");r=SB.from("cotizaciones").update({estado:"ganada",monto_ganado:m,factura:f}).eq("id",q.dbid)}
   else if(a==="tram-ini")r=SB.from("cotizaciones").update({tramite_inicio:HOY,forma_pago:"Crédito"}).eq("id",q.dbid);
   else if(a.startsWith("doc:")){const k=a.slice(4),d={...q.docs};if(d[k])delete d[k];else d[k]=HOY;r=SB.from("cotizaciones").update({documentos:d}).eq("id",q.dbid)}
@@ -1033,6 +1042,7 @@ document.addEventListener("click",e=>{
   if(e.target.closest("a,button:not([data-id])"))return;
   const t=e.target.closest("[data-id]");if(t)abrir(t.dataset.id)});
 $("cerrar").onclick=cerrar;$("scrim").onclick=()=>{cerrar();cerrarAlta()};
+$("fCot").addEventListener("change",e=>{if(e.target.name==="qPago")$("qLinea").hidden=e.target.value!=="Crédito"});
 /* ---------- alta de clientes y prospectos ---------- */
 const EDOS_ZONA=["Baja California","Baja California Sur","Sonora","Sinaloa","Nayarit","Jalisco","Nuevo León"];
 const EDOS_OTROS=["Aguascalientes","Campeche","Chiapas","Chihuahua","Ciudad de México","Coahuila","Colima","Durango","Estado de México","Guanajuato","Guerrero","Hidalgo","Michoacán","Morelos","Oaxaca","Puebla","Querétaro","Quintana Roo","San Luis Potosí","Tabasco","Tamaulipas","Tlaxcala","Veracruz","Yucatán","Zacatecas","Estados Unidos (cruce fronterizo)"];
