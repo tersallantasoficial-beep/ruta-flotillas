@@ -89,7 +89,7 @@ h1{font-family:var(--display);font-variation-settings:"wdth" 118;font-weight:800
 
 /* módulos */
 .grid{display:grid;grid-template-columns:repeat(12,minmax(0,1fr));gap:18px}
-.mod{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:18px;box-shadow:var(--shadow);min-width:0;display:grid;gap:14px;align-content:start}
+.mod{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:18px;box-shadow:var(--shadow);min-width:0;display:grid;grid-template-columns:minmax(0,1fr);gap:14px;align-content:start}
 .mod-h{display:flex;justify-content:space-between;align-items:baseline;gap:10px;flex-wrap:wrap}
 h2{font-family:var(--display);font-variation-settings:"wdth" 110;font-weight:700;font-size:17px;margin:0;letter-spacing:.005em}
 .hint{font-size:12px;color:var(--muted)}
@@ -167,6 +167,8 @@ h2{font-family:var(--display);font-variation-settings:"wdth" 110;font-weight:700
 .tbl-tools{display:flex;gap:10px;flex-wrap:wrap;align-items:center;justify-content:space-between}
 .search{width:240px}
 .tbl{overflow-x:auto;margin:0 -18px;padding:0 18px}
+/* seguimiento de activos: en celular cada cliente es una tarjeta, sin deslizar de lado */
+@media (max-width:640px){.seg table{min-width:0}.seg thead{display:none}.seg tr{display:grid;grid-template-columns:1fr 1fr;gap:6px 12px;padding:12px 0;border-bottom:1px solid var(--line)}.seg td{border:0;padding:0}.seg td:first-child{grid-column:1/-1}.seg td[data-l]::before{content:attr(data-l);display:block;font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.06em}}
 table{width:100%;border-collapse:collapse;font-size:13px;min-width:720px}
 th{text-align:left;font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);font-weight:600;padding:10px 8px;border-bottom:1px solid var(--line)}
 td{padding:11px 8px;border-bottom:1px solid var(--line);vertical-align:middle}
@@ -391,6 +393,7 @@ textarea{width:100%;font:inherit;padding:10px;border-radius:10px;border:1px soli
         <div class="mod-h"><h2>Clientes activos · visita mensual</h2><span class="hint" id="actSecHint"></span></div>
         <div class="bars" id="actBars"></div>
         <div class="legend"><span style="--c:var(--st-act)"><i></i>Visitados en los últimos 30 días</span><span style="--c:var(--soft2)"><i></i>Pendientes</span></div>
+        <div id="actDet"></div>
       </section>
       <section class="mod c5">
         <div class="mod-h"><h2>Requieren tu atención</h2><span class="hint">Toca un cliente para reasignarlo o regresarlo a la lista</span></div>
@@ -435,6 +438,10 @@ textarea{width:100%;font:inherit;padding:10px;border-radius:10px;border:1px soli
         <div class="mod-h"><h2>Clientes activos · visita una vez al mes</h2></div>
         <span class="hint" id="gActHint"></span>
         <div class="cards" id="gAct"></div>
+      </section>
+      <section class="mod c12" id="gActHist">
+        <div class="mod-h"><h2>Seguimiento de tus clientes activos</h2><span class="hint">Toca un cliente para ver todas sus visitas</span></div>
+        <div id="gActTabla"></div>
       </section>
       <section class="mod c12" id="gCotSec">
         <div class="mod-h"><h2>Tus cotizaciones</h2><span class="hint">Sin respuesta en 14 días se marcan como perdidas</span></div>
@@ -490,7 +497,7 @@ textarea{width:100%;font:inherit;padding:10px;border-radius:10px;border:1px soli
       <label for="lPass">Contraseña<input id="lPass" type="password" autocomplete="current-password" required></label>
       <button class="btn pri" type="submit" style="padding:12px">Entrar</button>
       <span class="toast" id="lErr" style="color:var(--st-esc)" hidden></span>
-      <span class="hint" style="font-size:11px">Versión 22 oct · clientes activos (3)</span>
+      <span class="hint" style="font-size:11px">Versión 22 oct · seguimiento de activos</span>
       <button type="button" class="btn" id="olvide" style="border:0;background:none;color:var(--muted);text-decoration:underline;padding:0;justify-self:start">Olvidé mi contraseña</button>
     </form>
     <form class="lg-card" id="passForm" hidden>
@@ -551,7 +558,8 @@ const cargarMaps=()=>new Promise(ok=>{if(!MAPS_KEY)return ok(false);
 const colorDe=v=>getComputedStyle(document.documentElement).getPropertyValue(v).trim();
 const ordKm=(a,b)=>(a.km??999)-(b.km??999);
 
-let SUC=[],CL=[],VISITAS=[],COTS=[],YO=null,IX={};
+let SUC=[],CL=[],VISITAS=[],COTS=[],YO=null,IX={},NOMS={};
+const quien=e=>NOMS[(e||"").toLowerCase()]||nombreDe(e);
 const cli=id=>IX[id];
 async function todo(tabla,cols){ // la API entrega máximo 1000 filas por llamada
   let out=[];for(let i=0;;i+=1000){const{data,error}=await SB.from(tabla).select(cols).order("id").range(i,i+999);if(error)throw error;out=out.concat(data);if(data.length<1000)return out}}
@@ -567,7 +575,7 @@ async function cargar(){
     todo("clientes","id,empresa,giro,tipo,latitud,longitud,link_maps,ciudad,unidades_flota,id_sucursal,km_sucursal,estatus,semanas_arrastre,intentos,horario_sugerido,motivo_escalado,revisar_ubicacion,codigo_erp,razon_social,ultima_compra"),
     todo("visitas","*"),todo("cotizaciones","*")]);
   const{data:pf}=await SB.from("perfiles").select("correo,nombre"); // el gerente solo ve el suyo; regional y admin ven todos
-  const NOM=Object.fromEntries((pf||[]).filter(x=>x.nombre).map(x=>[x.correo,x.nombre]));
+  const NOM=Object.fromEntries((pf||[]).filter(x=>x.nombre).map(x=>[x.correo,x.nombre]));NOMS=NOM;
   const conCli=new Set(c.map(x=>x.id_sucursal));
   SUC=s.filter(x=>conCli.has(x.id)||x.id===YO.id_sucursal).map(x=>({id:x.id,n:corta(x.nombre),g:x.gerente_correo?NOM[x.gerente_correo.toLowerCase()]||nombreDe(x.gerente_correo):"Sin gerente · "+corta(x.nombre),lat:x.latitud,lng:x.longitud}));
   const SI=Object.fromEntries(SUC.map(x=>[x.id,x]));
@@ -779,12 +787,19 @@ function feed(vis,max,conGerente){
     return `<div class="ev" data-id="${c.id}" style="--c:var(${RES[x.res]})"><span class="dot">${conGerente?iniciales(c.suc.g):fecha(x.fecha).split(" ")[0]}</span><div><div class="ev-h"><b>${esc(c.nombre)}</b><span>${fecha(x.fecha)}${conGerente?" · "+c.suc.n:""}</span></div><p><span class="chip" style="--c:var(${RES[x.res]})">${x.res}</span> ${verif(x)} ${esc(x.com)}</p></div></div>`}).join(""):'<div class="empty">Sin visitas en este periodo.</div>';
 }
 
+function actTabla(arr){
+  const filas=arr.map(c=>({c,m:mesDe(c),u:VISITAS.filter(x=>x.cli===c.id).sort((a,b)=>b.fecha.localeCompare(a.fecha))[0]}))
+    .sort((a,b)=>a.m.ok-b.m.ok||(b.m.d??1e9)-(a.m.d??1e9)||a.c.nombre.localeCompare(b.c.nombre));
+  const est=m=>m.ok?["Al corriente","--st-act"]:m.d==null?["Sin visita","--st-asig"]:["Toca visita","--warn"];
+  return `<div class="tbl seg"><table><thead><tr><th>Cliente</th><th>Última compra</th><th>Última visita</th><th>Visitó</th><th>Resultado</th><th>Estado del mes</th></tr></thead><tbody>${filas.map(({c,m,u})=>{const[t,col]=est(m);
+    return `<tr data-id="${c.id}"><td><b>${esc(c.nombre)}</b><span class="sub">${esc(c.erp||c.id)}</span></td><td data-l="Última compra">${c.ult?`${fecha(c.ult)}<span class="sub">hace ${diasDesde(c.ult)} días</span>`:"—"}</td><td data-l="Última visita">${u?`${fecha(u.fecha)}<span class="sub">hace ${diasDesde(u.fecha)} días</span>`:"—"}</td><td data-l="Visitó">${u?esc(quien(u.correo)):"—"}</td><td data-l="Resultado">${u?`<span class="chip" style="--c:var(${RES[u.res]})">${u.res}</span>`:"—"}</td><td data-l="Estado"><span class="chip" style="--c:var(${col})">${t}</span></td></tr>`}).join("")}</tbody></table></div>`}
 function cartera(list){
   const a=list.filter(c=>c.tipo===ACT);$("actSec").hidden=!a.length;if(!a.length)return;
   const ok=a.filter(c=>mesDe(c).ok).length;
   $("actSecHint").textContent=`${ok} de ${a.length} visitados en los últimos 30 días`;
   const filas=SUC.map(x=>{const t=a.filter(c=>c.suc.id===x.id);return{x,t:t.length,v:t.filter(c=>mesDe(c).ok).length}}).filter(r=>r.t).sort((p,q)=>p.v/p.t-q.v/q.t||q.t-p.t);
-  $("actBars").innerHTML=filas.map(({x,t,v})=>`<button type="button" class="br" data-suc="${x.id}" style="all:unset;display:grid;gap:4px;cursor:pointer"><div class="br-top"><span>${esc(x.g.startsWith("Sin gerente")?x.g:x.g+" · "+x.n)}</span><span class="tn">${v}/${t}</span></div><div class="br-track"><i style="width:100%;background:var(--soft2)"></i><i style="width:${v/t*100}%;background:var(--st-act)"></i></div></button>`).join("")}
+  $("actBars").innerHTML=filas.map(({x,t,v})=>`<button type="button" class="br" data-suc="${x.id}" style="all:unset;display:grid;gap:4px;cursor:pointer"><div class="br-top"><span>${esc(x.g.startsWith("Sin gerente")?x.g:x.g+" · "+x.n)}</span><span class="tn">${v}/${t}</span></div><div class="br-track"><i style="width:100%;background:var(--soft2)"></i><i style="width:${v/t*100}%;background:var(--st-act)"></i></div></button>`).join("");
+  $("actDet").innerHTML=$("vista").value!=="all"?actTabla(a):'<div class="hint">Toca una sucursal para ver sus clientes activos: última visita, quién la hizo y qué resultó. Toca un cliente para ver su historial completo.</div>'}
 
 /* ---------- gerente ---------- */
 function renderG(id){
@@ -815,7 +830,7 @@ function renderG(id){
     <div class="acts"><a class="btn" href="${maps(c)}" target="_blank" rel="noopener">Cómo llegar ↗</a><button class="btn pri" type="button" data-id="${c.id}">Registrar visita</button></div>
   </div>`).join(""):'<div class="mod empty">No tienes clientes pendientes esta semana. Tu lista nueva llega el lunes.</div>';
   const act=mis.filter(c=>c.tipo===ACT).map(c=>({c,m:mesDe(c)})),pend=act.filter(x=>!x.m.ok).sort((p,q)=>(q.m.d??1e9)-(p.m.d??1e9)||(yo(p.c)??ordKm(p.c,q.c))-(yo(q.c)??0));
-  $("gActSec").hidden=!act.length;
+  $("gActSec").hidden=$("gActHist").hidden=!act.length;$("gActTabla").innerHTML=act.length?actTabla(act.map(x=>x.c)):"";
   $("gActHint").textContent=`${act.length-pend.length} de ${act.length} visitados en los últimos 30 días · cuentan aparte de tus 10 de la semana`;
   $("gAct").innerHTML=pend.map(({c,m:mm})=>`<div class="card">
     <div class="card-h"><span class="lbl">${c.giro}</span><span class="chip" style="--c:var(${mm.d==null?"--st-asig":"--warn"})">${mm.d==null?"Sin visita registrada":"Última visita hace "+mm.d+" días"}</span></div>
@@ -845,14 +860,14 @@ $("filtrosTabla").innerHTML=[["todos","Todos","--muted"],...Object.entries(ST).m
 
 
 function abrir(id){const c=cli(id);if(!c)return;
-  $("fChip").innerHTML=chip(c.st);$("fNombre").textContent=c.nombre;$("fTipo").innerHTML=tipoTag(c)+(c.tipo===ACT?`<div class="hint" style="margin-top:6px">${(m=>m.d==null?"Sin visita registrada.":`Última visita hace ${m.d} días.`)(mesDe(c))} Se visita una vez al mes; no entra en la lista semanal.</div>`:"");
+  $("fChip").innerHTML=chip(c.st);$("fNombre").textContent=c.nombre;$("fTipo").innerHTML=tipoTag(c)+(c.tipo===ACT?`<div class="hint" style="margin-top:6px">${(m=>m.d==null?"Sin visita registrada.":`Última visita atendida: ${fecha(m.u)} (hace ${m.d} días) por ${esc(quien(VISITAS.filter(x=>x.cli===c.id&&x.fecha===m.u&&atendida(x)).pop().correo))}.`)(mesDe(c))} Se visita una vez al mes; no entra en la lista semanal.</div>`:"");
   $("fFacts").innerHTML=`<span><b class="num">${c.flota??"—"}</b>unidades</span><span><b class="num">${fk(c.km)}</b>km de ${c.suc.n}</span><span><b>${c.giro}</b>giro</span>`;
   $("fActs").innerHTML=`<a class="btn" href="${maps(c)}" target="_blank" rel="noopener">Abrir en Google Maps ↗</a>`;
   $("form").reset();actualizarForm();$("toast").hidden=true;$("ficha").dataset.cli=id;historial(id);cotModo=null;cotBlock(id);regBlock(id);
   $("ficha").hidden=$("scrim").hidden=false;$("cerrar").focus()}
 function cerrar(){$("ficha").hidden=$("scrim").hidden=true}
 function historial(id){const h=[...VISITAS].reverse().filter(x=>x.cli===id).sort((a,b)=>b.fecha.localeCompare(a.fecha));
-  $("fHist").innerHTML=`<div class="lbl">Historial · ${h.length} ${h.length===1?"visita":"visitas"}</div>`+(h.length?h.map(x=>`<div class="hi" style="--c:var(${RES[x.res]})"><div class="hi-h"><span>${fecha(x.fecha)}${x.tipoV?" · "+x.tipoV:""}</span><span>${x.res}</span></div><p>${verif(x)} ${esc(x.com)}</p></div>`).join(""):'<div class="empty" style="padding:0">Aún no hay visitas registradas.</div>')}
+  $("fHist").innerHTML=`<div class="lbl">Historial · ${h.length} ${h.length===1?"visita":"visitas"}</div>`+(h.length?h.map(x=>`<div class="hi" style="--c:var(${RES[x.res]})"><div class="hi-h"><span>${fecha(x.fecha)}${x.tipoV?" · "+x.tipoV:""} · ${esc(quien(x.correo))}</span><span>${x.res}</span></div><p>${verif(x)} ${esc(x.com)}</p></div>`).join(""):'<div class="empty" style="padding:0">Aún no hay visitas registradas.</div>')}
 
 let cotModo=null;
 function cotBlock(id){
