@@ -554,7 +554,7 @@ textarea{width:100%;font:inherit;padding:10px;border-radius:10px;border:1px soli
       <label for="lPass">Contraseña<input id="lPass" type="password" autocomplete="current-password" required></label>
       <button class="btn pri" type="submit" style="padding:12px">Entrar</button>
       <span class="toast" id="lErr" style="color:var(--st-esc)" hidden></span>
-      <span class="hint" style="font-size:11px">Versión 23 oct · alta de clientes</span>
+      <span class="hint" style="font-size:11px">Versión 23 oct · alta de clientes (3)</span>
       <button type="button" class="btn" id="olvide" style="border:0;background:none;color:var(--muted);text-decoration:underline;padding:0;justify-self:start">Olvidé mi contraseña</button>
     </form>
     <form class="lg-card" id="passForm" hidden>
@@ -787,10 +787,10 @@ function renderR(){
   const sum=(a,k)=>a.reduce((s,q)=>s+q[k],0);
   $("cotHint").textContent=rangoTxt();
   $("cotStats").innerHTML=[
-    ["Cotizado",corto(sum(qR,"monto")),`${qR.length} cotizaciones`],
-    ["Ganado",corto(sum(gan,"ganado")),`${gan.length} ${gan.length===1?"venta cerrada":"ventas cerradas"}`],
-    ["Tasa de cierre",cerr.length?Math.round(gan.length/cerr.length*100)+"%":"—",`${gan.length} de ${cerr.length} cerradas`],
-    ["En juego",corto(sum(ab,"monto")),`${ab.length} abiertas`]
+    ["Cotizado en el periodo",corto(sum(qR,"monto")),`${qR.length} cotizaciones nuevas`],
+    ["Ganado en el periodo",corto(sum(gan,"ganado")),`${gan.length} ${gan.length===1?"venta cerrada":"ventas cerradas"}, de cotizaciones de cualquier fecha`],
+    ["Tasa de cierre",cerr.length?Math.round(gan.length/cerr.length*100)+"%":"—",`${gan.length} ganadas de ${cerr.length} cerradas en el periodo`],
+    ["Cotizaciones sin cerrar (histórico)",corto(sum(ab,"monto")),`${ab.length} abiertas de cualquier fecha`]
   ].map(([l,v2,s2])=>`<div class="mstat"><span class="lbl">${l}</span><b class="num">${v2}</b><span>${s2}</span></div>`).join("");
   $("cotList").innerHTML=ab.length?ab.slice(0,5).map(qrow).join(""):'<div class="empty">No hay cotizaciones abiertas.</div>';
   const per=qs.filter(q=>q.estado==="perdida"),pm=Math.max(1,...MOTIVOS.map(m=>per.filter(q=>q.motivo===m).length));
