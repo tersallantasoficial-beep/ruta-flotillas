@@ -664,6 +664,7 @@ function resumenDe(v){
   const tp=v.tipos_unidad||[],nd=v.necesidades||[];
   return `${v.contacto.replace("Me atendió","Atendió")}${v.contacto_nombre?" ("+v.contacto_nombre+(v.contacto_puesto?", "+v.contacto_puesto:"")+")":""}. ${v.unidades?"Flota "+v.unidades:""}${tp.length?" ("+tp.join(", ")+")":""}.${nd.length?" Necesita: "+nd.join(", ")+".":""}${v.proveedor?" Proveedor: "+v.proveedor+".":""}${v.siguiente_paso?" Siguiente paso: "+v.siguiente_paso+".":""}${v.comentario?" "+v.comentario:""}`;
 }
+const cotDe=x=>({dbid:x.id,id:x.folio,factura:x.factura,cli:x.cliente_id,fecha:x.fecha,monto:+x.monto,estado:x.estado,ganado:x.monto_ganado==null?0:+x.monto_ganado,motivo:x.motivo,cierre:x.cerrada_en,pago:x.forma_pago,linea:!!x.linea_autorizada,ini:x.tramite_inicio,docsOk:x.docs_completos,fin:x.tramite_fin,res:x.credito_result,docs:x.documentos||{}});
 async function cargar(){
   const[s,c,v,q]=await Promise.all([todo("sucursales","*"),
     todo("clientes","id,empresa,giro,tipo,latitud,longitud,link_maps,ciudad,unidades_flota,id_sucursal,km_sucursal,estatus,semanas_arrastre,intentos,horario_sugerido,motivo_escalado,revisar_ubicacion,codigo_erp,razon_social,ultima_compra,areas_cobertura,cuenta_id"),
@@ -687,7 +688,7 @@ async function cargar(){
   for(const c of CL){const k=CUENTAS[c.cuenta];c.at=k&&k.modo==="centralizada"&&k.sucursal_resp?k.sucursal_resp:c.suc.id}
   IX=Object.fromEntries(CL.map(x=>[x.id,x]));
   VISITAS=v.filter(x=>IX[x.cliente_id]).map(x=>({cli:x.cliente_id,fecha:new Date(x.fecha).toLocaleDateString("en-CA"),res:resDe(x),com:resumenDe(x),ver:x.verificacion,dist:x.distancia_m,tipoV:x.tipo_visita,correo:x.correo,dur:x.duracion_min}));
-  COTS=q.filter(x=>IX[x.cliente_id]).map(x=>({dbid:x.id,id:x.folio,factura:x.factura,cli:x.cliente_id,fecha:x.fecha,monto:+x.monto,estado:x.estado,ganado:x.monto_ganado==null?0:+x.monto_ganado,motivo:x.motivo,cierre:x.cerrada_en,pago:x.forma_pago,linea:!!x.linea_autorizada,ini:x.tramite_inicio,docsOk:x.docs_completos,fin:x.tramite_fin,res:x.credito_result,docs:x.documentos||{}}));
+  COTS=q.filter(x=>IX[x.cliente_id]).map(cotDe);
   // pidió cotización en su última visita con interés y todavía no se le registra una
   for(const x of VISITAS)if(x.res==="Pidió cotización"&&!COTS.some(q=>q.cli===x.cli&&q.fecha>=x.fecha))IX[x.cli].pideCot=true;
 }
@@ -1124,6 +1125,7 @@ async function regAccion(a){
   if(error){regBlock(id);const m2=$("rMsg");m2.textContent="No se guardó: "+error.message;m2.style.color="var(--st-esc)";m2.hidden=false;return}
   await recargar(id);const t=$("toast");t.textContent=msg;t.style.color="var(--st-vis)";t.hidden=false;
 }
+let docCola=Promise.resolve();
 async function cotAccion(a){
   const id=$("ficha").dataset.cli,q=COTS.find(x=>x.cli===id&&x.estado==="abierta");
   const err=t=>{const m=$("qMsg");m.textContent=t;m.style.color="var(--st-esc)";m.hidden=false};
@@ -1133,16 +1135,27 @@ async function cotAccion(a){
     r=SB.from("cotizaciones").insert({cliente_id:id,monto:m,forma_pago:pago,linea_autorizada:lin==="si",tramite_inicio:pago==="Crédito"&&lin==="no"?HOY:null})}
   else if(a==="ok-ganar"){const m=+$("qGan").value,f=$("qFac").value.trim();if(!(m>0))return err("Escribe el monto cerrado.");if(!f)return err("Escribe el número de factura.");r=SB.from("cotizaciones").update({estado:"ganada",monto_ganado:m,factura:f}).eq("id",q.dbid)}
   else if(a==="tram-ini")r=SB.from("cotizaciones").update({tramite_inicio:HOY,forma_pago:"Crédito"}).eq("id",q.dbid);
-  else if(a.startsWith("doc:")){const k=a.slice(4),d={...q.docs};if(d[k])delete d[k];else d[k]=HOY;r=SB.from("cotizaciones").update({documentos:d}).eq("id",q.dbid)}
+  else if(a.startsWith("doc:")){const k=a.slice(4),antes=q.docs,d={...antes};if(d[k])delete d[k];else d[k]=HOY;
+    // palomeo inmediato; si la base no lo acepta, se regresa como estaba
+    q.docs=d;cotBlock(id);
+    // en fila: si toca varios seguidos, se guardan en orden y el último gana
+    const{data,error}=await (docCola=docCola.then(()=>SB.from("cotizaciones").update({documentos:q.docs}).eq("id",q.dbid).select("id")));
+    if(error||!data||!data.length){q.docs=antes;cotBlock(id);err("No se guardó: "+(error?error.message:"tu usuario no tiene permiso de cambiar esta cotización."))}
+    return}
   else if(a==="tram-env")r=SB.from("cotizaciones").update({docs_completos:HOY}).eq("id",q.dbid);
   else if(a==="tram-falta")r=SB.from("cotizaciones").update({docs_completos:null}).eq("id",q.dbid);
   else if(a==="tram-ok"||a==="tram-no")r=SB.from("cotizaciones").update({tramite_fin:HOY,credito_result:a==="tram-ok"?"aprobado":"rechazado"}).eq("id",q.dbid);
   else if(a==="ok-perder"){const mo=($("fCot").querySelector("input[name=motivo]:checked")||{}).value;if(!mo)return err("Elige el motivo.");r=SB.from("cotizaciones").update({estado:"perdida",motivo:mo}).eq("id",q.dbid)}
   else{cotModo=a==="cancelar"?null:a;return cotBlock(id)}
   $("fCot").querySelectorAll("button").forEach(b=>b.disabled=true);
-  const{error}=await r;
-  if(error){cotBlock(id);return err("No se guardó: "+(error.message||"revisa tu conexión"))}
-  cotModo=null;await recargar(id);
+  try{const{data,error}=await r.select("*");
+    if(error){cotBlock(id);return err("No se guardó: "+(error.message||"revisa tu conexión"))}
+    // RLS no marca error si no deja cambiar el renglón: solo regresa 0 renglones
+    if(!data||!data.length){cotBlock(id);return err("No se guardó: tu usuario no tiene permiso de cambiar esta cotización.")}
+    // se muestra al instante con lo que regresó la base; el resto de la página se actualiza por detrás
+    const nq=cotDe(data[0]),i=COTS.findIndex(x=>x.dbid===nq.dbid);i<0?COTS.push(nq):COTS[i]=nq;
+    cotModo=null;cotBlock(id);recargar(id);
+  }catch(x){cotBlock(id);err("No se guardó: "+(x&&x.message||x))}
 }
 document.addEventListener("click",e=>{
   const qa=e.target.closest("[data-cot]");if(qa){cotAccion(qa.dataset.cot);return}
