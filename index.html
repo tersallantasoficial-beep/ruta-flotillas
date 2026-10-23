@@ -208,6 +208,15 @@ a.btn{text-decoration:none;color:var(--ink);display:inline-flex;align-items:cent
 .acts{display:flex;gap:8px;flex-wrap:wrap}
 
 /* ficha */
+.fab{position:fixed;right:max(20px,env(safe-area-inset-right,0px));bottom:calc(20px + env(safe-area-inset-bottom,0px));width:60px;height:60px;border-radius:50%;border:0;background:var(--accent);color:#0f1b2d;box-shadow:0 10px 24px -8px rgba(0,0,0,.45);z-index:39;display:grid;place-items:center;cursor:pointer}
+.fab svg{width:28px;height:28px}
+.fab:focus-visible{outline:3px solid var(--ink);outline-offset:3px}
+.fab-tip{position:fixed;right:calc(92px + env(safe-area-inset-right,0px));bottom:calc(36px + env(safe-area-inset-bottom,0px));background:var(--ink);color:var(--panel);font-size:12px;padding:6px 10px;border-radius:8px;z-index:39;pointer-events:none;opacity:0;transition:opacity .15s}
+.fab:hover+.fab-tip{opacity:1}
+main.main{padding-bottom:calc(100px + env(safe-area-inset-bottom,0px))}  /* espacio para que el botón + no tape lo último de la página */
+.alta-g{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.alta-g .full{grid-column:1/-1}
+@media (max-width:640px){.alta-g{grid-template-columns:1fr}.fab-tip{display:none}}
 .scrim{position:fixed;inset:0;background:rgba(6,10,17,.45);z-index:40}
 .drawer{position:fixed;top:0;right:0;bottom:0;width:min(440px,100%);background:var(--panel);z-index:41;box-shadow:-20px 0 40px -20px rgba(0,0,0,.4);display:grid;grid-template-rows:auto 1fr;padding-top:env(safe-area-inset-top,0px);padding-right:env(safe-area-inset-right,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
 .dr-h{padding:20px;border-bottom:1px solid var(--line);display:grid;gap:10px;background:var(--soft)}
@@ -460,7 +469,55 @@ textarea{width:100%;font:inherit;padding:10px;border-radius:10px;border:1px soli
   </main>
 </div>
 
+<button class="fab" id="fab" type="button" hidden aria-label="Agregar cliente o prospecto"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12h14" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" fill="none"/></svg></button>
+<span class="fab-tip" aria-hidden="true">Agregar cliente o prospecto</span>
 <div class="scrim" id="scrim" hidden></div>
+<aside class="drawer" id="alta" hidden aria-label="Agregar cliente o prospecto">
+  <div class="dr-h">
+    <div style="display:flex;justify-content:space-between;gap:10px;align-items:center"><span class="lbl">Nuevo registro</span><button class="btn" type="button" id="altaCerrar">Cerrar</button></div>
+    <h3>Agregar cliente o prospecto</h3>
+  </div>
+  <div class="dr-b">
+    <form id="altaForm" style="display:grid;gap:16px" novalidate>
+      <fieldset class="q"><legend>¿Qué vas a registrar?</legend><div class="pills big">
+        <label><input type="radio" name="aTipo" value="Prospecto" checked>Prospecto<br><small style="opacity:.75">Todavía no nos compra</small></label>
+        <label><input type="radio" name="aTipo" value="Cliente">Cliente de Tersa<br><small style="opacity:.75">Ya nos ha comprado</small></label></div></fieldset>
+      <div class="alta-g">
+        <label class="qlab full" for="aEmp">Nombre de la empresa *<input class="txt" id="aEmp" autocomplete="off" required></label>
+        <div class="aviso full" id="aDup" hidden></div>
+        <label class="qlab" for="aSuc">Sucursal que lo atiende<select class="txt" id="aSuc"></select></label>
+        <label class="qlab" for="aFlota">Unidades de su flota<input class="txt" id="aFlota" type="number" inputmode="numeric" min="1" placeholder="Ej. 25"></label>
+      </div>
+      <fieldset class="q"><legend>Giro</legend><div class="pills" id="aGiro"></div></fieldset>
+      <fieldset class="q" id="aSap" hidden><legend>Datos de SAP</legend><div class="alta-g">
+        <label class="qlab" for="aUlt">Fecha de última compra *<input class="txt" id="aUlt" type="date"></label>
+        <label class="qlab" for="aErp">Código SAP<input class="txt" id="aErp" autocomplete="off" placeholder="C000000-00"></label>
+        <label class="qlab" for="aRs">Razón social<input class="txt" id="aRs" autocomplete="off"></label>
+        <label class="qlab" for="aRfc">RFC<input class="txt" id="aRfc" autocomplete="off" style="text-transform:uppercase"></label>
+        <div class="hint full" id="aTipoCalc"></div></div></fieldset>
+      <fieldset class="q"><legend>Ubicación</legend><div class="alta-g">
+        <label class="qlab full" for="aDir">Dirección<input class="txt" id="aDir" autocomplete="off" placeholder="Calle, número y colonia"></label>
+        <label class="qlab" for="aCiudad">Ciudad<input class="txt" id="aCiudad" autocomplete="off"></label>
+        <label class="qlab" for="aEdo">Estado<select class="txt" id="aEdo"></select></label>
+        <label class="qlab" for="aCp">Código postal<input class="txt" id="aCp" inputmode="numeric" maxlength="5" autocomplete="off"></label>
+        <div class="qlab"><span>Ubicación en el mapa</span><button class="btn" type="button" id="aGps">Usar mi ubicación actual</button></div>
+        <div class="hint full" id="aGpsTxt">Úsala solo si estás en el lugar del cliente.</div></div></fieldset>
+      <fieldset class="q"><legend>Áreas de cobertura <span>· estados donde opera su flotilla</span></legend>
+        <div class="pills" id="aCob"></div>
+        <details><summary class="hint" style="cursor:pointer">Ver todos los estados</summary><div class="pills" id="aCob2" style="margin-top:8px"></div></details></fieldset>
+      <fieldset class="q"><legend>Contacto <span>· opcional</span></legend><div class="alta-g">
+        <label class="qlab" for="aCNom">Nombre<input class="txt" id="aCNom" autocomplete="off"></label>
+        <label class="qlab" for="aCPue">Puesto<select class="txt" id="aCPue"><option value="">—</option><option>Jefe de compras</option><option>Jefe de mantenimiento</option><option>Dueño</option><option>Otro</option></select></label>
+        <label class="qlab" for="aCCel">Celular<input class="txt" id="aCCel" inputmode="tel" autocomplete="off" placeholder="10 dígitos"></label>
+        <label class="qlab" for="aCMail">Correo<input class="txt" id="aCMail" type="email" autocomplete="off"></label>
+        <label class="qlab" for="aTel">Teléfono de la empresa<input class="txt" id="aTel" inputmode="tel" autocomplete="off"></label>
+        <label class="qlab" for="aWeb">Sitio web<input class="txt" id="aWeb" inputmode="url" autocomplete="off"></label></div></fieldset>
+      <label class="qlab" for="aNotas">Notas<textarea id="aNotas" placeholder="Cómo lo conociste, qué necesita, etc."></textarea></label>
+      <label id="aListaL" style="display:flex;gap:8px;align-items:center;font-size:14px"><input type="checkbox" id="aLista"> Ponerlo en la lista de visitas de esta semana</label>
+      <div style="display:flex;gap:12px;align-items:center;flex-wrap:wrap"><button class="btn pri" type="submit">Guardar</button><span class="toast" id="aMsg" hidden></span></div>
+    </form>
+  </div>
+</aside>
 <aside class="drawer" id="ficha" hidden aria-label="Ficha del cliente">
   <div class="dr-h">
     <div style="display:flex;justify-content:space-between;gap:10px;align-items:start"><div id="fChip"></div><button class="btn" type="button" id="cerrar">Cerrar</button></div>
@@ -497,7 +554,7 @@ textarea{width:100%;font:inherit;padding:10px;border-radius:10px;border:1px soli
       <label for="lPass">Contraseña<input id="lPass" type="password" autocomplete="current-password" required></label>
       <button class="btn pri" type="submit" style="padding:12px">Entrar</button>
       <span class="toast" id="lErr" style="color:var(--st-esc)" hidden></span>
-      <span class="hint" style="font-size:11px">Versión 22 oct · seguimiento de activos</span>
+      <span class="hint" style="font-size:11px">Versión 23 oct · alta de clientes</span>
       <button type="button" class="btn" id="olvide" style="border:0;background:none;color:var(--muted);text-decoration:underline;padding:0;justify-self:start">Olvidé mi contraseña</button>
     </form>
     <form class="lg-card" id="passForm" hidden>
@@ -572,7 +629,7 @@ function resumenDe(v){
 }
 async function cargar(){
   const[s,c,v,q]=await Promise.all([todo("sucursales","*"),
-    todo("clientes","id,empresa,giro,tipo,latitud,longitud,link_maps,ciudad,unidades_flota,id_sucursal,km_sucursal,estatus,semanas_arrastre,intentos,horario_sugerido,motivo_escalado,revisar_ubicacion,codigo_erp,razon_social,ultima_compra"),
+    todo("clientes","id,empresa,giro,tipo,latitud,longitud,link_maps,ciudad,unidades_flota,id_sucursal,km_sucursal,estatus,semanas_arrastre,intentos,horario_sugerido,motivo_escalado,revisar_ubicacion,codigo_erp,razon_social,ultima_compra,areas_cobertura"),
     todo("visitas","*"),todo("cotizaciones","*")]);
   const{data:pf}=await SB.from("perfiles").select("correo,nombre"); // el gerente solo ve el suyo; regional y admin ven todos
   const NOM=Object.fromEntries((pf||[]).filter(x=>x.nombre).map(x=>[x.correo,x.nombre]));NOMS=NOM;
@@ -580,7 +637,7 @@ async function cargar(){
   SUC=s.filter(x=>conCli.has(x.id)||x.id===YO.id_sucursal).map(x=>({id:x.id,n:corta(x.nombre),g:x.gerente_correo?NOM[x.gerente_correo.toLowerCase()]||nombreDe(x.gerente_correo):"Sin gerente · "+corta(x.nombre),lat:x.latitud,lng:x.longitud}));
   const SI=Object.fromEntries(SUC.map(x=>[x.id,x]));
   CL=c.filter(x=>SI[x.id_sucursal]).map(x=>({id:x.id,nombre:x.empresa,giro:x.giro||"Otro",lat:x.latitud,lng:x.longitud,link:x.link_maps,ciudad:x.ciudad,flota:x.unidades_flota,
-    suc:SI[x.id_sucursal],km:x.km_sucursal==null?null:+x.km_sucursal,st:STMAP[x.estatus]||"disp",arr:x.estatus==="asignado"&&x.semanas_arrastre>0?1:0,intentos:x.intentos||0,horario:x.horario_sugerido,motivo:x.motivo_escalado,tipo:x.tipo,revisar:!!x.revisar_ubicacion,erp:x.codigo_erp,rs:x.razon_social,ult:x.ultima_compra}));
+    suc:SI[x.id_sucursal],km:x.km_sucursal==null?null:+x.km_sucursal,st:STMAP[x.estatus]||"disp",arr:x.estatus==="asignado"&&x.semanas_arrastre>0?1:0,intentos:x.intentos||0,horario:x.horario_sugerido,motivo:x.motivo_escalado,tipo:x.tipo,revisar:!!x.revisar_ubicacion,erp:x.codigo_erp,rs:x.razon_social,ult:x.ultima_compra,cob:x.areas_cobertura||[]}));
   IX=Object.fromEntries(CL.map(x=>[x.id,x]));
   VISITAS=v.filter(x=>IX[x.cliente_id]).map(x=>({cli:x.cliente_id,fecha:new Date(x.fecha).toLocaleDateString("en-CA"),res:resDe(x),com:resumenDe(x),ver:x.verificacion,dist:x.distancia_m,tipoV:x.tipo_visita,correo:x.correo}));
   COTS=q.filter(x=>IX[x.cliente_id]).map(x=>({dbid:x.id,id:x.folio,factura:x.factura,cli:x.cliente_id,fecha:x.fecha,monto:+x.monto,estado:x.estado,ganado:x.monto_ganado==null?0:+x.monto_ganado,motivo:x.motivo,cierre:x.cerrada_en}));
@@ -860,7 +917,7 @@ $("filtrosTabla").innerHTML=[["todos","Todos","--muted"],...Object.entries(ST).m
 
 
 function abrir(id){const c=cli(id);if(!c)return;
-  $("fChip").innerHTML=chip(c.st);$("fNombre").textContent=c.nombre;$("fTipo").innerHTML=tipoTag(c)+(c.tipo===ACT?`<div class="hint" style="margin-top:6px">${(m=>m.d==null?"Sin visita registrada.":`Última visita atendida: ${fecha(m.u)} (hace ${m.d} días) por ${esc(quien(VISITAS.filter(x=>x.cli===c.id&&x.fecha===m.u&&atendida(x)).pop().correo))}.`)(mesDe(c))} Se visita una vez al mes; no entra en la lista semanal.</div>`:"");
+  $("fChip").innerHTML=chip(c.st);$("fNombre").textContent=c.nombre;$("fTipo").innerHTML=tipoTag(c)+(c.cob.length?`<div class="hint" style="margin-top:6px">Cobertura: ${esc(c.cob.join(", "))}</div>`:"")+(c.tipo===ACT?`<div class="hint" style="margin-top:6px">${(m=>m.d==null?"Sin visita registrada.":`Última visita atendida: ${fecha(m.u)} (hace ${m.d} días) por ${esc(quien(VISITAS.filter(x=>x.cli===c.id&&x.fecha===m.u&&atendida(x)).pop().correo))}.`)(mesDe(c))} Se visita una vez al mes; no entra en la lista semanal.</div>`:"");
   $("fFacts").innerHTML=`<span><b class="num">${c.flota??"—"}</b>unidades</span><span><b class="num">${fk(c.km)}</b>km de ${c.suc.n}</span><span><b>${c.giro}</b>giro</span>`;
   $("fActs").innerHTML=`<a class="btn" href="${maps(c)}" target="_blank" rel="noopener">Abrir en Google Maps ↗</a>`;
   $("form").reset();actualizarForm();$("toast").hidden=true;$("ficha").dataset.cli=id;historial(id);cotModo=null;cotBlock(id);regBlock(id);
@@ -939,8 +996,55 @@ document.addEventListener("click",e=>{
   const na=e.target.closest(".nav a");if(na){document.querySelectorAll(".nav a").forEach(a=>a.classList.toggle("on",a===na))}
   if(e.target.closest("a,button:not([data-id])"))return;
   const t=e.target.closest("[data-id]");if(t)abrir(t.dataset.id)});
-$("cerrar").onclick=cerrar;$("scrim").onclick=cerrar;
-document.addEventListener("keydown",e=>{if(e.key==="Escape"&&!$("ficha").hidden)cerrar()});
+$("cerrar").onclick=cerrar;$("scrim").onclick=()=>{cerrar();cerrarAlta()};
+/* ---------- alta de clientes y prospectos ---------- */
+const EDOS_ZONA=["Baja California","Baja California Sur","Sonora","Sinaloa","Nayarit","Jalisco","Nuevo León"];
+const EDOS_OTROS=["Aguascalientes","Campeche","Chiapas","Chihuahua","Ciudad de México","Coahuila","Colima","Durango","Estado de México","Guanajuato","Guerrero","Hidalgo","Michoacán","Morelos","Oaxaca","Puebla","Querétaro","Quintana Roo","San Luis Potosí","Tabasco","Tamaulipas","Tlaxcala","Veracruz","Yucatán","Zacatecas","Estados Unidos (cruce fronterizo)"];
+const pillsCob=l=>l.map(e=>`<label><input type="checkbox" name="aCob" value="${e}">${e}</label>`).join("");
+$("aCob").innerHTML=pillsCob(EDOS_ZONA);$("aCob2").innerHTML=pillsCob(EDOS_OTROS);
+$("aGiro").innerHTML=GIROS.map(g=>`<label><input type="radio" name="aGiro" value="${g}">${g}</label>`).join("");
+$("aEdo").innerHTML='<option value="">—</option>'+[...EDOS_ZONA,...EDOS_OTROS.slice(0,-1)].map(e=>`<option>${e}</option>`).join("");
+let altaPos=null;
+const nkey=t=>(t||"").normalize("NFD").replace(/[\u0300-\u036f]/g,"").toLowerCase().replace(/\b(s ?a|de|c ?v|s ?de ?r ?l|grupo|transportes?)\b/g," ").replace(/[^a-z0-9]+/g," ").trim();
+function abrirAlta(){
+  $("altaForm").reset();altaPos=null;$("aGpsTxt").textContent="Úsala solo si estás en el lugar del cliente.";$("aDup").hidden=$("aMsg").hidden=true;
+  const mias=rol==="reg"?SUC:SUC.filter(x=>x.id===rol);
+  $("aSuc").innerHTML=mias.map(x=>`<option value="${x.id}">${esc(x.n)} · ${esc(x.g)}</option>`).join("");$("aSuc").disabled=mias.length<2;
+  if(rol==="reg"&&$("vista").value!=="all")$("aSuc").value=$("vista").value;
+  altaTipo();$("alta").hidden=$("scrim").hidden=false;$("aEmp").focus()}
+function cerrarAlta(){$("alta").hidden=true;if($("ficha").hidden)$("scrim").hidden=true}
+function altaTipo(){const cl=document.querySelector("input[name=aTipo]:checked").value==="Cliente";$("aSap").hidden=!cl;
+  const u=$("aUlt").value,d=u?diasDesde(u):null,act=cl&&d!=null&&d<=180;
+  $("aTipoCalc").innerHTML=!cl?"":d==null?"Con la fecha se decide si entra como activo (compró en los últimos 180 días) o inactivo.":act?`Entrará como <b>cliente activo</b> (compró hace ${d} días): visita una vez al mes.`:`Entrará como <b>cliente inactivo</b> (${d} días sin comprar): va a la lista semanal como recuperación.`;
+  $("aListaL").hidden=act}
+document.querySelectorAll("input[name=aTipo]").forEach(r=>r.onchange=altaTipo);$("aUlt").oninput=altaTipo;
+$("aEmp").onblur=()=>{const k=nkey($("aEmp").value);if(k.length<3){$("aDup").hidden=true;return}
+  const m=CL.filter(c=>nkey(c.nombre)===k||(k.length>=6&&nkey(c.nombre).includes(k))).slice(0,3);
+  $("aDup").hidden=!m.length;$("aDup").innerHTML=m.length?`Ya existe algo parecido: ${m.map(c=>`<a href="#" data-dup="${c.id}">${esc(c.nombre)}</a> (${esc(c.suc.n)})`).join(", ")}. Si es el mismo, ábrelo en lugar de crear otro.`:""};
+$("aDup").onclick=e=>{const a=e.target.closest("[data-dup]");if(!a)return;e.preventDefault();cerrarAlta();abrir(a.dataset.dup)};
+$("aGps").onclick=async()=>{$("aGpsTxt").textContent="Buscando tu ubicación…";const u=await ubic();
+  if(!u){altaPos=null;$("aGpsTxt").textContent="No se pudo obtener la ubicación. Activa el permiso de ubicación del navegador.";return}
+  altaPos=u;$("aGpsTxt").textContent=`Ubicación guardada (precisión ±${Math.round(u.acc||0)} m). Se usará como la ubicación del cliente.`};
+$("fab").onclick=abrirAlta;$("altaCerrar").onclick=cerrarAlta;
+$("altaForm").addEventListener("submit",async e=>{e.preventDefault();const m=$("aMsg"),err=t=>{m.textContent=t;m.style.color="var(--st-esc)";m.hidden=false};
+  const emp=$("aEmp").value.trim(),cl=document.querySelector("input[name=aTipo]:checked").value==="Cliente",v=id=>$(id).value.trim()||null;
+  if(emp.length<3)return err("Escribe el nombre de la empresa.");
+  if(cl&&!$("aUlt").value)return err("Escribe la fecha de última compra.");
+  const cel=($("aCCel").value||"").replace(/\D/g,"");if(cel&&cel.length!==10)return err("El celular debe tener 10 dígitos.");
+  const row={empresa:emp,tipo:cl?"Cliente":"Prospecto",id_sucursal:$("aSuc").value,giro:(document.querySelector("input[name=aGiro]:checked")||{}).value||"Otro",
+    unidades_flota:+$("aFlota").value||null,direccion:v("aDir"),ciudad:v("aCiudad"),estado:v("aEdo"),cp:v("aCp"),telefono:v("aTel"),sitio_web:v("aWeb"),
+    contacto_nombre:v("aCNom"),contacto_puesto:v("aCPue"),contacto_celular:cel||null,contacto_correo:v("aCMail"),notas:v("aNotas"),
+    areas_cobertura:[...document.querySelectorAll("input[name=aCob]:checked")].map(x=>x.value),
+    latitud:altaPos?altaPos.lat:null,longitud:altaPos?altaPos.lng:null,
+    codigo_erp:cl?v("aErp"):null,razon_social:cl?v("aRs"):null,rfc:cl&&v("aRfc")?v("aRfc").toUpperCase():null,ultima_compra:cl?$("aUlt").value:null,
+    estatus:$("aLista").checked&&!$("aListaL").hidden?"asignado":"disponible"};
+  if(!row.areas_cobertura.length)row.areas_cobertura=null;
+  if(!row.id_sucursal)return err("Elige la sucursal.");
+  const b=$("altaForm").querySelector("button[type=submit]");b.disabled=true;m.textContent="Guardando…";m.style.color="";m.hidden=false;
+  const{data,error}=await SB.from("clientes").insert(row).select("id,tipo").single();b.disabled=false;
+  if(error)return err("No se guardó: "+(error.message.includes("row-level")?"no tienes permiso en esa sucursal.":error.message));
+  cerrarAlta();await recargar();abrir(data.id);const t=$("toast");t.textContent=`Se agregó como ${data.tipo.toLowerCase()} (${data.id}). Ya puedes registrar su visita.`;t.style.color="var(--st-vis)";t.hidden=false});
+document.addEventListener("keydown",e=>{if(e.key!=="Escape")return;if(!$("alta").hidden)cerrarAlta();else if(!$("ficha").hidden)cerrar()});
 $("fQs").innerHTML=Q.map(q=>`<fieldset class="q" data-q="${q.k}"${q.si?` data-si="${q.si}"`:""}><legend>${q.t}${q.multi?" <span>· puedes elegir varias</span>":""}</legend><div class="pills${q.big?" big":""}">${q.ops.map((o,i)=>`<label><input type="${q.multi?"checkbox":"radio"}" name="${q.k}" value="${o}" id="${q.k}${i}">${o}</label>`).join("")}</div>${q.k==="horario"?'<input class="txt" id="fTel" placeholder="Nombre o teléfono del encargado, si lo conseguiste">':""}</fieldset>`).join("")+`<fieldset class="q" data-si="ef"><legend>¿Con quién hablaste? <span>· opcional</span></legend><input class="txt" id="fCNom" autocomplete="off" placeholder="Nombre"><div class="pills">${["Jefe de compras","Jefe de mantenimiento","Dueño","Otro"].map((o,i)=>`<label><input type="radio" name="puesto" value="${o}" id="puesto${i}">${o}</label>`).join("")}</div><input class="txt" id="fCCel" inputmode="tel" autocomplete="off" placeholder="Celular a 10 dígitos"></fieldset>`;
 const val=k=>($("form").querySelector(`input[name="${k}"]:checked`)||{}).value;
 const vals=k=>[...$("form").querySelectorAll(`input[name="${k}"]:checked`)].map(x=>x.value);
@@ -1018,7 +1122,7 @@ async function entrar(){
   const nm=p.nombre||nombreDe(p.correo);
   $("quien").textContent=nm;$("rolTxt").textContent={gerente:"Gerente de sucursal",regional:"Regional",admin:"Administrador",telemarketing:"Telemarketing"}[p.rol];$("avatar").textContent=iniciales(nm);
   $("vista").innerHTML='<option value="all">Todas las sucursales</option>'+SUC.map(x=>`<option value="${x.id}">${esc(x.n)} · ${esc(x.g)}</option>`).join("");
-  $("vista").value="all";mostrar=10;msgLogin("");nav();render();$("login").hidden=true;window.scrollTo(0,0);
+  $("vista").value="all";mostrar=10;msgLogin("");nav();render();$("login").hidden=true;$("fab").hidden=false;window.scrollTo(0,0);
 }
 $("loginForm").addEventListener("submit",async e=>{e.preventDefault();
   msgLogin("Entrando…",true);
@@ -1034,7 +1138,7 @@ $("passForm").addEventListener("submit",async e=>{e.preventDefault();const a=$("
   const{error}=await SB.auth.updateUser({password:a});
   if(error){m.textContent="No se guardó: "+error.message;m.hidden=false;return}
   $("passForm").hidden=true;$("loginForm").hidden=false;history.replaceState(null,"",location.pathname);entrar()});
-$("salir").onclick=async()=>{cerrar();await SB.auth.signOut();YO=null;$("login").hidden=false};
+$("salir").onclick=async()=>{cerrar();cerrarAlta();$("fab").hidden=true;await SB.auth.signOut();YO=null;$("login").hidden=false};
 // al volver a la pestaña se actualiza lo que otros registraron
 document.addEventListener("visibilitychange",()=>{if(!document.hidden&&YO)recargar($("ficha").hidden?null:$("ficha").dataset.cli)});
 (async()=>{const{data:{session}}=await SB.auth.getSession();
