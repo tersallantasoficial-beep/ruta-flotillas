@@ -216,8 +216,19 @@ a.btn{text-decoration:none;color:var(--ink);display:inline-flex;align-items:cent
 .acts{display:flex;gap:8px;flex-wrap:wrap}
 
 /* ficha */
-.fab{position:fixed;right:max(20px,env(safe-area-inset-right,0px));bottom:calc(20px + env(safe-area-inset-bottom,0px));width:60px;height:60px;border-radius:50%;border:0;background:var(--accent);color:#0f1b2d;box-shadow:0 10px 24px -8px rgba(0,0,0,.45);z-index:39;display:grid;place-items:center;cursor:pointer}
+.fab{position:fixed;right:max(20px,env(safe-area-inset-right,0px));bottom:calc(20px + var(--barra,0px) + env(safe-area-inset-bottom,0px));width:60px;height:60px;border-radius:50%;border:0;background:var(--accent);color:#0f1b2d;box-shadow:0 10px 24px -8px rgba(0,0,0,.45);z-index:39;display:grid;place-items:center;cursor:pointer}
 .fab svg{width:28px;height:28px}
+.encurso{position:fixed;left:max(12px,env(safe-area-inset-left,0px));right:max(12px,env(safe-area-inset-right,0px));bottom:calc(12px + env(safe-area-inset-bottom,0px));z-index:39;display:grid;gap:8px;max-width:560px;margin:0 auto}
+.encurso button{display:flex;align-items:center;gap:12px;width:100%;padding:12px 14px;border:0;border-radius:14px;background:var(--st-vis);color:#0f1b2d;font:inherit;text-align:left;cursor:pointer;box-shadow:0 10px 24px -8px rgba(0,0,0,.5)}
+.encurso button.tarde{background:#c62f2f;color:#fff}
+.encurso button.tarde .pt{background:#fff}
+.encurso button.tarde .go{background:rgba(255,255,255,.2)}
+.encurso .pt{flex:none;width:12px;height:12px;border-radius:50%;background:#0f1b2d;animation:latido 1.4s infinite}
+.encurso .sub{display:block;font-size:13px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.encurso .go{margin-left:auto;flex:none;font-weight:700;padding:8px 12px;border-radius:10px;background:rgba(15,27,45,.14)}
+@keyframes latido{50%{opacity:.25}}
+@media (prefers-reduced-motion:reduce){.encurso .pt{animation:none}}
+.card.curso{border:2px solid var(--st-vis)}
 .fab:focus-visible{outline:3px solid var(--ink);outline-offset:3px}
 .fab-tip{position:fixed;right:calc(92px + env(safe-area-inset-right,0px));bottom:calc(36px + env(safe-area-inset-bottom,0px));background:var(--ink);color:var(--panel);font-size:12px;padding:6px 10px;border-radius:8px;z-index:39;pointer-events:none;opacity:0;transition:opacity .15s}
 .fab:hover+.fab-tip{opacity:1}
@@ -393,6 +404,10 @@ textarea{width:100%;font:inherit;padding:10px;border-radius:10px;border:1px soli
         <div class="mod-h"><h2>Ranking de gerentes</h2><span class="hint" id="rankHint"></span></div>
         <div class="rank" id="rank"></div>
       </section>
+      <section class="mod c12" id="tiempos">
+        <div class="mod-h"><h2>Tiempo en visitas</h2><span class="hint" id="tiemposHint"></span></div>
+        <div id="tiemposT"></div>
+      </section>
 
       <section class="mod c5">
         <div class="mod-h"><h2>Visitas por semana</h2><span class="hint">Últimas 8 semanas</span></div>
@@ -484,6 +499,7 @@ textarea{width:100%;font:inherit;padding:10px;border-radius:10px;border:1px soli
   </main>
 </div>
 
+<div class="encurso" id="enCurso" role="status" aria-live="polite" hidden></div>
 <button class="fab" id="fab" type="button" hidden aria-label="Agregar cliente o prospecto"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12h14" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" fill="none"/></svg></button>
 <span class="fab-tip" aria-hidden="true">Agregar cliente o prospecto</span>
 <div class="scrim" id="scrim" hidden></div>
@@ -547,10 +563,14 @@ textarea{width:100%;font:inherit;padding:10px;border-radius:10px;border:1px soli
     <div class="cotbox" id="fCot" hidden></div>
     <form id="form" style="display:grid;gap:12px">
       <div class="lbl">Registrar visita</div>
+      <div id="fCk" style="display:grid;gap:8px"></div>
+      <div id="fBody" style="display:grid;gap:12px">
       <div id="fQs" style="display:grid;gap:16px"></div>
       <div class="aviso" id="fAviso" hidden></div>
       <textarea id="fCom" placeholder="Comentario libre (opcional): algo que las opciones no cubran"></textarea>
-      <div style="display:flex;gap:12px;align-items:center;flex-wrap:wrap"><button class="btn pri" type="submit">Guardar visita</button><span class="toast" id="toast" hidden></span></div>
+      <div><button class="btn pri" type="submit">Terminar visita (check-out)</button></div>
+      </div>
+      <span class="toast" id="toast" hidden></span>
     </form>
     <div class="hist" id="fHist"></div>
   </div>
@@ -570,7 +590,7 @@ textarea{width:100%;font:inherit;padding:10px;border-radius:10px;border:1px soli
       <label for="lPass">Contraseña<input id="lPass" type="password" autocomplete="current-password" required></label>
       <button class="btn pri" type="submit" style="padding:12px">Entrar</button>
       <span class="toast" id="lErr" style="color:var(--st-esc)" hidden></span>
-      <span class="hint" style="font-size:11px">Versión 23 oct · buscador</span>
+      <span class="hint" style="font-size:11px">Versión 23 oct · check-out</span>
       <button type="button" class="btn" id="olvide" style="border:0;background:none;color:var(--muted);text-decoration:underline;padding:0;justify-self:start">Olvidé mi contraseña</button>
     </form>
     <form class="lg-card" id="passForm" hidden>
@@ -631,7 +651,7 @@ const cargarMaps=()=>new Promise(ok=>{if(!MAPS_KEY)return ok(false);
 const colorDe=v=>getComputedStyle(document.documentElement).getPropertyValue(v).trim();
 const ordKm=(a,b)=>(a.km??999)-(b.km??999);
 
-let SUC=[],CL=[],VISITAS=[],COTS=[],YO=null,IX={},NOMS={},CUENTAS={};
+let SUC=[],CL=[],VISITAS=[],COTS=[],YO=null,IX={},NOMS={},CUENTAS={},CKS=[],CHK={};
 const sinAcento=t=>(t||"").normalize("NFD").replace(/[\u0300-\u036f]/g,"").toLowerCase();
 const quien=e=>NOMS[(e||"").toLowerCase()]||nombreDe(e);
 const cli=id=>IX[id];
@@ -648,6 +668,9 @@ async function cargar(){
   const[s,c,v,q]=await Promise.all([todo("sucursales","*"),
     todo("clientes","id,empresa,giro,tipo,latitud,longitud,link_maps,ciudad,unidades_flota,id_sucursal,km_sucursal,estatus,semanas_arrastre,intentos,horario_sugerido,motivo_escalado,revisar_ubicacion,codigo_erp,razon_social,ultima_compra,areas_cobertura,cuenta_id"),
     todo("visitas","*"),todo("cotizaciones","*")]);
+  // check-ins: los míos abiertos (visita en curso) y los que quedaron sin check-out
+  const{data:ck}=await SB.from("checkins").select("id,cliente_id,correo,inicio,cerrado_en,abandonado,verificacion,distancia_m");CKS=ck||[];
+  CHK=Object.fromEntries(CKS.filter(x=>!x.cerrado_en&&x.correo===YO.correo.toLowerCase()).map(x=>[x.cliente_id,x]));
   const q0=q,IX0=Object.fromEntries(c.map(x=>[x.id,1]));
   const{data:cu}=await SB.from("cuentas_v").select("*");CUENTAS=Object.fromEntries((cu||[]).map(k=>[k.id,k]));
   const{data:pf}=await SB.from("perfiles").select("correo,nombre"); // el gerente solo ve el suyo; regional y admin ven todos
@@ -663,7 +686,7 @@ async function cargar(){
   // sucursal que ATIENDE: la responsable si la cuenta es centralizada
   for(const c of CL){const k=CUENTAS[c.cuenta];c.at=k&&k.modo==="centralizada"&&k.sucursal_resp?k.sucursal_resp:c.suc.id}
   IX=Object.fromEntries(CL.map(x=>[x.id,x]));
-  VISITAS=v.filter(x=>IX[x.cliente_id]).map(x=>({cli:x.cliente_id,fecha:new Date(x.fecha).toLocaleDateString("en-CA"),res:resDe(x),com:resumenDe(x),ver:x.verificacion,dist:x.distancia_m,tipoV:x.tipo_visita,correo:x.correo}));
+  VISITAS=v.filter(x=>IX[x.cliente_id]).map(x=>({cli:x.cliente_id,fecha:new Date(x.fecha).toLocaleDateString("en-CA"),res:resDe(x),com:resumenDe(x),ver:x.verificacion,dist:x.distancia_m,tipoV:x.tipo_visita,correo:x.correo,dur:x.duracion_min}));
   COTS=q.filter(x=>IX[x.cliente_id]).map(x=>({dbid:x.id,id:x.folio,factura:x.factura,cli:x.cliente_id,fecha:x.fecha,monto:+x.monto,estado:x.estado,ganado:x.monto_ganado==null?0:+x.monto_ganado,motivo:x.motivo,cierre:x.cerrada_en,pago:x.forma_pago,linea:!!x.linea_autorizada,ini:x.tramite_inicio,docsOk:x.docs_completos,fin:x.tramite_fin,res:x.credito_result,docs:x.documentos||{}}));
   // pidió cotización en su última visita con interés y todavía no se le registra una
   for(const x of VISITAS)if(x.res==="Pidió cotización"&&!COTS.some(q=>q.cli===x.cli&&q.fecha>=x.fecha))IX[x.cli].pideCot=true;
@@ -838,6 +861,7 @@ function renderR(){
   $("rank").innerHTML=rk.map(({x,nn,pv},i)=>{const[c,t]=semaforo(nn,m);
     return `<button class="rk" type="button" data-suc="${x.id}" style="--c:var(${c});opacity:${v==="all"||v===x.id?1:.4}"><span class="pos">${String(i+1).padStart(2,"0")}</span><span class="nm"><b>${x.g}</b><span class="meter"><i style="width:${Math.min(nn/m,1)*100}%"></i></span></span><span class="sc"><b class="num">${nn}/${m}</b><span class="chip">${t}</span>${pv!=null?`<span class="hint" style="font-size:11px">${pv}% en sitio</span>`:""}</span></button>`}).join("");
 
+  tiempos(v);
   tendencia(ids);
 
   // embudo acumulado: cada etapa es subconjunto de la anterior
@@ -883,6 +907,15 @@ function actTabla(arr){
   const est=m=>m.ok?["Al corriente","--st-act"]:m.d==null?["Sin visita","--st-asig"]:["Toca visita","--warn"];
   return `<div class="tbl seg"><table><thead><tr><th>Cliente</th><th>Última compra</th><th>Última visita</th><th>Visitó</th><th>Resultado</th><th>Estado del mes</th></tr></thead><tbody>${filas.map(({c,m,u})=>{const[t,col]=est(m);
     return `<tr data-id="${c.id}"><td><b>${esc(c.nombre)}</b><span class="sub">${esc(c.erp||c.id)}</span></td><td data-l="Última compra">${c.ult?`${fecha(c.ult)}<span class="sub">hace ${diasDesde(c.ult)} días</span>`:"—"}</td><td data-l="Última visita">${u?`${fecha(u.fecha)}<span class="sub">hace ${diasDesde(u.fecha)} días</span>`:"—"}</td><td data-l="Visitó">${u?esc(quien(u.correo)):"—"}</td><td data-l="Resultado">${u?`<span class="chip" style="--c:var(${RES[u.res]})">${u.res}</span>`:"—"}</td><td data-l="Estado"><span class="chip" style="--c:var(${col})">${t}</span></td></tr>`}).join("")}</tbody></table></div>`}
+// duración de visitas por gerente (check-in → check-out) y check-ins que se quedaron sin check-out
+function tiempos(v){
+  const fil=SUC.filter(x=>v==="all"||x.id===v).map(x=>{const ids=new Set(CL.filter(c=>c.at===x.id).map(c=>c.id)),vv=visitasDe(ids).filter(z=>z.dur!=null);
+    const cl=new Set(vv.map(z=>z.cli)).size,tot=vv.reduce((s,z)=>s+z.dur,0);
+    const sin=CKS.filter(k=>k.abandonado&&ids.has(k.cliente_id)&&(d=>d>=desde&&d<=hasta)(new Date(k.inicio).toLocaleDateString("en-CA"))).length;
+    return{x,n:vv.length,pm:vv.length?Math.round(tot/vv.length):null,pc:cl?Math.round(tot/cl):null,cl,sin}}).filter(r=>r.n||r.sin).sort((a,b)=>b.n-a.n);
+  const all=fil.reduce((s,r)=>s+r.n,0),pg=all?Math.round(fil.reduce((s,r)=>s+(r.pm||0)*r.n,0)/all):null;
+  $("tiemposHint").textContent=pg!=null?`Promedio general ${pg} min por visita · ${rangoTxt()}`:rangoTxt();
+  $("tiemposT").innerHTML=fil.length?`<div class="tbl seg"><table><thead><tr><th>Gerente</th><th>Visitas con check-out</th><th>Promedio por visita</th><th>Clientes</th><th>Tiempo promedio por cliente</th><th>Sin check-out</th></tr></thead><tbody>${fil.map(r=>`<tr><td><b>${esc(r.x.g)}</b><span class="sub">${esc(r.x.n)}</span></td><td data-l="Visitas con check-out">${r.n}</td><td data-l="Promedio por visita">${r.pm!=null?r.pm+" min":"—"}</td><td data-l="Clientes">${r.cl}</td><td data-l="Tiempo promedio por cliente">${r.pc!=null?r.pc+" min":"—"}</td><td data-l="Sin check-out"${r.sin?' style="color:var(--st-esc);font-weight:600"':""}>${r.sin}</td></tr>`).join("")}</tbody></table></div>`:'<div class="empty">Aún no hay visitas con check-out en este periodo.</div>'}
 function tramPanel(qs){
   const cur=qs.filter(q=>q.estado==="abierta"&&enTram(q)),doc=cur.filter(q=>!q.docsOk),ver=cur.filter(q=>q.docsOk),fuera=ver.filter(q=>entre(q.docsOk,HOY)>DCRED);
   const con=qs.filter(q=>q.fin&&q.fin>=desde&&q.fin<=hasta),avg=a=>a.length?(a.reduce((s,x)=>s+x,0)/a.length).toFixed(1):"—";
@@ -916,26 +949,27 @@ function renderG(id){
   $("gStats").innerHTML=`<div><b class="num">${sem.length}</b><span>por visitar</span></div><div><b class="num">${sem.filter(c=>c.st==="reint").length}</b><span>reintentos</span></div><div><b class="num">${sem.filter(c=>c.arr).length}</b><span>arrastrados</span></div><div><b class="num">${cot}</b><span>cotizaciones</span></div><div><b class="num">${habilesRestantes()}</b><span>días hábiles restantes</span></div>`;
   const gq=COTS.filter(q=>ids.has(q.cli)),gab=gq.filter(q=>q.estado==="abierta").sort((a,b)=>a.fecha.localeCompare(b.fecha));
   const ganG=gq.filter(q=>q.estado==="ganada"&&q.cierre>=desde&&q.cierre<=hasta).reduce((s,q)=>s+q.ganado,0);
-  $("gStats").innerHTML+=`<div><b class="num">${corto(ganG)}</b><span>vendido</span></div>`;
+  const enCurso=Object.keys(CHK).filter(k=>ids.has(k)).length,pmG=promMin(visT.filter(x=>x.correo===YO.correo.toLowerCase()));
+  $("gStats").innerHTML+=`<div><b class="num">${corto(ganG)}</b><span>vendido</span></div><div><b class="num">${pmG??"—"}</b><span>min por visita</span></div>`+(enCurso?`<div><b class="num">${enCurso}</b><span>visita${enCurso>1?"s":""} en curso</span></div>`:"");
   const porCot=mis.filter(c=>c.pideCot);
   $("gCots").innerHTML=(porCot.map(c=>`<div class="qrow" data-id="${c.id}"><div style="min-width:0"><b>${esc(c.nombre)}</b><span class="sub">Pidió cotización · captura el monto</span></div><b class="num">—</b><span class="chip" style="--c:var(--st-asig)">Por cotizar</span></div>`).join("")+gab.map(qrow).join(""))||'<div class="empty">No tienes cotizaciones abiertas.</div>';
   const nx=sem[0];
   $("gNext").innerHTML=nx?`<span class="lbl">Siguiente parada</span><b>${esc(nx.nombre)}</b><span style="font-size:12px;opacity:.75">${nx.giro}${nx.flota?" · "+nx.flota+" unidades":""} · ${fk(nx.km)} km de tu sucursal</span><a class="btn pri" href="${maps(nx)}" target="_blank" rel="noopener">Cómo llegar ↗</a>`:`<span class="lbl">Siguiente parada</span><b>Semana completa</b>`;
-  $("gCards").innerHTML=sem.length?sem.map(c=>`<div class="card${c.arr||c.st==="reint"?" arr":""}">
+  $("gCards").innerHTML=sem.length?sem.map(c=>`<div class="card${CHK[c.id]?" curso":""}${c.arr||c.st==="reint"?" arr":""}">
     <div class="card-h"><span class="lbl">${c.giro}</span>${c.st==="reint"?`<span class="chip" style="--c:var(--warn)">Intento ${c.intentos+1} de ${MAX_INT}</span>`:c.arr?'<span class="chip" style="--c:var(--warn)">2ª semana</span>':chip(c.st)}</div>
-    <h3>${esc(c.nombre)}</h3>${tipoTag(c)}${yo(c)!=null?`<span class="yo">A ${fk(yo(c))} km de ti</span>`:""}
+    <h3>${esc(c.nombre)}</h3>${CHK[c.id]?'<span class="chip" style="--c:var(--st-vis)">Visita en curso</span>':""}${tipoTag(c)}${yo(c)!=null?`<span class="yo">A ${fk(yo(c))} km de ti</span>`:""}
     ${c.st==="reint"?`<div class="aviso">No estaba el encargado. Vuelve ${(c.horario||"en otro horario").toLowerCase()}.</div>`:""}
     <div class="facts"><span><b class="num">${c.flota??"—"}</b>unidades</span><span><b class="num">${fk(c.km)}</b>km de tu sucursal</span><span><b class="num">${VISITAS.filter(x=>x.cli===c.id).length}</b>visitas previas</span></div>
-    <div class="acts"><a class="btn" href="${maps(c)}" target="_blank" rel="noopener">Cómo llegar ↗</a><button class="btn pri" type="button" data-id="${c.id}">Registrar visita</button></div>
+    <div class="acts"><a class="btn" href="${maps(c)}" target="_blank" rel="noopener">Cómo llegar ↗</a><button class="btn pri" type="button" data-id="${c.id}">${CHK[c.id]?"Terminar visita":"Registrar visita"}</button></div>
   </div>`).join(""):'<div class="mod empty">No tienes clientes pendientes esta semana. Tu lista nueva llega el lunes.</div>';
   const act=mis.filter(c=>c.tipo===ACT).map(c=>({c,m:mesDe(c)})),pend=act.filter(x=>!x.m.ok).sort((p,q)=>(q.m.d??1e9)-(p.m.d??1e9)||(yo(p.c)??ordKm(p.c,q.c))-(yo(q.c)??0));
   $("gActSec").hidden=$("gActHist").hidden=!act.length;$("gActTabla").innerHTML=act.length?actTabla(act.map(x=>x.c)):"";
   $("gActHint").textContent=`${act.length-pend.length} de ${act.length} visitados en los últimos 30 días · cuentan aparte de tus 10 de la semana`;
-  $("gAct").innerHTML=pend.map(({c,m:mm})=>`<div class="card">
+  $("gAct").innerHTML=pend.map(({c,m:mm})=>`<div class="card${CHK[c.id]?" curso":""}">
     <div class="card-h"><span class="lbl">${c.giro}</span><span class="chip" style="--c:var(${mm.d==null?"--st-asig":"--warn"})">${mm.d==null?"Sin visita registrada":"Última visita hace "+mm.d+" días"}</span></div>
-    <h3>${esc(c.nombre)}</h3>${tipoTag(c)}${yo(c)!=null?`<span class="yo">A ${fk(yo(c))} km de ti</span>`:""}
+    <h3>${esc(c.nombre)}</h3>${CHK[c.id]?'<span class="chip" style="--c:var(--st-vis)">Visita en curso</span>':""}${tipoTag(c)}${yo(c)!=null?`<span class="yo">A ${fk(yo(c))} km de ti</span>`:""}
     <div class="facts"><span><b class="num">${fk(c.km)}</b>km de tu sucursal</span><span><b>${esc(c.erp||"—")}</b>código SAP</span></div>
-    <div class="acts"><a class="btn" href="${maps(c)}" target="_blank" rel="noopener">Cómo llegar ↗</a><button class="btn pri" type="button" data-id="${c.id}">Registrar visita</button></div>
+    <div class="acts"><a class="btn" href="${maps(c)}" target="_blank" rel="noopener">Cómo llegar ↗</a><button class="btn pri" type="button" data-id="${c.id}">${CHK[c.id]?"Terminar visita":"Registrar visita"}</button></div>
   </div>`).join("")||'<div class="mod empty">Todos tus clientes activos tienen visita en los últimos 30 días.</div>';
   const ajenas=CL.filter(c=>c.suc.id===id&&c.at!==id);$("gAjenas").hidden=!ajenas.length;
   $("gAjenasL").innerHTML=ajenas.map(c=>{const k=CUENTAS[c.cuenta];return `<div class="qrow" data-id="${c.id}"><div style="min-width:0"><b>${esc(c.nombre)}</b><span class="sub">Cuenta ${esc(k.nombre)} · la atiende ${esc(respTxt(k))}</span></div><span class="chip" style="--c:var(--st-disp)">Informativo</span></div>`}).join("");
@@ -951,7 +985,7 @@ function nav(){
 }
 function render(){
   const reg=rol==="reg";$("vReg").hidden=!reg;$("vGer").hidden=reg;$("vista").hidden=!reg;
-  reg?renderR():renderG(rol);
+  reg?renderR():renderG(rol);barra();
   const ids=new Set((reg?CL:CL.filter(c=>c.at===rol)).map(c=>c.id));
   $("zonaCard").innerHTML=`<small>${reg?"Mi zona":"Mi cartera"}</small><b class="num" style="font-size:22px">${ids.size}</b><span style="font-size:12px;color:var(--rail-mut)">empresas · ${[...ids].filter(i=>cli(i).st==="vis").length} visitadas</span>`;
 }
@@ -964,11 +998,11 @@ function abrir(id){const c=cli(id);if(!c)return;
   $("fChip").innerHTML=chip(c.st);$("fNombre").textContent=c.nombre;$("fTipo").innerHTML=tipoTag(c)+(c.cob.length?`<div class="hint" style="margin-top:6px">Cobertura: ${esc(c.cob.join(", "))}</div>`:"")+(c.tipo===ACT?`<div class="hint" style="margin-top:6px">${(m=>m.d==null?"Sin visita registrada.":`Última visita atendida: ${fecha(m.u)} (hace ${m.d} días) por ${esc(quien(VISITAS.filter(x=>x.cli===c.id&&x.fecha===m.u&&atendida(x)).pop().correo))}.`)(mesDe(c))} Se visita una vez al mes; no entra en la lista semanal.</div>`:"");
   $("fFacts").innerHTML=`<span><b class="num">${c.flota??"—"}</b>unidades</span><span><b class="num">${fk(c.km)}</b>km de ${c.suc.n}</span><span><b>${c.giro}</b>giro</span>`;
   $("fActs").innerHTML=`<a class="btn" href="${maps(c)}" target="_blank" rel="noopener">Abrir en Google Maps ↗</a>`;
-  $("form").reset();actualizarForm();$("toast").hidden=true;$("ficha").dataset.cli=id;historial(id);cotModo=null;cotBlock(id);regBlock(id);ctaBlock(id);
+  $("form").reset();actualizarForm();$("toast").hidden=true;$("ficha").dataset.cli=id;ckBlock(id);historial(id);cotModo=null;cotBlock(id);regBlock(id);ctaBlock(id);
   $("ficha").hidden=$("scrim").hidden=false;$("cerrar").focus()}
 function cerrar(){$("ficha").hidden=$("scrim").hidden=true}
-function historial(id){const h=[...VISITAS].reverse().filter(x=>x.cli===id).sort((a,b)=>b.fecha.localeCompare(a.fecha));
-  $("fHist").innerHTML=`<div class="lbl">Historial · ${h.length} ${h.length===1?"visita":"visitas"}</div>`+(h.length?h.map(x=>`<div class="hi" style="--c:var(${RES[x.res]})"><div class="hi-h"><span>${fecha(x.fecha)}${x.tipoV?" · "+x.tipoV:""} · ${esc(quien(x.correo))}</span><span>${x.res}</span></div><p>${verif(x)} ${esc(x.com)}</p></div>`).join(""):'<div class="empty" style="padding:0">Aún no hay visitas registradas.</div>')}
+function historial(id){const h=[...VISITAS].reverse().filter(x=>x.cli===id).sort((a,b)=>b.fecha.localeCompare(a.fecha)),pm=promMin(h);
+  $("fHist").innerHTML=`<div class="lbl">Historial · ${h.length} ${h.length===1?"visita":"visitas"}</div>`+(pm!=null?`<div class="hint">Promedio en este cliente: <b>${pm} min</b> por visita (${h.filter(x=>x.dur!=null).length} con check-out).</div>`:"")+(h.length?h.map(x=>`<div class="hi" style="--c:var(${RES[x.res]})"><div class="hi-h"><span>${fecha(x.fecha)}${x.tipoV?" · "+x.tipoV:""} · ${esc(quien(x.correo))}${x.dur!=null?" · "+x.dur+" min":""}</span><span>${x.res}</span></div><p>${verif(x)} ${esc(x.com)}</p></div>`).join(""):'<div class="empty" style="padding:0">Aún no hay visitas registradas.</div>')}
 
 let cotModo=null;
 function tramBlock(q){
@@ -1207,29 +1241,54 @@ $("form").addEventListener("change",actualizarForm);
 const ubic=()=>new Promise(ok=>{if(!navigator.geolocation)return ok(null);
   navigator.geolocation.getCurrentPosition(p=>ok({lat:p.coords.latitude,lng:p.coords.longitude,acc:p.coords.accuracy}),()=>ok(null),{enableHighAccuracy:true,timeout:10000,maximumAge:0})});
 async function recargar(id){await cargar();render();if(id&&!$("ficha").hidden){const c=cli(id);if(c){$("fChip").innerHTML=chip(c.st);historial(id);cotBlock(id);regBlock(id)}}}
-let forzarPin=false; // el gerente confirmó que el pin del cliente está mal
+const promMin=a=>{a=a.filter(x=>x.dur!=null);return a.length?Math.round(a.reduce((s,x)=>s+x.dur,0)/a.length):null};
+const hora=d=>new Date(d).toLocaleTimeString("es-MX",{hour:"numeric",minute:"2-digit"});
+const vtTxt=nv=>({en_sitio:` Verificada en sitio (a ${mts(nv&&nv.distancia_m)}).`,ubicacion_nueva:" Guardamos tu ubicación como la del cliente.",pin_reportado:" Quedó sin verificar y avisamos a tu regional para corregir la ubicación."}[nv&&nv.verificacion]||"");
+const SIN_GPS="Necesitas compartir tu ubicación. En iPhone: <b>Ajustes → Privacidad → Localización → Safari → Al usar la app</b>. Luego vuelve a tocar «Llegué».";
+// paso 1 de la visita: check-in al llegar (misma validación GPS de 300 m)
+const TARDE=90,minDe=k=>Math.max(0,Math.round((Date.now()-new Date(k.inicio))/60000));
+// barra fija con cada visita abierta: siempre a la vista para no olvidar el check-out
+function barra(){const el=$("enCurso"),ks=YO?Object.values(CHK).filter(k=>cli(k.cliente_id)):[];el.hidden=!ks.length;
+  el.innerHTML=ks.map(k=>{const c=cli(k.cliente_id),min=minDe(k),t=min>=TARDE;
+    return `<button type="button" data-curso="${c.id}" class="${t?"tarde":""}"><span class="pt" aria-hidden="true"></span><span style="min-width:0"><b>${t?"¿Ya terminaste?":"Visita en curso"} · ${min} min</b><span class="sub">${esc(c.nombre)}</span></span><span class="go">Terminar visita</span></button>`}).join("");
+  const h=ks.length?el.offsetHeight:0;document.body.style.paddingBottom=h?h+100+"px":"";document.body.style.setProperty("--barra",h?h+8+"px":"0px")}
+$("enCurso").addEventListener("click",e=>{const b=e.target.closest("[data-curso]");if(!b)return;abrir(b.dataset.curso);$("fCk").scrollIntoView({block:"start"})});
+setInterval(()=>{barra();const id=$("ficha").dataset.cli;if(!$("ficha").hidden&&CHK[id])ckBlock(id)},30000);
+function ckBlock(id){const k=CHK[id],el=$("fCk");$("fBody").hidden=!k;
+  if(!k){el.innerHTML=`<div class="hint">Al llegar con el cliente toca «Llegué». Al terminar llenas la visita y tocas «Terminar visita»: así se mide cuánto duró.</div><button class="btn pri" type="button" id="fLlegue" style="justify-self:start">Llegué: iniciar visita (check-in)</button>`;$("fLlegue").onclick=()=>checkin(id);return}
+  const min=minDe(k);
+  el.innerHTML=`<div class="aviso" style="--c:var(${min>=TARDE?"--st-esc":"--st-vis"})">Visita en curso desde las ${hora(k.inicio)} · lleva ${min} min. Al terminar, llena lo de abajo y toca «Terminar visita».</div>`}
+async function checkin(id,pin){const t=$("toast"),b=$("fLlegue");b.disabled=true;t.textContent="Verificando tu ubicación…";t.style.color="var(--muted)";t.hidden=false;
+  const g=await ubic();
+  if(!g){b.disabled=false;t.innerHTML=SIN_GPS;t.style.color="var(--st-esc)";return}
+  const{data,error}=await SB.from("checkins").insert({cliente_id:id,latitud:g.lat,longitud:g.lng,precision_m:Math.round(g.acc||0),ubicacion_incorrecta:!!pin}).select("id,cliente_id,correo,inicio,cerrado_en,abandonado,verificacion,distancia_m").single();
+  b.disabled=false;
+  if(error){const fr=/FUERA_DE_RANGO:(\d+):(\d+)/.exec(error.message||"");
+    if(fr){t.innerHTML=`Estás a <b>${mts(+fr[1])}</b> de ${esc(cli(id).nombre)}. Para iniciar la visita tienes que estar a menos de ${mts(+fr[2])} del cliente.<br><button class="btn" type="button" id="fPin" style="margin-top:8px">Estoy en el lugar: la ubicación del cliente está mal</button>`;
+      t.style.color="var(--st-esc)";$("fPin").onclick=()=>checkin(id,true);return}
+    t.innerHTML=/UBICACION_REQUERIDA/.test(error.message||"")?SIN_GPS:"No se pudo hacer el check-in: "+esc(error.message||"revisa tu conexión")+". Intenta de nuevo.";t.style.color="var(--st-esc)";return}
+  CHK[id]=data;CKS.push(data);ckBlock(id);render();
+  t.textContent="Check-in hecho: llegaste a las "+hora(data.inicio)+vtTxt(data);t.style.color="var(--st-vis)"}
+// paso 2: check-out = guardar la visita ligada a su check-in (la base calcula la duración)
 $("form").addEventListener("submit",async e=>{e.preventDefault();
   const t=$("toast"),id=$("ficha").dataset.cli,con=val("contacto"),cs=caso(con),com=$("fCom").value.trim(),btn=$("form").querySelector("button[type=submit]");
   const falta=!con?["cómo fue la visita"]:cs==="reint"?(val("horario")?[]:["cuándo conviene volver"]):cs==="ef"?[["interes","nivel de interés"],["unidades","tamaño de flota"],["paso","siguiente paso"]].filter(([k])=>!val(k)).map(x=>x[1]):[];
   const cel=($("fCCel").value||"").replace(/\D/g,"");
   if(cs==="ef"&&cel&&cel.length!==10)falta.push("celular a 10 dígitos");
   if(falta.length){t.textContent="Falta: "+falta.join(", ")+".";t.style.color="var(--st-esc)";t.hidden=false;return}
+  const k=CHK[id];if(!k)return ckBlock(id);
   btn.disabled=true;t.textContent="Guardando…";t.style.color="var(--muted)";t.hidden=false;
-  t.textContent="Verificando tu ubicación…";
-  const g=await ubic(),tel=($("fTel").value||"").trim();
-  if(!g){btn.disabled=false;t.innerHTML="Para registrar la visita necesitas compartir tu ubicación. En iPhone: <b>Ajustes → Privacidad → Localización → Safari → Al usar la app</b>. Luego vuelve a tocar «Guardar visita».";t.style.color="var(--st-esc)";return}
-  const row={cliente_id:id,contacto:con,comentario:[cs==="reint"&&tel?"Contacto: "+tel+".":"",com].filter(Boolean).join(" ")||null,latitud:g.lat,longitud:g.lng,precision_m:Math.round(g.acc||0),ubicacion_incorrecta:forzarPin};
+  const g=await ubic(),tel=($("fTel").value||"").trim(); // al salir la ubicación es informativa: si no hay, se guarda igual
+  const row={cliente_id:id,checkin_id:k.id,contacto:con,comentario:[cs==="reint"&&tel?"Contacto: "+tel+".":"",com].filter(Boolean).join(" ")||null,latitud:g?g.lat:null,longitud:g?g.lng:null,precision_m:g?Math.round(g.acc||0):null};
   if(cs==="reint")row.horario=val("horario");
   if(cs==="ef")Object.assign(row,{interes:val("interes"),unidades:val("unidades"),tipos_unidad:vals("tipos"),necesidades:vals("necesidades"),proveedor:val("proveedor")||null,
     siguiente_paso:val("paso"),contacto_nombre:$("fCNom").value.trim()||null,contacto_puesto:val("puesto")||null,contacto_celular:cel||null});
-  const{data:nv,error}=await SB.from("visitas").insert(row).select("verificacion,distancia_m").single();
-  btn.disabled=false;forzarPin=false;
-  if(error){const fr=/FUERA_DE_RANGO:(\d+):(\d+)/.exec(error.message||"");
-    if(fr){t.innerHTML=`Estás a <b>${mts(+fr[1])}</b> de ${esc(cli(id).nombre)}. Para registrar la visita tienes que estar a menos de ${mts(+fr[2])} del cliente.<br><button class="btn" type="button" id="fPin" style="margin-top:8px">Estoy en el lugar: la ubicación del cliente está mal</button>`;
-      t.style.color="var(--st-esc)";$("fPin").onclick=()=>{forzarPin=true;$("form").requestSubmit()};return}
-    t.textContent=/UBICACION_REQUERIDA/.test(error.message||"")?"Para registrar la visita necesitas compartir tu ubicación.":"No se guardó: "+(error.message||"revisa tu conexión")+". Intenta de nuevo.";t.style.color="var(--st-esc)";return}
-  await recargar(id);const c=cli(id);
-  const vt={en_sitio:` Verificada en sitio (a ${mts(nv&&nv.distancia_m)}).`,ubicacion_nueva:" Guardamos tu ubicación como la del cliente.",pin_reportado:" Se guardó sin verificar y avisamos a tu regional para corregir la ubicación."}[nv&&nv.verificacion]||"";
+  const{data:nv,error}=await SB.from("visitas").insert(row).select("verificacion,distancia_m,duracion_min").single();
+  btn.disabled=false;
+  if(error){if(/CHECKIN_(INVALIDO|REQUERIDO)/.test(error.message||"")){await recargar(id);ckBlock(id);t.textContent="Tu check-in ya se había cerrado (pasaron más de 12 horas o ya se usó). Toca «Llegué» otra vez; lo que llenaste se conserva.";t.style.color="var(--st-esc)";return}
+    t.textContent="No se guardó: "+(error.message||"revisa tu conexión")+". Intenta de nuevo.";t.style.color="var(--st-esc)";return}
+  await recargar(id);ckBlock(id);const c=cli(id);
+  const vt=vtTxt(nv)+(nv&&nv.duracion_min!=null?` Duró ${nv.duracion_min} min.`:"");
   t.textContent=(c.st==="esc"?"Guardado. Pasó a tu regional.":c.st==="reint"?`Guardado. Vuelve a tu lista la próxima semana · intento ${c.intentos+1} de ${MAX_INT}.`:c.st==="seg"?"Guardado. Queda en seguimiento.":"Visita guardada.")+vt;
   t.style.color="var(--st-vis)";$("form").reset();actualizarForm()});
 // ventas ganadas del periodo y la vista elegida, para cotejar con facturación
@@ -1283,7 +1342,7 @@ $("passForm").addEventListener("submit",async e=>{e.preventDefault();const a=$("
   const{error}=await SB.auth.updateUser({password:a});
   if(error){m.textContent="No se guardó: "+error.message;m.hidden=false;return}
   $("passForm").hidden=true;$("loginForm").hidden=false;history.replaceState(null,"",location.pathname);entrar()});
-$("salir").onclick=async()=>{cerrar();cerrarAlta();$("fab").hidden=true;await SB.auth.signOut();YO=null;$("login").hidden=false};
+$("salir").onclick=async()=>{cerrar();cerrarAlta();$("fab").hidden=true;CHK={};$("enCurso").hidden=true;document.body.style.paddingBottom="";document.body.style.setProperty("--barra","0px");await SB.auth.signOut();YO=null;$("login").hidden=false};
 // al volver a la pestaña se actualiza lo que otros registraron
 document.addEventListener("visibilitychange",()=>{if(!document.hidden&&YO)recargar($("ficha").hidden?null:$("ficha").dataset.cli)});
 (async()=>{const{data:{session}}=await SB.auth.getSession();
