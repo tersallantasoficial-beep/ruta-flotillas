@@ -153,7 +153,7 @@ h2{font-family:var(--display);font-variation-settings:"wdth" 110;font-weight:700
 .chart text{font-family:var(--body);font-size:11px;fill:var(--muted)}
 .bars{display:grid;gap:10px}
 .br{display:grid;gap:5px}
-#actDet,#actSec{scroll-margin-top:96px}
+#actDet,#actSec,#titulo{scroll-margin-top:calc(110px + env(safe-area-inset-top,0px))}
 .brbtn{appearance:none;-webkit-appearance:none;background:none;border:0;padding:4px 0;margin:0;width:100%;text-align:left;color:inherit;font:inherit;cursor:pointer;touch-action:manipulation}
 .br-top{display:flex;justify-content:space-between;gap:8px;font-size:13px}
 .br-top span:last-child{color:var(--muted);font-size:12px}
@@ -864,7 +864,7 @@ function renderR(){
   $("rankHint").textContent=`Meta ${m} · ${rangoTxt()}`;
   const rk=SUC.map(x=>{const vv=visitasDe(new Set(CL.filter(c=>c.at===x.id&&prosp(c)).map(c=>c.id))),nn=vv.length,ok=vv.filter(z=>z.ver==="en_sitio"||z.ver==="ubicacion_nueva").length;return{x,nn,pv:nn?Math.round(ok/nn*100):null}}).sort((a,b)=>b.nn-a.nn);
   $("rank").innerHTML=rk.map(({x,nn,pv},i)=>{const[c,t]=semaforo(nn,m);
-    return `<button class="rk" type="button" data-suc="${x.id}" style="--c:var(${c});opacity:${v==="all"||v===x.id?1:.4}"><span class="pos">${String(i+1).padStart(2,"0")}</span><span class="nm"><b>${x.g}</b><span class="meter"><i style="width:${Math.min(nn/m,1)*100}%"></i></span></span><span class="sc"><b class="num">${nn}/${m}</b><span class="chip">${t}</span>${pv!=null?`<span class="hint" style="font-size:11px">${pv}% en sitio</span>`:""}</span></button>`}).join("");
+    return `<button class="rk" type="button" data-suc="${x.id}" data-ir="titulo" style="--c:var(${c});opacity:${v==="all"||v===x.id?1:.4}"><span class="pos">${String(i+1).padStart(2,"0")}</span><span class="nm"><b>${x.g}</b><span class="meter"><i style="width:${Math.min(nn/m,1)*100}%"></i></span></span><span class="sc"><b class="num">${nn}/${m}</b><span class="chip">${t}</span>${pv!=null?`<span class="hint" style="font-size:11px">${pv}% en sitio</span>`:""}</span></button>`}).join("");
 
   tiempos(v);
   tendencia(ids);
@@ -937,7 +937,7 @@ function cartera(list){
   const ok=a.filter(c=>mesDe(c).ok).length;
   $("actSecHint").textContent=`${ok} de ${a.length} visitados en los últimos 30 días`;
   const filas=SUC.map(x=>{const t=a.filter(c=>c.at===x.id);return{x,t:t.length,v:t.filter(c=>mesDe(c).ok).length}}).filter(r=>r.t).sort((p,q)=>p.v/p.t-q.v/q.t||q.t-p.t);
-  $("actBars").innerHTML=filas.map(({x,t,v})=>`<button type="button" class="br brbtn" data-suc="${x.id}" data-ir="actDet"><div class="br-top"><span>${esc(x.g.startsWith("Sin gerente")?x.g:x.g+" · "+x.n)}</span><span class="tn">${v}/${t}</span></div><div class="br-track"><i style="width:100%;background:var(--soft2)"></i><i style="width:${v/t*100}%;background:var(--st-act)"></i></div></button>`).join("");
+  $("actBars").innerHTML=filas.map(({x,t,v})=>`<button type="button" class="br brbtn" data-suc="${x.id}" data-ir="actSec"><div class="br-top"><span>${esc(x.g.startsWith("Sin gerente")?x.g:x.g+" · "+x.n)}</span><span class="tn">${v}/${t}</span></div><div class="br-track"><i style="width:100%;background:var(--soft2)"></i><i style="width:${v/t*100}%;background:var(--st-act)"></i></div></button>`).join("");
   const vs=$("vista").value,sx=SUC.find(x=>x.id===vs);
   $("actDet").innerHTML=vs!=="all"?(sx?`<div class="mod-h" style="margin:8px 0"><b>Clientes activos de ${esc(sx.g)} · ${esc(sx.n)}</b><button class="btn" type="button" data-suc="${vs}" data-ir="actSec">Ver todas las sucursales</button></div>`:"")+actTabla(a):'<div class="hint">Toca una sucursal para ver sus clientes activos: última visita, quién la hizo y qué resultó. Toca un cliente para ver su historial completo.</div>'}
 
