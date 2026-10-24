@@ -153,6 +153,8 @@ h2{font-family:var(--display);font-variation-settings:"wdth" 110;font-weight:700
 .chart text{font-family:var(--body);font-size:11px;fill:var(--muted)}
 .bars{display:grid;gap:10px}
 .br{display:grid;gap:5px}
+#actDet,#actSec{scroll-margin-top:96px}
+.brbtn{appearance:none;-webkit-appearance:none;background:none;border:0;padding:4px 0;margin:0;width:100%;text-align:left;color:inherit;font:inherit;cursor:pointer;touch-action:manipulation}
 .br-top{display:flex;justify-content:space-between;gap:8px;font-size:13px}
 .br-top span:last-child{color:var(--muted);font-size:12px}
 .br-track{height:12px;border-radius:4px;background:var(--soft2);position:relative;overflow:hidden}
@@ -935,8 +937,9 @@ function cartera(list){
   const ok=a.filter(c=>mesDe(c).ok).length;
   $("actSecHint").textContent=`${ok} de ${a.length} visitados en los últimos 30 días`;
   const filas=SUC.map(x=>{const t=a.filter(c=>c.at===x.id);return{x,t:t.length,v:t.filter(c=>mesDe(c).ok).length}}).filter(r=>r.t).sort((p,q)=>p.v/p.t-q.v/q.t||q.t-p.t);
-  $("actBars").innerHTML=filas.map(({x,t,v})=>`<button type="button" class="br" data-suc="${x.id}" style="all:unset;display:grid;gap:4px;cursor:pointer"><div class="br-top"><span>${esc(x.g.startsWith("Sin gerente")?x.g:x.g+" · "+x.n)}</span><span class="tn">${v}/${t}</span></div><div class="br-track"><i style="width:100%;background:var(--soft2)"></i><i style="width:${v/t*100}%;background:var(--st-act)"></i></div></button>`).join("");
-  $("actDet").innerHTML=$("vista").value!=="all"?actTabla(a):'<div class="hint">Toca una sucursal para ver sus clientes activos: última visita, quién la hizo y qué resultó. Toca un cliente para ver su historial completo.</div>'}
+  $("actBars").innerHTML=filas.map(({x,t,v})=>`<button type="button" class="br brbtn" data-suc="${x.id}" data-ir="actDet"><div class="br-top"><span>${esc(x.g.startsWith("Sin gerente")?x.g:x.g+" · "+x.n)}</span><span class="tn">${v}/${t}</span></div><div class="br-track"><i style="width:100%;background:var(--soft2)"></i><i style="width:${v/t*100}%;background:var(--st-act)"></i></div></button>`).join("");
+  const vs=$("vista").value,sx=SUC.find(x=>x.id===vs);
+  $("actDet").innerHTML=vs!=="all"?(sx?`<div class="mod-h" style="margin:8px 0"><b>Clientes activos de ${esc(sx.g)} · ${esc(sx.n)}</b><button class="btn" type="button" data-suc="${vs}" data-ir="actSec">Ver todas las sucursales</button></div>`:"")+actTabla(a):'<div class="hint">Toca una sucursal para ver sus clientes activos: última visita, quién la hizo y qué resultó. Toca un cliente para ver su historial completo.</div>'}
 
 /* ---------- gerente ---------- */
 function renderG(id){
@@ -1166,7 +1169,9 @@ document.addEventListener("click",e=>{
   const ra=e.target.closest("[data-reg]");if(ra){regAccion(ra.dataset.reg);return}
   const st=e.target.closest("[data-st]");if(st){const k=st.dataset.st,on=visibles.has(k);on?visibles.delete(k):visibles.add(k);st.setAttribute("aria-pressed",!on);render();return}
   const ft=e.target.closest("[data-ft]");if(ft){filtroT=ft.dataset.ft;mostrar=10;document.querySelectorAll("[data-ft]").forEach(b=>b.setAttribute("aria-pressed",b===ft));render();return}
-  const sc=e.target.closest("[data-suc]");if(sc){$("vista").value=$("vista").value===sc.dataset.suc?"all":sc.dataset.suc;mostrar=10;render();return}
+  const sc=e.target.closest("[data-suc]");if(sc){$("vista").value=$("vista").value===sc.dataset.suc?"all":sc.dataset.suc;mostrar=10;render();
+    // en celular el detalle queda abajo: se lleva la vista ahí para que se note el cambio
+    if(sc.dataset.ir)$(sc.dataset.ir).scrollIntoView({behavior:"smooth",block:"start"});return}
   const na=e.target.closest(".nav a");if(na){document.querySelectorAll(".nav a").forEach(a=>a.classList.toggle("on",a===na))}
   if(e.target.closest("a,button:not([data-id])"))return;
   const t=e.target.closest("[data-id]");if(t)abrir(t.dataset.id)});
