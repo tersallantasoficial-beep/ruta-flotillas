@@ -677,8 +677,10 @@ async function cargar(){
   const{data:pf}=await SB.from("perfiles").select("correo,nombre"); // el gerente solo ve el suyo; regional y admin ven todos
   const NOM=Object.fromEntries((pf||[]).filter(x=>x.nombre).map(x=>[x.correo,x.nombre]));NOMS=NOM;
   const conCli=new Set(c.map(x=>x.id_sucursal));
-  SUC=s.filter(x=>conCli.has(x.id)||x.id===YO.id_sucursal).map(x=>({id:x.id,n:corta(x.nombre),g:x.gerente_correo?NOM[x.gerente_correo.toLowerCase()]||nombreDe(x.gerente_correo):"Sin gerente · "+corta(x.nombre),lat:x.latitud,lng:x.longitud}));
-  const SI=Object.fromEntries(SUC.map(x=>[x.id,x]));
+  const TODAS=s.filter(x=>conCli.has(x.id)||x.id===YO.id_sucursal).map(x=>({id:x.id,n:corta(x.nombre),g:x.gerente_correo?NOM[x.gerente_correo.toLowerCase()]||nombreDe(x.gerente_correo):"Sin gerente · "+corta(x.nombre),lat:x.latitud,lng:x.longitud,reg:(x.regional_correo||"").toLowerCase()}));
+  const SI=Object.fromEntries(TODAS.map(x=>[x.id,x]));
+  // sucursales propias; las demás solo aparecen porque se ven sedes de una cuenta centralizada
+  SUC=TODAS.filter(x=>YO.rol==="regional"?x.reg===YO.correo.toLowerCase():YO.rol==="gerente"?x.id===YO.id_sucursal:true);
   CL=c.filter(x=>SI[x.id_sucursal]).map(x=>({id:x.id,nombre:x.empresa,giro:x.giro||"Otro",lat:x.latitud,lng:x.longitud,link:x.link_maps,ciudad:x.ciudad,flota:x.unidades_flota,
     suc:SI[x.id_sucursal],km:x.km_sucursal==null?null:+x.km_sucursal,st:STMAP[x.estatus]||"disp",arr:x.estatus==="asignado"&&x.semanas_arrastre>0?1:0,intentos:x.intentos||0,horario:x.horario_sugerido,motivo:x.motivo_escalado,tipo:x.tipo,revisar:!!x.revisar_ubicacion,erp:x.codigo_erp,rs:x.razon_social,ult:x.ultima_compra,cob:x.areas_cobertura||[],cuenta:x.cuenta_id}));
   // texto de búsqueda de cada cliente (sin acentos ni mayúsculas)
@@ -819,7 +821,7 @@ function tendencia(ids){
 
 /* ---------- regional ---------- */
 function renderR(){
-  const v=$("vista").value,list=v==="all"?CL:CL.filter(c=>c.at===v),sucs=v==="all"?SUC:SUC.filter(x=>x.id===v);
+  const v=$("vista").value,list=v==="all"?CL.filter(c=>SUC.some(x=>x.id===c.at)):CL.filter(c=>c.at===v),sucs=v==="all"?SUC:SUC.filter(x=>x.id===v);
   const ids=new Set(list.map(c=>c.id)),idsP=new Set(list.filter(prosp).map(c=>c.id)),m=metaRango(),meta=m*sucs.length;
   const visT=visitasDe(ids),vis=visitasDe(idsP),n=vis.length;
   const pa=addDias(desde,-dias()),pb=addDias(desde,-1),prev=visitasDe(idsP,pa,pb).length;
@@ -989,7 +991,7 @@ function nav(){
 function render(){
   const reg=rol==="reg";$("vReg").hidden=!reg;$("vGer").hidden=reg;$("vista").hidden=!reg;
   reg?renderR():renderG(rol);barra();
-  const ids=new Set((reg?CL:CL.filter(c=>c.at===rol)).map(c=>c.id));
+  const ids=new Set((reg?CL.filter(c=>SUC.some(x=>x.id===c.at)):CL.filter(c=>c.at===rol)).map(c=>c.id));
   $("zonaCard").innerHTML=`<small>${reg?"Mi zona":"Mi cartera"}</small><b class="num" style="font-size:22px">${ids.size}</b><span style="font-size:12px;color:var(--rail-mut)">empresas · ${[...ids].filter(i=>cli(i).st==="vis").length} visitadas</span>`;
 }
 
