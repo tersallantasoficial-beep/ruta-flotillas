@@ -570,6 +570,7 @@ textarea{width:100%;font:inherit;padding:10px;border-radius:10px;border:1px soli
     <div id="fRes" style="display:grid;gap:14px"></div>
     <div class="cotbox" id="fReg" hidden></div>
     <div class="cotbox" id="fCta" hidden></div>
+    <div class="cotbox" id="fCred" hidden></div>
     <div class="cotbox" id="fCot" hidden></div>
     <form id="form" style="display:grid;gap:12px">
       <div class="lbl">Registrar visita</div>
@@ -600,7 +601,7 @@ textarea{width:100%;font:inherit;padding:10px;border-radius:10px;border:1px soli
       <label for="lPass">Contraseña<input id="lPass" type="password" autocomplete="current-password" required></label>
       <button class="btn pri" type="submit" style="padding:12px">Entrar</button>
       <span class="toast" id="lErr" style="color:var(--st-esc)" hidden></span>
-      <span class="hint" style="font-size:11px">Versión 27 oct · ficha del cliente</span>
+      <span class="hint" style="font-size:11px">Versión 27 oct · crédito del cliente</span>
       <button type="button" class="btn" id="olvide" style="border:0;background:none;color:var(--muted);text-decoration:underline;padding:0;justify-self:start">Olvidé mi contraseña</button>
     </form>
     <form class="lg-card" id="passForm" hidden>
@@ -625,7 +626,8 @@ const Q=[
   {k:"interes",t:"Nivel de interés",ops:["Pidió cotización","Interesado","Ya tiene proveedor","Sin interés"],si:"ef"},
   {k:"unidades",t:"Tamaño de flota",ops:["1–5","6–15","16–50","Más de 50"],si:"ef"},
   {k:"tipos",t:"Tipo de unidades",ops:["Autos","Pickups","Reparto","Tractocamiones","Maquinaria"],multi:1,si:"ef"},
-  {k:"necesidades",t:"¿Qué necesita?",ops:["Llantas","Mantenimiento","Frenos","Alineación","Crédito"],multi:1,si:"ef"},
+  {k:"necesidades",t:"¿Qué necesita?",ops:["Llantas","Mantenimiento","Frenos","Alineación"],multi:1,si:"ef"},
+  {k:"pago",t:"¿Cómo pagaría?",ops:["Contado","Crédito","Aún no sabe"],si:"ef"},
   {k:"proveedor",t:"Proveedor actual",ops:["Ninguno","Agencia","Otro taller","Otra llantera"],si:"ef"},
   {k:"paso",t:"Siguiente paso",ops:["Enviar cotización","Segunda visita","Llamada","Ninguno"],si:"ef"}
 ];
@@ -661,7 +663,7 @@ const cargarMaps=()=>new Promise(ok=>{if(!MAPS_KEY)return ok(false);
 const colorDe=v=>getComputedStyle(document.documentElement).getPropertyValue(v).trim();
 const ordKm=(a,b)=>(a.km??999)-(b.km??999);
 
-let SUC=[],CL=[],VISITAS=[],COTS=[],YO=null,IX={},NOMS={},CUENTAS={},CKS=[],CHK={};
+let SUC=[],CL=[],VISITAS=[],COTS=[],YO=null,IX={},NOMS={},CUENTAS={},CKS=[],CHK={},CRED={},CREDS=[];
 const sinAcento=t=>(t||"").normalize("NFD").replace(/[\u0300-\u036f]/g,"").toLowerCase();
 const quien=e=>NOMS[(e||"").toLowerCase()]||nombreDe(e);
 const cli=id=>IX[id];
@@ -672,14 +674,15 @@ function resumenDe(v){
   if(REINT.includes(v.contacto))return `${v.contacto}.${v.horario?" Volver "+v.horario.toLowerCase()+".":""}${v.comentario?" "+v.comentario:""}`;
   if(v.contacto==="La dirección no existe")return "La dirección no existe."+(v.comentario?" "+v.comentario:"");
   const tp=v.tipos_unidad||[],nd=v.necesidades||[];
-  return `${v.contacto.replace("Me atendió","Atendió")}${v.contacto_nombre?" ("+v.contacto_nombre+(v.contacto_puesto?", "+v.contacto_puesto:"")+")":""}. ${v.unidades?"Flota "+v.unidades:""}${tp.length?" ("+tp.join(", ")+")":""}.${nd.length?" Necesita: "+nd.join(", ")+".":""}${v.proveedor?" Proveedor: "+v.proveedor+".":""}${v.siguiente_paso?" Siguiente paso: "+v.siguiente_paso+".":""}${v.comentario?" "+v.comentario:""}`;
+  return `${v.contacto.replace("Me atendió","Atendió")}${v.contacto_nombre?" ("+v.contacto_nombre+(v.contacto_puesto?", "+v.contacto_puesto:"")+")":""}. ${v.unidades?"Flota "+v.unidades:""}${tp.length?" ("+tp.join(", ")+")":""}.${nd.length?" Necesita: "+nd.join(", ")+".":""}${v.proveedor?" Proveedor: "+v.proveedor+".":""}${v.forma_pago?" Pagaría: "+v.forma_pago.toLowerCase()+".":""}${v.siguiente_paso?" Siguiente paso: "+v.siguiente_paso+".":""}${v.comentario?" "+v.comentario:""}`;
 }
 const cotDe=x=>({dbid:x.id,id:x.folio,factura:x.factura,cli:x.cliente_id,fecha:x.fecha,monto:+x.monto,estado:x.estado,ganado:x.monto_ganado==null?0:+x.monto_ganado,motivo:x.motivo,cierre:x.cerrada_en,pago:x.forma_pago,linea:!!x.linea_autorizada,ini:x.tramite_inicio,docsOk:x.docs_completos,fin:x.tramite_fin,res:x.credito_result,docs:x.documentos||{}});
 async function cargar(){
   const[s,c,v,q]=await Promise.all([todo("sucursales","*"),
-    todo("clientes","id,empresa,giro,tipo,latitud,longitud,link_maps,ciudad,unidades_flota,id_sucursal,km_sucursal,estatus,semanas_arrastre,intentos,horario_sugerido,motivo_escalado,revisar_ubicacion,codigo_erp,razon_social,ultima_compra,areas_cobertura,cuenta_id,creado_en,observaciones,observaciones_por,observaciones_en"),
+    todo("clientes","id,empresa,giro,tipo,latitud,longitud,link_maps,ciudad,unidades_flota,id_sucursal,km_sucursal,estatus,semanas_arrastre,intentos,horario_sugerido,motivo_escalado,revisar_ubicacion,codigo_erp,razon_social,ultima_compra,areas_cobertura,cuenta_id,creado_en,observaciones,observaciones_por,observaciones_en,linea_autorizada,linea_desde"),
     todo("visitas","*"),todo("cotizaciones","*")]);
   // check-ins: los míos abiertos (visita en curso) y los que quedaron sin check-out
+  const{data:cr}=await SB.from("creditos").select("*").order("id");CREDS=cr||[];CRED={};for(const x of CREDS)CRED[x.cliente_id]=x;  // la más reciente por cliente
   const{data:ck}=await SB.from("checkins").select("id,cliente_id,correo,inicio,cerrado_en,abandonado,verificacion,distancia_m");CKS=ck||[];
   CHK=Object.fromEntries(CKS.filter(x=>!x.cerrado_en&&x.correo===YO.correo.toLowerCase()).map(x=>[x.cliente_id,x]));
   const q0=q,IX0=Object.fromEntries(c.map(x=>[x.id,1]));
@@ -692,14 +695,14 @@ async function cargar(){
   // sucursales propias; las demás solo aparecen porque se ven sedes de una cuenta centralizada
   SUC=TODAS.filter(x=>YO.rol==="regional"?x.reg===YO.correo.toLowerCase():YO.rol==="gerente"?x.id===YO.id_sucursal:true);
   CL=c.filter(x=>SI[x.id_sucursal]).map(x=>({id:x.id,nombre:x.empresa,giro:x.giro||"Otro",lat:x.latitud,lng:x.longitud,link:x.link_maps,ciudad:x.ciudad,flota:x.unidades_flota,
-    suc:SI[x.id_sucursal],km:x.km_sucursal==null?null:+x.km_sucursal,st:STMAP[x.estatus]||"disp",arr:x.estatus==="asignado"&&x.semanas_arrastre>0?1:0,intentos:x.intentos||0,horario:x.horario_sugerido,motivo:x.motivo_escalado,tipo:x.tipo,revisar:!!x.revisar_ubicacion,erp:x.codigo_erp,rs:x.razon_social,ult:x.ultima_compra,cob:x.areas_cobertura||[],cuenta:x.cuenta_id,alta:x.creado_en?String(x.creado_en).slice(0,10):null,obs:x.observaciones||"",obsPor:x.observaciones_por,obsEn:x.observaciones_en}));
+    suc:SI[x.id_sucursal],km:x.km_sucursal==null?null:+x.km_sucursal,st:STMAP[x.estatus]||"disp",arr:x.estatus==="asignado"&&x.semanas_arrastre>0?1:0,intentos:x.intentos||0,horario:x.horario_sugerido,motivo:x.motivo_escalado,tipo:x.tipo,revisar:!!x.revisar_ubicacion,erp:x.codigo_erp,rs:x.razon_social,ult:x.ultima_compra,cob:x.areas_cobertura||[],cuenta:x.cuenta_id,alta:x.creado_en?String(x.creado_en).slice(0,10):null,obs:x.observaciones||"",obsPor:x.observaciones_por,obsEn:x.observaciones_en,linea:!!x.linea_autorizada,lineaDesde:x.linea_desde}));
   // texto de búsqueda de cada cliente (sin acentos ni mayúsculas)
   const FOL={};for(const q of q0)if(IX0[q.cliente_id])(FOL[q.cliente_id]=FOL[q.cliente_id]||[]).push(q.folio);
   for(const c of CL)c.hay=sinAcento([c.nombre,c.rs,c.erp,c.id,c.ciudad,c.giro,c.obs,c.suc.n,c.suc.g,(CUENTAS[c.cuenta]||{}).nombre,...(FOL[c.id]||[])].filter(Boolean).join(" "));
   // sucursal que ATIENDE: la responsable si la cuenta es centralizada
   for(const c of CL){const k=CUENTAS[c.cuenta];c.at=k&&k.modo==="centralizada"&&k.sucursal_resp?k.sucursal_resp:c.suc.id}
   IX=Object.fromEntries(CL.map(x=>[x.id,x]));
-  VISITAS=v.filter(x=>IX[x.cliente_id]).map(x=>({cli:x.cliente_id,fecha:new Date(x.fecha).toLocaleDateString("en-CA"),res:resDe(x),com:resumenDe(x),ver:x.verificacion,dist:x.distancia_m,tipoV:x.tipo_visita,correo:x.correo,dur:x.duracion_min}));
+  VISITAS=v.filter(x=>IX[x.cliente_id]).map(x=>({cli:x.cliente_id,fecha:new Date(x.fecha).toLocaleDateString("en-CA"),res:resDe(x),com:resumenDe(x),ver:x.verificacion,dist:x.distancia_m,tipoV:x.tipo_visita,correo:x.correo,dur:x.duracion_min,pago:x.forma_pago}));
   COTS=q.filter(x=>IX[x.cliente_id]).map(cotDe);
   // pidió cotización en su última visita con interés y todavía no se le registra una
   for(const x of VISITAS)if(x.res==="Pidió cotización"&&!COTS.some(q=>q.cli===x.cli&&q.fecha>=x.fecha))IX[x.cli].pideCot=true;
@@ -724,6 +727,7 @@ const atendida=x=>x.res!=="No se encontró"&&x.res!=="Dirección no existe";
 function mesDe(c){const u=VISITAS.filter(x=>x.cli===c.id&&atendida(x)).map(x=>x.fecha).sort().pop(),d=u?diasDesde(u):null;return{u,d,ok:d!=null&&d<30}}
 const diasDesde=f=>Math.round((new Date(HOY)-new Date(f))/864e5);
 const restan=q=>Math.max(0,-diasDesde(vence(q)));
+const credRow=x=>{const c=cli(x.cli);return `<div class="qrow" data-id="${c.id}"><div style="min-width:0"><b>${esc(c.nombre)}</b><span class="sub">Solicitud de crédito sin cotización · desde ${fecha(x.ini)} · ${c.suc.n}</span></div><b class="num">—</b>${x.docsOk?'<span class="chip" style="--c:var(--st-asig)">En Crédito y Cobranza</span>':`<span class="chip" style="--c:var(--warn)">Faltan documentos · ${DOCS.filter(([d])=>x.docs[d]).length} de ${DOCS.length}</span>`}</div>`};
 const qrow=q=>{const c=cli(q.cli),rs=restan(q);return `<div class="qrow" data-id="${c.id}"><div style="min-width:0"><b>${esc(c.nombre)}</b><span class="sub">${q.id} · ${fecha(q.fecha)} · ${c.suc.n}</span></div><b class="num">${corto(q.monto)}</b>${enVerif(q)?'<span class="chip" style="--c:var(--st-asig)">En Crédito y Cobranza</span>':enTram(q)?`<span class="chip" style="--c:var(${rs<=2?"--st-esc":"--warn"})">Faltan documentos · vence en ${rs} d</span>`:`<span class="chip" style="--c:var(${rs<=2?"--st-esc":"--warn"})">Vence en ${rs} d</span>`}</div>`};
 $("fDesde").value=RANGOS.mes[0];$("fHasta").value=HOY;
 let modo="semana",desde=RANGOS.semana[0],hasta=RANGOS.semana[1]; // la meta es semanal: se abre en la semana
@@ -860,7 +864,7 @@ function renderR(){
     ["Tasa de cierre",cerr.length?Math.round(gan.length/cerr.length*100)+"%":"—",`${gan.length} ganadas de ${cerr.length} cerradas en el periodo`],
     ["Cotizaciones sin cerrar (histórico)",corto(sum(ab,"monto")),`${ab.length} abiertas de cualquier fecha`]
   ].map(([l,v2,s2])=>`<div class="mstat"><span class="lbl">${l}</span><b class="num">${v2}</b><span>${s2}</span></div>`).join("");
-  tramPanel(qs);
+  tramPanel(qs,ids);
   $("cotList").innerHTML=ab.length?ab.slice(0,5).map(qrow).join(""):'<div class="empty">No hay cotizaciones abiertas.</div>';
   const per=qs.filter(q=>q.estado==="perdida"),pm=Math.max(1,...MOTIVOS_TODOS.map(m=>per.filter(q=>q.motivo===m).length));
   $("cotPerd").innerHTML=per.length?MOTIVOS_TODOS.map(m=>{const n2=per.filter(q=>q.motivo===m).length;return `<div class="br"><div class="br-top"><span>${m}</span><span class="tn">${n2}</span></div><div class="br-track"><i style="width:${n2/pm*100}%;background:var(${m==="Sin respuesta"?"--st-esc":"--st-disp"})"></i></div></div>`}).join(""):'<div class="empty">Sin cotizaciones perdidas.</div>';
@@ -931,7 +935,10 @@ function tiempos(v){
   $("tiemposHint").textContent=pg!=null?`Promedio general ${pg} min por visita · ${rangoTxt()}`:rangoTxt();
   $("tiemposT").innerHTML=fil.length?`<div class="tbl seg"><table><thead><tr><th>Gerente</th><th>Visitas medidas</th><th>Clientes distintos</th><th>Tiempo total en visitas</th><th>Duración promedio de una visita</th><th>Tiempo promedio por cliente (suma de sus visitas)</th><th>Visitas sin cerrar</th></tr></thead><tbody>${fil.map(r=>`<tr><td><b>${esc(r.x.g)}</b><span class="sub">${esc(r.x.n)}</span></td><td data-l="Visitas medidas">${r.n}</td><td data-l="Clientes distintos">${r.cl}</td><td data-l="Tiempo total en visitas">${hm(r.tot)}</td><td data-l="Duración promedio de una visita">${r.pm!=null?r.pm+" min":"—"}</td><td data-l="Tiempo promedio por cliente">${r.pc!=null?r.pc+" min":"—"}</td><td data-l="Visitas sin cerrar"${r.sin?' style="color:var(--st-esc);font-weight:600"':""}>${r.sin}</td></tr>`).join("")}</tbody></table></div>
     <div class="hint" style="margin-top:8px"><b>Visitas medidas:</b> visitas con check-in y check-out. <b>Clientes distintos:</b> cuántas empresas diferentes visitó (si fue 2 veces a la misma, cuenta 1). <b>Duración promedio de una visita:</b> cuánto tarda en promedio cada visita. <b>Tiempo promedio por cliente:</b> todo el tiempo dedicado a cada empresa en el periodo, sumando sus visitas (tiempo total ÷ clientes distintos). <b>Visitas sin cerrar:</b> hizo check-in y nunca check-out; se cierran solas a las 12 horas.</div>`:'<div class="empty">Aún no hay visitas con check-out en este periodo.</div>'}
-function tramPanel(qs){
+// panel de crédito: por solicitud del cliente (con la cotización ligada más reciente, si hay)
+function tramPanel(cots,ids){
+  const qs=CREDS.filter(k=>ids.has(k.cliente_id)).map(k=>{const q=cots.filter(x=>x.cli===k.cliente_id&&x.ini).sort((a,b)=>b.fecha.localeCompare(a.fecha))[0];
+    return{cli:k.cliente_id,id:q?q.id:"Solicitud de crédito",fecha:q?q.fecha:k.inicio,monto:q?q.monto:0,estado:k.fin?"cerrada":"abierta",ini:k.inicio,docsOk:k.docs_completos,fin:k.fin,res:k.resultado,docs:k.documentos||{},sinCot:!q}});
   const cur=qs.filter(q=>q.estado==="abierta"&&enTram(q)),doc=cur.filter(q=>!q.docsOk),ver=cur.filter(q=>q.docsOk),fuera=ver.filter(q=>entre(q.docsOk,HOY)>DCRED);
   const con=qs.filter(q=>q.fin&&q.fin>=desde&&q.fin<=hasta),avg=a=>a.length?(a.reduce((s,x)=>s+x,0)/a.length).toFixed(1):"—";
   const dT=avg(con.map(diasTram)),dV=avg(con.filter(q=>q.docsOk).map(q=>entre(q.docsOk,q.fin))),pV=con.length?Math.round(con.reduce((s,q)=>s+diasTram(q),0)/con.length/VIG*100)+"%":"—";
@@ -939,7 +946,7 @@ function tramPanel(qs){
     ["Crédito aprobado",con.filter(q=>q.res==="aprobado").length,con.length?`${Math.round(con.filter(q=>q.res==="aprobado").length/con.length*100)}% de ${con.length} resueltos · ${rangoTxt()}`:`ninguno resuelto · ${rangoTxt()}`],["Crédito no aprobado",con.filter(q=>q.res==="rechazado").length,con.length?`${Math.round(con.filter(q=>q.res==="rechazado").length/con.length*100)}% de ${con.length} resueltos · ${rangoTxt()}`:`ninguno resuelto · ${rangoTxt()}`],["Duración promedio",dT==="—"?"—":dT+" d",`verificación ${dV==="—"?"—":dV+" d"} · meta ${DCRED} d`],["Vigencia consumida",pV,`promedio, de ${VIG} días`]];
   $("cotTram").innerHTML=(cur.length||con.length)?`<div class="lbl" style="margin-top:6px">Trámite de crédito · documentos del cliente (la vigencia corre) y Crédito y Cobranza (la vigencia se pausa)</div>
     <div class="money">${st.map(([l,v,s2])=>`<div class="mstat"><span class="lbl">${l}</span><b class="num">${v}</b><span>${s2}</span></div>`).join("")}</div>
-    ${cur.sort((a,b)=>(!!b.docsOk-!!a.docsOk)||diasTram(b)-diasTram(a)).map(qrow).join("")}`:'<div class="hint">Sin cotizaciones en trámite de crédito.</div>'}
+    ${cur.sort((a,b)=>(!!b.docsOk-!!a.docsOk)||diasTram(b)-diasTram(a)).map(x=>x.sinCot?credRow(x):qrow(x)).join("")}`:'<div class="hint">Sin cotizaciones en trámite de crédito.</div>'}
 function cartera(list){
   const a=list.filter(c=>c.tipo===ACT);$("actSec").hidden=!a.length;if(!a.length)return;
   const ok=a.filter(c=>mesDe(c).ok).length;
@@ -1014,7 +1021,7 @@ function abrir(id){const c=cli(id);if(!c)return;
   $("fChip").innerHTML=chip(c.st);$("fNombre").textContent=c.nombre;$("fTipo").innerHTML=tipoTag(c)+(c.tipo===ACT?`<div class="hint" style="margin-top:6px">${(m=>m.d==null?"Sin visita registrada.":`Última visita atendida: ${fecha(m.u)} (hace ${m.d} días) por ${esc(quien(VISITAS.filter(x=>x.cli===c.id&&x.fecha===m.u&&atendida(x)).pop().correo))}.`)(mesDe(c))} Se visita una vez al mes; no entra en la lista semanal.</div>`:"");
   $("fFacts").innerHTML=`<span><b class="num">${c.flota??"—"}</b>unidades</span><span><b class="num">${fk(c.km)}</b>km de ${c.suc.n}</span><span><b>${c.giro}</b>giro</span>`;
   $("fActs").innerHTML=`<a class="btn" href="${maps(c)}" target="_blank" rel="noopener">Abrir en Google Maps ↗</a>`;
-  $("form").reset();actualizarForm();$("toast").hidden=true;$("ficha").dataset.cli=id;ckBlock(id);resBlock(id);historial(id);cotModo=null;cotBlock(id);regBlock(id);ctaBlock(id);
+  $("form").reset();actualizarForm();$("toast").hidden=true;$("ficha").dataset.cli=id;ckBlock(id);resBlock(id);historial(id);cotModo=null;credBlock(id);cotBlock(id);regBlock(id);ctaBlock(id);
   $("ficha").hidden=$("scrim").hidden=false;$("cerrar").focus()}
 function cerrar(){$("ficha").hidden=$("scrim").hidden=true}
 // resumen del cliente: lo cotizado y vendido en la plataforma, visitas, datos y dónde opera
@@ -1072,19 +1079,51 @@ function historial(id){const h=[...VISITAS].reverse().filter(x=>x.cli===id).sort
   $("fHist").innerHTML=`<div class="lbl">Historial · ${h.length} ${h.length===1?"visita":"visitas"}</div>`+(pm!=null?`<div class="hint">Promedio en este cliente: <b>${pm} min</b> por visita (${h.filter(x=>x.dur!=null).length} con check-out).</div>`:"")+(h.length?h.map(x=>`<div class="hi" style="--c:var(${RES[x.res]})"><div class="hi-h"><span>${fecha(x.fecha)}${x.tipoV?" · "+x.tipoV:""} · ${esc(quien(x.correo))}${x.dur!=null?" · "+x.dur+" min":""}</span><span>${x.res}</span></div><p>${verif(x)} ${esc(x.com)}</p></div>`).join(""):'<div class="empty" style="padding:0">Aún no hay visitas registradas.</div>')}
 
 let cotModo=null;
+// Trámite de crédito. En la cotización solo se muestra cómo va (afecta su vigencia); se avanza en la sección Crédito del cliente.
 function tramBlock(q){
   if(!q.ini)return"";
   const dd=entre(q.ini,q.docsOk||q.fin||HOY),dv=q.docsOk?entre(q.docsOk,q.fin||HOY):null,dt=diasTram(q),pct=Math.round(dt/VIG*100);
-  const res=`<div class="hint">Trámite: ${dt} ${dt===1?"día":"días"} (${dd} esperando documentos${dv!=null?` · ${dv} en Crédito y Cobranza`:""}) = ${pct}% de la vigencia de ${VIG} días.${enVerif(q)?" En Crédito y Cobranza la vigencia está en pausa.":""}</div>`;
-  if(!enTram(q))return `<div class="aviso" style="--c:var(${q.res==="aprobado"?"--st-vis":"--st-esc"})">Crédito ${q.res} el ${fecha(q.fin)}.</div>`+res;
-  if(!q.docsOk){const n=DOCS.filter(([k])=>q.docs[k]).length;
-    return `<div class="lbl" style="margin-top:6px">Trámite de crédito · esperando documentos (${n} de ${DOCS.length})</div>
-    <div style="display:grid;gap:6px">${DOCS.map(([k,t])=>`<button type="button" class="btn" data-cot="doc:${k}" style="justify-content:flex-start;text-align:left;${q.docs[k]?"border-color:var(--st-vis)":""}"><span aria-hidden="true" style="color:var(${q.docs[k]?"--st-vis":"--muted"})">${q.docs[k]?"✔":"○"}</span>&nbsp;${t}</button>`).join("")}</div>
-    <div class="acts"><button class="btn pri" type="button" data-cot="tram-env"${n<DOCS.length?" disabled":""}>Entregar a Crédito y Cobranza</button></div>`+res}
-
-  const tarde=dv>DCRED;
-  return `<div class="aviso" style="--c:var(${tarde?"--st-esc":"--st-asig"})">En Crédito y Cobranza: día ${dv} de ${DCRED}${tarde?" · fuera de plazo":""}. Documentos entregados el ${fecha(q.docsOk)}.</div>
-    <div class="acts"><button class="btn pri" type="button" data-cot="tram-ok">Crédito aprobado</button><button class="btn" type="button" data-cot="tram-no">Crédito rechazado</button><button class="btn" type="button" data-cot="tram-falta">Faltó información</button></div>`+res}
+  const etapa=!enTram(q)?`Crédito ${q.res==="aprobado"?"aprobado":"no aprobado"} el ${fecha(q.fin)}.`:q.docsOk?`En Crédito y Cobranza: día ${dv} de ${DCRED}. La vigencia está en pausa.`:`Esperando documentos del cliente (${DOCS.filter(([k])=>q.docs[k]).length} de ${DOCS.length}).`;
+  return `<div class="aviso" style="--c:var(${!enTram(q)?(q.res==="aprobado"?"--st-vis":"--st-esc"):q.docsOk?"--st-asig":"--warn"})">Cotización a crédito · ${etapa} El avance se marca en la sección <b>Crédito</b> del cliente.</div>
+  <div class="hint">Trámite: ${dt} ${dt===1?"día":"días"} (${dd} esperando documentos${dv!=null?` · ${dv} en Crédito y Cobranza`:""}) = ${pct}% de la vigencia de ${VIG} días.</div>`}
+// Crédito del cliente (prospecto o cliente de contado): solicitud con documentos → Crédito y Cobranza → aprobado / no aprobado
+function credBlock(id){
+  const c=cli(id),el=$("fCred"),k=CRED[id],ok=puedeAtender(c),cta=CUENTAS[c.cuenta],abierta=k&&!k.fin;
+  const pidio=VISITAS.filter(x=>x.cli===id&&x.pago==="Crédito").sort((a,b)=>b.fecha.localeCompare(a.fecha))[0];
+  let h=`<div class="lbl">Crédito</div>`;
+  if(c.linea||(cta&&cta.linea_autorizada)){
+    h+=`<div class="aviso" style="--c:var(--st-vis)">Línea de crédito autorizada${c.lineaDesde?` desde el ${fecha(c.lineaDesde)}`:""}${!c.linea&&cta?` (de la cuenta ${esc(cta.nombre)})`:""}. Sus cotizaciones a crédito no llevan trámite.</div>`}
+  else if(abierta){const x={ini:k.inicio,docsOk:k.docs_completos,fin:null,docs:k.documentos||{}},n=DOCS.filter(([d])=>x.docs[d]).length,dd=entre(x.ini,x.docsOk||HOY);
+    if(!x.docsOk){
+      h+=`<div class="aviso" style="--c:var(--warn)">Solicitud de crédito · esperando documentos del cliente: ${n} de ${DOCS.length} · ${dd} ${dd===1?"día":"días"} desde que se pidieron.</div>
+      <div style="display:grid;gap:6px">${DOCS.map(([d,t])=>ok?`<button type="button" class="btn" data-cred="doc:${d}" style="justify-content:flex-start;text-align:left;${x.docs[d]?"border-color:var(--st-vis)":""}"><span aria-hidden="true" style="color:var(${x.docs[d]?"--st-vis":"--muted"})">${x.docs[d]?"✔":"○"}</span>&nbsp;${t}</button>`:`<div><span style="color:var(${x.docs[d]?"--st-vis":"--muted"})">${x.docs[d]?"✔":"○"}</span> ${t}</div>`).join("")}</div>
+      ${ok?`<div class="acts"><button class="btn pri" type="button" data-cred="env"${n<DOCS.length?" disabled":""}>Entregar a Crédito y Cobranza</button></div>`:""}`}
+    else{const dv=entre(x.docsOk,HOY),tarde=dv>DCRED;
+      h+=`<div class="aviso" style="--c:var(${tarde?"--st-esc":"--st-asig"})">En Crédito y Cobranza: día ${dv} de ${DCRED}${tarde?" · fuera de plazo":""}. Documentos entregados el ${fecha(x.docsOk)}.</div>
+      ${ok?`<div class="acts"><button class="btn pri" type="button" data-cred="ok">Crédito aprobado</button><button class="btn" type="button" data-cred="no">Crédito no aprobado</button><button class="btn" type="button" data-cred="falta">Faltó información</button></div>`:""}`}}
+  else{
+    if(k)h+=`<div class="hint">Su última solicitud no fue aprobada (${fecha(k.fin)}).</div>`;
+    if(pidio)h+=`<div class="hint">En su visita del ${fecha(pidio.fecha)} dijo que pagaría a crédito.</div>`;
+    h+=ok?`<div class="acts" style="margin:0"><button class="btn${pidio?" pri":""}" type="button" data-cred="nuevo">${k?"Volver a solicitar crédito":"¿Quiere crédito? Iniciar solicitud y pedir documentos"}</button></div>`:'<div class="hint">Sin línea de crédito.</div>'}
+  el.innerHTML=h+'<span class="toast" id="credMsg" hidden></span>';el.hidden=false}
+async function credAccion(a){
+  const id=$("ficha").dataset.cli,k=CRED[id],m=t=>{const x=$("credMsg");x.textContent=t;x.style.color="var(--st-esc)";x.hidden=false};
+  let r;
+  if(a==="nuevo")r=SB.from("creditos").insert({cliente_id:id});
+  else if(!k)return;
+  else if(a.startsWith("doc:")){const d=a.slice(4),antes=k.documentos||{},nd={...antes};if(nd[d])delete nd[d];else nd[d]=HOY;k.documentos=nd;credBlock(id);
+    r=(docCola=docCola.then(()=>SB.from("creditos").update({documentos:k.documentos}).eq("id",k.id)));
+    const{data,error}=await r.then(x=>x);  // en fila, como en cotizaciones
+    if(error){k.documentos=antes;credBlock(id);return m("No se guardó: "+error.message)}
+    for(const q of COTS)if(q.cli===id&&enTram(q))q.docs=k.documentos;cotBlock(id);return}  // la base ya lo copió a su cotización
+  else if(a==="env")r=SB.from("creditos").update({docs_completos:HOY}).eq("id",k.id);
+  else if(a==="falta")r=SB.from("creditos").update({docs_completos:null}).eq("id",k.id);
+  else if(a==="ok"||a==="no")r=SB.from("creditos").update({fin:HOY,resultado:a==="ok"?"aprobado":"rechazado"}).eq("id",k.id);
+  $("fCred").querySelectorAll("button").forEach(b=>b.disabled=true);
+  const{data,error}=await r.select("*");
+  if(error||!data||!data.length){credBlock(id);return m("No se guardó: "+(error?error.message:"tu usuario no tiene permiso."))}
+  CRED[id]=data[0];if(a==="ok"){cli(id).linea=true;cli(id).lineaDesde=HOY}credBlock(id);recargar(id)}
+document.addEventListener("click",e=>{const b=e.target.closest("[data-cred]");if(b){e.stopPropagation();credAccion(b.dataset.cred)}},true);
 // ¿Puedo registrar visitas y cotizaciones a este cliente? (la base lo valida igual)
 const puedeAtender=c=>rol==="reg"?(YO.rol!=="regional"||SUC.some(x=>x.id===c.at)):c.at===rol;
 let ctaModo=null;
@@ -1151,11 +1190,11 @@ function cotBlock(id){
     else if(!puedeAtender(c))h+='<div class="hint">La registra quien atiende la cuenta.</div>';
     else h+=`<div class="acts"><button class="btn pri" type="button" data-cot="ganar">Se ganó</button><button class="btn" type="button" data-cot="perder">Se perdió</button>${q.ini||q.linea?"":`<button class="btn" type="button" data-cot="tram-ini">${q.pago==="Contado"?"Cambiar a crédito (pedir documentos)":"Iniciar trámite de crédito"}</button>`}</div>`;
   }else if(c.pideCot&&!puedeAtender(c))h="";
-  else if(c.pideCot){const k=CUENTAS[c.cuenta],lc=!!(k&&k.linea_autorizada),pc=lc||VISITAS.some(x=>x.cli===id&&/Crédito/.test(x.com));
+  else if(c.pideCot){const k=CUENTAS[c.cuenta],lc=c.linea||!!(k&&k.linea_autorizada),pc=lc||(CRED[id]&&!CRED[id].fin)||VISITAS.some(x=>x.cli===id&&(x.pago==="Crédito"||/Crédito/.test(x.com)));
     h=`<div class="lbl">Pidió cotización</div><label class="qlab" for="qMonto">Monto cotizado en pesos, con IVA<input class="txt" id="qMonto" type="number" inputmode="numeric" min="1" placeholder="Ej. 85000"></label>
     <div class="qlab">Forma de pago</div><div class="pills"><label><input type="radio" name="qPago" value="Contado"${pc?"":" checked"}>Contado</label><label><input type="radio" name="qPago" value="Crédito"${pc?" checked":""}>Crédito</label></div>
     <div id="qLinea"${pc?"":" hidden"}><div class="qlab">¿Ya tiene línea de crédito autorizada con Tersa?</div><div class="pills"><label><input type="radio" name="qLin" value="si"${lc?" checked":""}>Sí, ya tiene línea${lc?" (de la cuenta "+esc(k.nombre)+")":""}</label><label><input type="radio" name="qLin" value="no">No: hay que pedir documentos</label></div>
-    <div class="hint" style="margin-top:6px">Si no tiene línea, empieza el trámite de documentos. La vigencia de ${VIG} días sigue corriendo mientras el cliente los junta; solo se pausa cuando los entregas a Crédito y Cobranza.</div></div>
+    <div class="hint" style="margin-top:6px">Si no tiene línea, la cotización se liga a la solicitud de crédito del cliente (o la inicia) y los documentos se marcan en la sección Crédito. La vigencia de ${VIG} días sigue corriendo mientras el cliente los junta; solo se pausa cuando están en Crédito y Cobranza.</div></div>
     <div class="acts"><button class="btn pri" type="button" data-cot="nueva">Registrar cotización</button></div>`}
   if(cer.length)h+=`<div class="lbl">Cotizaciones cerradas</div>`+cer.map(x=>`<div class="hi" style="--c:var(${x.estado==="ganada"?"--st-vis":"--st-esc"})"><div class="hi-h"><span>${x.id} · ${fecha(x.cierre)}</span><span>${x.estado==="ganada"?"Ganada":"Perdida"}</span></div><p>${x.estado==="ganada"?`Cotizado ${mxn(x.monto)} · cerrado ${mxn(x.ganado)}${x.factura?" · factura "+esc(x.factura):""}`:`${mxn(x.monto)} · ${x.motivo}`}</p></div>`).join("");
   el.innerHTML=h+'<span class="toast" id="qMsg" hidden></span>';el.hidden=!h;
@@ -1200,19 +1239,9 @@ async function cotAccion(a){
   let r=null;
   if(a==="nueva"){const m=+$("qMonto").value,v=n=>($("fCot").querySelector(`input[name=${n}]:checked`)||{}).value,pago=v("qPago"),lin=v("qLin");
     if(!(m>0))return err("Escribe el monto cotizado.");if(!pago)return err("Elige la forma de pago.");if(pago==="Crédito"&&!lin)return err("Indica si ya tiene línea de crédito autorizada.");
-    r=SB.from("cotizaciones").insert({cliente_id:id,monto:m,forma_pago:pago,linea_autorizada:lin==="si",tramite_inicio:pago==="Crédito"&&lin==="no"?HOY:null})}
+    r=SB.from("cotizaciones").insert({cliente_id:id,monto:m,forma_pago:pago,linea_autorizada:pago==="Crédito"&&lin==="si"})}  // sin línea: la base la liga a la solicitud de crédito del cliente
   else if(a==="ok-ganar"){const m=+$("qGan").value,f=$("qFac").value.trim();if(!(m>0))return err("Escribe el monto cerrado.");if(!f)return err("Escribe el número de factura.");r=SB.from("cotizaciones").update({estado:"ganada",monto_ganado:m,factura:f}).eq("id",q.dbid)}
-  else if(a==="tram-ini")r=SB.from("cotizaciones").update({tramite_inicio:HOY,forma_pago:"Crédito"}).eq("id",q.dbid);
-  else if(a.startsWith("doc:")){const k=a.slice(4),antes=q.docs,d={...antes};if(d[k])delete d[k];else d[k]=HOY;
-    // palomeo inmediato; si la base no lo acepta, se regresa como estaba
-    q.docs=d;cotBlock(id);
-    // en fila: si toca varios seguidos, se guardan en orden y el último gana
-    const{data,error}=await (docCola=docCola.then(()=>SB.from("cotizaciones").update({documentos:q.docs}).eq("id",q.dbid).select("id")));
-    if(error||!data||!data.length){q.docs=antes;cotBlock(id);err("No se guardó: "+(error?error.message:"tu usuario no tiene permiso de cambiar esta cotización."))}
-    return}
-  else if(a==="tram-env")r=SB.from("cotizaciones").update({docs_completos:HOY}).eq("id",q.dbid);
-  else if(a==="tram-falta")r=SB.from("cotizaciones").update({docs_completos:null}).eq("id",q.dbid);
-  else if(a==="tram-ok"||a==="tram-no")r=SB.from("cotizaciones").update({tramite_fin:HOY,credito_result:a==="tram-ok"?"aprobado":"rechazado"}).eq("id",q.dbid);
+  else if(a==="tram-ini")r=SB.from("cotizaciones").update({forma_pago:"Crédito"}).eq("id",q.dbid);
   else if(a==="ok-perder"){const mo=($("fCot").querySelector("input[name=motivo]:checked")||{}).value;if(!mo)return err("Elige el motivo.");r=SB.from("cotizaciones").update({estado:"perdida",motivo:mo}).eq("id",q.dbid)}
   else{cotModo=a==="cancelar"?null:a;return cotBlock(id)}
   $("fCot").querySelectorAll("button").forEach(b=>b.disabled=true);
@@ -1323,7 +1352,7 @@ $("form").addEventListener("change",actualizarForm);
 // ubicación del celular al guardar (opcional: si la niega o no hay señal, se guarda sin ella)
 const ubic=()=>new Promise(ok=>{if(!navigator.geolocation)return ok(null);
   navigator.geolocation.getCurrentPosition(p=>ok({lat:p.coords.latitude,lng:p.coords.longitude,acc:p.coords.accuracy}),()=>ok(null),{enableHighAccuracy:true,timeout:10000,maximumAge:0})});
-async function recargar(id){await cargar();render();if(id&&!$("ficha").hidden){const c=cli(id);if(c){$("fChip").innerHTML=chip(c.st);resBlock(id);historial(id);cotBlock(id);regBlock(id)}}}
+async function recargar(id){await cargar();render();if(id&&!$("ficha").hidden){const c=cli(id);if(c){$("fChip").innerHTML=chip(c.st);resBlock(id);historial(id);credBlock(id);cotBlock(id);regBlock(id)}}}
 const promMin=a=>{a=a.filter(x=>x.dur!=null);return a.length?Math.round(a.reduce((s,x)=>s+x.dur,0)/a.length):null};
 const hora=d=>new Date(d).toLocaleTimeString("es-MX",{hour:"numeric",minute:"2-digit"});
 const vtTxt=nv=>({en_sitio:` Verificada en sitio (a ${mts(nv&&nv.distancia_m)}).`,ubicacion_nueva:" Guardamos tu ubicación como la del cliente.",pin_reportado:" Quedó sin verificar y avisamos a tu regional para corregir la ubicación."}[nv&&nv.verificacion]||"");
@@ -1365,7 +1394,7 @@ $("form").addEventListener("submit",async e=>{e.preventDefault();
   const row={cliente_id:id,checkin_id:k.id,contacto:con,comentario:[cs==="reint"&&tel?"Contacto: "+tel+".":"",com].filter(Boolean).join(" ")||null,latitud:g?g.lat:null,longitud:g?g.lng:null,precision_m:g?Math.round(g.acc||0):null};
   if(cs==="reint")row.horario=val("horario");
   if(cs==="ef")Object.assign(row,{interes:val("interes"),unidades:val("unidades"),tipos_unidad:vals("tipos"),necesidades:vals("necesidades"),proveedor:val("proveedor")||null,
-    siguiente_paso:val("paso"),contacto_nombre:$("fCNom").value.trim()||null,contacto_puesto:val("puesto")||null,contacto_celular:cel||null});
+    siguiente_paso:val("paso"),forma_pago:val("pago")||null,contacto_nombre:$("fCNom").value.trim()||null,contacto_puesto:val("puesto")||null,contacto_celular:cel||null});
   const{data:nv,error}=await SB.from("visitas").insert(row).select("verificacion,distancia_m,duracion_min").single();
   btn.disabled=false;
   if(error){if(/CHECKIN_(INVALIDO|REQUERIDO)/.test(error.message||"")){await recargar(id);ckBlock(id);t.textContent="Tu check-in ya se había cerrado (pasaron más de 12 horas o ya se usó). Toca «Llegué» otra vez; lo que llenaste se conserva.";t.style.color="var(--st-esc)";return}
