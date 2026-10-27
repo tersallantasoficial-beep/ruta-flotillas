@@ -846,7 +846,7 @@ function renderR(){
   const tiles=[
     ["t1","Por visitar",list.filter(c=>c.st==="asig"||c.st==="reint").length,`${list.filter(c=>c.arr).length} arrastrados · ${list.filter(c=>c.st==="reint").length} reintentos`,"--st-asig","ruta"],
     ["t2","Cotizaciones",cot,`pedidas en ${rangoTxt()}`,"--st-vis","actividad"],
-    ["t3","Escalados",list.filter(c=>c.st==="esc").length,"sin visita en 2 semanas","--st-esc","equipo"]];
+    ["t3",YO.rol==="regional"?"Reasignados a ti por falta de seguimiento":"Asignados al regional por falta de seguimiento de gerentes de sucursal",list.filter(c=>c.st==="esc").length,"detalle en «Requieren tu atención»","--st-esc","equipo"]];
   for(const[id,l,val,sub,c,ic]of tiles)$(id).innerHTML=`<div class="tile-top"><span class="lbl">${l}</span><span class="ic" style="--c:var(${c})">${svgI(ic)}</span></div><div class="v num">${val}</div><div class="s">${sub}</div>`;
 
   const qs=COTS.filter(q=>ids.has(q.cli)),enR=f=>f&&f>=desde&&f<=hasta;
