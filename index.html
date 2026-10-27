@@ -271,6 +271,13 @@ textarea{width:100%;font:inherit;padding:10px;border-radius:10px;border:1px soli
 .qrow:hover{background:var(--soft)}
 .qrow b{font-size:14px}
 .qrow .sub{display:block;font-size:12px;color:var(--muted)}
+.dl{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px 16px;margin:0}
+.dl>div{min-width:0}.dl dt{font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted)}.dl dd{margin:2px 0 0;font-size:14px;overflow-wrap:anywhere}
+.drawer .money{grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
+.drawer .mstat b{font-size:20px}
+.chips{display:flex;flex-wrap:wrap;gap:6px}
+.sede{display:grid;gap:2px;padding:8px 0;border-top:1px solid var(--line)}.sede:first-child{border-top:0}
+@media (min-width:1100px){.drawer{width:min(760px,100%)}.drawer .money{grid-template-columns:repeat(4,minmax(0,1fr))}.dl{grid-template-columns:repeat(3,minmax(0,1fr))}}
 .cotbox{display:grid;gap:10px;padding:14px;border-radius:12px;background:var(--soft);border:1px solid var(--line)}
 .cotbox .pills label{background:var(--panel)}
 .cotbox .txt{background:var(--panel)}
@@ -560,6 +567,7 @@ textarea{width:100%;font:inherit;padding:10px;border-radius:10px;border:1px soli
     <div class="acts" id="fActs"></div>
   </div>
   <div class="dr-b">
+    <div id="fRes" style="display:grid;gap:14px"></div>
     <div class="cotbox" id="fReg" hidden></div>
     <div class="cotbox" id="fCta" hidden></div>
     <div class="cotbox" id="fCot" hidden></div>
@@ -669,7 +677,7 @@ function resumenDe(v){
 const cotDe=x=>({dbid:x.id,id:x.folio,factura:x.factura,cli:x.cliente_id,fecha:x.fecha,monto:+x.monto,estado:x.estado,ganado:x.monto_ganado==null?0:+x.monto_ganado,motivo:x.motivo,cierre:x.cerrada_en,pago:x.forma_pago,linea:!!x.linea_autorizada,ini:x.tramite_inicio,docsOk:x.docs_completos,fin:x.tramite_fin,res:x.credito_result,docs:x.documentos||{}});
 async function cargar(){
   const[s,c,v,q]=await Promise.all([todo("sucursales","*"),
-    todo("clientes","id,empresa,giro,tipo,latitud,longitud,link_maps,ciudad,unidades_flota,id_sucursal,km_sucursal,estatus,semanas_arrastre,intentos,horario_sugerido,motivo_escalado,revisar_ubicacion,codigo_erp,razon_social,ultima_compra,areas_cobertura,cuenta_id"),
+    todo("clientes","id,empresa,giro,tipo,latitud,longitud,link_maps,ciudad,unidades_flota,id_sucursal,km_sucursal,estatus,semanas_arrastre,intentos,horario_sugerido,motivo_escalado,revisar_ubicacion,codigo_erp,razon_social,ultima_compra,areas_cobertura,cuenta_id,creado_en,observaciones,observaciones_por,observaciones_en"),
     todo("visitas","*"),todo("cotizaciones","*")]);
   // check-ins: los míos abiertos (visita en curso) y los que quedaron sin check-out
   const{data:ck}=await SB.from("checkins").select("id,cliente_id,correo,inicio,cerrado_en,abandonado,verificacion,distancia_m");CKS=ck||[];
@@ -684,10 +692,10 @@ async function cargar(){
   // sucursales propias; las demás solo aparecen porque se ven sedes de una cuenta centralizada
   SUC=TODAS.filter(x=>YO.rol==="regional"?x.reg===YO.correo.toLowerCase():YO.rol==="gerente"?x.id===YO.id_sucursal:true);
   CL=c.filter(x=>SI[x.id_sucursal]).map(x=>({id:x.id,nombre:x.empresa,giro:x.giro||"Otro",lat:x.latitud,lng:x.longitud,link:x.link_maps,ciudad:x.ciudad,flota:x.unidades_flota,
-    suc:SI[x.id_sucursal],km:x.km_sucursal==null?null:+x.km_sucursal,st:STMAP[x.estatus]||"disp",arr:x.estatus==="asignado"&&x.semanas_arrastre>0?1:0,intentos:x.intentos||0,horario:x.horario_sugerido,motivo:x.motivo_escalado,tipo:x.tipo,revisar:!!x.revisar_ubicacion,erp:x.codigo_erp,rs:x.razon_social,ult:x.ultima_compra,cob:x.areas_cobertura||[],cuenta:x.cuenta_id}));
+    suc:SI[x.id_sucursal],km:x.km_sucursal==null?null:+x.km_sucursal,st:STMAP[x.estatus]||"disp",arr:x.estatus==="asignado"&&x.semanas_arrastre>0?1:0,intentos:x.intentos||0,horario:x.horario_sugerido,motivo:x.motivo_escalado,tipo:x.tipo,revisar:!!x.revisar_ubicacion,erp:x.codigo_erp,rs:x.razon_social,ult:x.ultima_compra,cob:x.areas_cobertura||[],cuenta:x.cuenta_id,alta:x.creado_en?String(x.creado_en).slice(0,10):null,obs:x.observaciones||"",obsPor:x.observaciones_por,obsEn:x.observaciones_en}));
   // texto de búsqueda de cada cliente (sin acentos ni mayúsculas)
   const FOL={};for(const q of q0)if(IX0[q.cliente_id])(FOL[q.cliente_id]=FOL[q.cliente_id]||[]).push(q.folio);
-  for(const c of CL)c.hay=sinAcento([c.nombre,c.rs,c.erp,c.id,c.ciudad,c.giro,c.suc.n,c.suc.g,(CUENTAS[c.cuenta]||{}).nombre,...(FOL[c.id]||[])].filter(Boolean).join(" "));
+  for(const c of CL)c.hay=sinAcento([c.nombre,c.rs,c.erp,c.id,c.ciudad,c.giro,c.obs,c.suc.n,c.suc.g,(CUENTAS[c.cuenta]||{}).nombre,...(FOL[c.id]||[])].filter(Boolean).join(" "));
   // sucursal que ATIENDE: la responsable si la cuenta es centralizada
   for(const c of CL){const k=CUENTAS[c.cuenta];c.at=k&&k.modo==="centralizada"&&k.sucursal_resp?k.sucursal_resp:c.suc.id}
   IX=Object.fromEntries(CL.map(x=>[x.id,x]));
@@ -1003,12 +1011,63 @@ $("filtrosTabla").innerHTML=[["todos","Todos","--muted"],...Object.entries(ST).m
 
 
 function abrir(id){const c=cli(id);if(!c)return;
-  $("fChip").innerHTML=chip(c.st);$("fNombre").textContent=c.nombre;$("fTipo").innerHTML=tipoTag(c)+(c.cob.length?`<div class="hint" style="margin-top:6px">Cobertura: ${esc(c.cob.join(", "))}</div>`:"")+(c.tipo===ACT?`<div class="hint" style="margin-top:6px">${(m=>m.d==null?"Sin visita registrada.":`Última visita atendida: ${fecha(m.u)} (hace ${m.d} días) por ${esc(quien(VISITAS.filter(x=>x.cli===c.id&&x.fecha===m.u&&atendida(x)).pop().correo))}.`)(mesDe(c))} Se visita una vez al mes; no entra en la lista semanal.</div>`:"");
+  $("fChip").innerHTML=chip(c.st);$("fNombre").textContent=c.nombre;$("fTipo").innerHTML=tipoTag(c)+(c.tipo===ACT?`<div class="hint" style="margin-top:6px">${(m=>m.d==null?"Sin visita registrada.":`Última visita atendida: ${fecha(m.u)} (hace ${m.d} días) por ${esc(quien(VISITAS.filter(x=>x.cli===c.id&&x.fecha===m.u&&atendida(x)).pop().correo))}.`)(mesDe(c))} Se visita una vez al mes; no entra en la lista semanal.</div>`:"");
   $("fFacts").innerHTML=`<span><b class="num">${c.flota??"—"}</b>unidades</span><span><b class="num">${fk(c.km)}</b>km de ${c.suc.n}</span><span><b>${c.giro}</b>giro</span>`;
   $("fActs").innerHTML=`<a class="btn" href="${maps(c)}" target="_blank" rel="noopener">Abrir en Google Maps ↗</a>`;
-  $("form").reset();actualizarForm();$("toast").hidden=true;$("ficha").dataset.cli=id;ckBlock(id);historial(id);cotModo=null;cotBlock(id);regBlock(id);ctaBlock(id);
+  $("form").reset();actualizarForm();$("toast").hidden=true;$("ficha").dataset.cli=id;ckBlock(id);resBlock(id);historial(id);cotModo=null;cotBlock(id);regBlock(id);ctaBlock(id);
   $("ficha").hidden=$("scrim").hidden=false;$("cerrar").focus()}
 function cerrar(){$("ficha").hidden=$("scrim").hidden=true}
+// resumen del cliente: lo cotizado y vendido en la plataforma, visitas, datos y dónde opera
+// barras de lo vendido por año (fecha de la venta), desde el alta del cliente, con monto y tendencia lineal
+function grafVentas(c,gan){
+  const Y=+HOY.slice(0,4),ini=Math.min(Y,...[c.alta,...gan.map(q=>q.cierre),...COTS.filter(q=>q.cli===c.id).map(q=>q.fecha)].filter(Boolean).map(f=>+f.slice(0,4)));
+  const ser=[];for(let y=Math.max(ini,Y-9);y<=Y;y++)ser.push({y,v:gan.filter(q=>(q.cierre||"").startsWith(y)).reduce((t,q)=>t+q.ganado,0)});  // shortcut: hasta 10 años a la vista
+  const n=ser.length,mx=Math.max(1,...ser.map(x=>x.v)),H=v=>Math.max(0,Math.min(78,v/mx*78));
+  // tendencia lineal por mínimos cuadrados (con 2 años o más)
+  let tr="",tt='<div class="hint">La tendencia aparece cuando hay 2 años o más.</div>';
+  if(n>1){const xm=(n-1)/2,ym=ser.reduce((t,x)=>t+x.v,0)/n,b=ser.reduce((t,x,i)=>t+(i-xm)*(x.v-ym),0)/ser.reduce((t,x,i)=>t+(i-xm)**2,0),a=ym-b*xm;
+    const pt=i=>`${(i+.5)/n*100},${100-H(a+b*i)}`;
+    tr=`<svg viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true" style="position:absolute;inset:0;width:100%;height:100%;pointer-events:none"><polyline points="${pt(0)} ${pt(n-1)}" fill="none" stroke="var(--warn)" stroke-width="2" stroke-dasharray="6 4" vector-effect="non-scaling-stroke"/></svg>`;
+    tt=`<div class="hint"><span style="color:var(--warn);font-weight:700">- - Tendencia:</span> ${b>=0?"▲ sube":"▼ baja"} en promedio ${corto(Math.abs(Math.round(b)))} por año.</div>`}
+  return `<div class="lbl">Vendido por año · desde ${ser[0].y}</div>
+  <div style="position:relative;height:150px;display:grid;grid-template-columns:repeat(${n},minmax(0,1fr));gap:6px;border-bottom:1px solid var(--line)">
+    ${ser.map(x=>`<div style="display:flex;flex-direction:column;justify-content:flex-end;align-items:center;min-width:0"><span class="num" style="font-size:12px;font-weight:700;white-space:nowrap">${x.v?corto(x.v):"$0"}</span><i style="display:block;width:min(56px,80%);height:${H(x.v)}%;min-height:${x.v?3:0}px;background:var(--st-vis);border-radius:4px 4px 0 0;margin-top:4px"></i></div>`).join("")}
+    ${tr}
+  </div>
+  <div style="display:grid;grid-template-columns:repeat(${n},minmax(0,1fr));gap:6px;font-size:12px;color:var(--muted);text-align:center">${ser.map(x=>`<span>${x.y}${x.y===Y?" *":""}</span>`).join("")}</div>
+  ${tt}<div class="hint">* ${Y} va del 1 de enero a hoy.</div>`}
+function resBlock(id){const borr=$("fObs")&&$("ficha").dataset.cli===id?$("fObs").value:null,c=cli(id),k=CUENTAS[c.cuenta],qs=COTS.filter(q=>q.cli===id),gan=qs.filter(q=>q.estado==="ganada"),cer=qs.filter(q=>q.estado!=="abierta"),ab=qs.length-cer.length;
+  const vs=VISITAS.filter(x=>x.cli===id).sort((a,b)=>b.fecha.localeCompare(a.fecha)),pm=promMin(vs),ult=gan.map(q=>q.cierre).sort().pop(),sum=a=>a.reduce((t,v)=>t+v,0);
+  // año en curso contra el mismo periodo del año anterior (1 ene al día de hoy)
+  const Y=+HOY.slice(0,4),md=HOY.slice(4),enA=(f,y)=>!!f&&f>=y+"-01-01"&&f<=y+md;
+  const vs2=(a,b)=>!b?(a?`sin registro en ${Y-1}`:`igual que ${Y-1}`):`<b style="color:var(${a>=b?"--st-vis":"--st-esc"});font-size:13px">${a>=b?"▲":"▼"} ${Math.abs(Math.round((a-b)/b*100))}%</b> vs mismo periodo ${Y-1}`;
+  // todo sobre las cotizaciones hechas en el año: cotizadas = ganadas + perdidas + abiertas
+  const qA=qs.filter(q=>enA(q.fecha,Y)),qB=qs.filter(q=>enA(q.fecha,Y-1)),gA=qA.filter(q=>q.estado==="ganada"),gB=qB.filter(q=>q.estado==="ganada"),pA=qA.filter(q=>q.estado==="perdida"),aA=qA.length-gA.length-pA.length;
+  const cA=sum(qA.map(q=>q.monto)),cB=sum(qB.map(q=>q.monto)),vA=sum(gA.map(q=>q.ganado)),vB=sum(gB.map(q=>q.ganado)),n1=(n,s1,s2)=>n+" "+(n===1?s1:s2);
+  const st=[[`Cotizado ${Y}`,mxn(cA),`${n1(qA.length,"cotización","cotizaciones")}<br>${vs2(cA,cB)}`],
+    [`Vendido ${Y}`,mxn(vA),`${n1(gA.length,"cotización ganada","cotizaciones ganadas")}<br>${vs2(vA,vB)}`],
+    [`Tasa de cierre ${Y}`,gA.length+pA.length?Math.round(gA.length/(gA.length+pA.length)*100)+"%":"—",qA.length?`${n1(gA.length,"ganada","ganadas")} · ${n1(pA.length,"perdida","perdidas")}${aA?` · ${n1(aA,"abierta","abiertas")}`:""}`:"sin cotizaciones este año"],
+    ["Visitas",vs.length,vs.length?`última ${fecha(vs[0].fecha)} (hace ${diasDesde(vs[0].fecha)} d)${pm!=null?` · ${pm} min prom.`:""}`:"sin visitas"]];
+  const atiende=k&&k.modo==="centralizada"?respTxt(k):`${c.suc.g} (${c.suc.n})`;
+  const datos=[["Razón social",c.rs],["Código SAP",c.erp],["Folio",c.id],["Ciudad",c.ciudad],["Sucursal",c.suc.n],["Lo atiende",atiende],
+    ["Última compra (SAP)",c.ult?`${fecha(c.ult)} · hace ${diasDesde(c.ult)} días`:null],["Unidades",c.flota],["Giro",c.giro]];
+  $("fRes").innerHTML=`<div class="lbl">Resumen comercial</div><div class="money">${st.map(([l,v,s2])=>`<div class="mstat"><span class="lbl">${l}</span><b class="num">${v}</b><span>${s2}</span></div>`).join("")}</div>
+    ${grafVentas(c,gan)}
+    <div class="hint">Los recuadros cuentan las cotizaciones hechas en ${Y}; la gráfica, lo vendido en cada año. Todo es lo registrado en Ruta Flotillas${ult?`; última venta el ${fecha(ult)}`:""}.</div>
+    <div class="lbl">Datos del cliente</div><dl class="dl">${datos.map(([t,v])=>`<div><dt>${t}</dt><dd>${v==null||v===""?"—":esc(String(v))}</dd></div>`).join("")}</dl>
+    <div class="lbl">Presencia y operación</div>
+    <div class="chips">${c.cob.length?c.cob.map(e=>`<span class="chip" style="--c:var(--st-asig)">${esc(e)}</span>`).join(""):'<span class="hint">Estados de cobertura sin registrar.</span>'}</div>
+    ${k?`<div class="hint">Es parte de la cuenta multisede <b>${esc(k.nombre)}</b>: abajo están sus sedes, en qué ciudad y quién atiende cada una.</div>`:""}
+    <div class="lbl">Observaciones del cliente</div>
+    ${puedeAtender(c)?`<textarea id="fObs" maxlength="2000" rows="3" placeholder="Particularidades: horarios, cómo compra, con quién tratar, condiciones especiales…">${esc(c.obs)}</textarea>
+    <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap"><button class="btn" type="button" id="fObsG">Guardar observaciones</button><span class="hint" id="fObsM">${obsTxt(c)}</span></div>`
+    :`<div style="white-space:pre-wrap">${c.obs?esc(c.obs):'<span class="hint">Sin observaciones.</span>'}</div><span class="hint">${obsTxt(c)}</span>`}`;
+  if(borr!=null&&$("fObs"))$("fObs").value=borr;  // no perder lo que estaba escribiendo si la ficha se refresca
+  const g=$("fObsG");if(g)g.onclick=async()=>{const m=$("fObsM");g.disabled=true;m.textContent="Guardando…";
+    const{error}=await SB.rpc("guardar_observaciones",{cliente:id,texto:$("fObs").value});g.disabled=false;
+    if(error){m.textContent="No se guardó: "+error.message;m.style.color="var(--st-esc)";return}
+    c.obs=$("fObs").value.trim();c.obsPor=YO.correo.toLowerCase();c.obsEn=new Date().toISOString();m.style.color="var(--st-vis)";m.textContent="Guardado. "+obsTxt(c)}}
+const obsTxt=c=>c.obsEn?`Última edición: ${esc(quien(c.obsPor))} el ${fecha(String(c.obsEn).slice(0,10))}.`:"";
 function historial(id){const h=[...VISITAS].reverse().filter(x=>x.cli===id).sort((a,b)=>b.fecha.localeCompare(a.fecha)),pm=promMin(h);
   $("fHist").innerHTML=`<div class="lbl">Historial · ${h.length} ${h.length===1?"visita":"visitas"}</div>`+(pm!=null?`<div class="hint">Promedio en este cliente: <b>${pm} min</b> por visita (${h.filter(x=>x.dur!=null).length} con check-out).</div>`:"")+(h.length?h.map(x=>`<div class="hi" style="--c:var(${RES[x.res]})"><div class="hi-h"><span>${fecha(x.fecha)}${x.tipoV?" · "+x.tipoV:""} · ${esc(quien(x.correo))}${x.dur!=null?" · "+x.dur+" min":""}</span><span>${x.res}</span></div><p>${verif(x)} ${esc(x.com)}</p></div>`).join(""):'<div class="empty" style="padding:0">Aún no hay visitas registradas.</div>')}
 
@@ -1057,7 +1116,9 @@ async function ctaBlock(id){
   el.hidden=false;
   const{data}=await SB.rpc("sedes_cuenta",{cuenta:k.id});
   if($("ficha").dataset.cli!==id)return;
-  $("ctaSedes").innerHTML=(data||[]).length?`<div style="display:grid;gap:4px">${data.map(x=>`<div${x.id===id?' style="font-weight:700"':""}>${esc(x.ciudad||"—")} · ${esc(x.empresa)} <span style="color:var(--muted)">· ${esc(x.sucursal.replace(/^(Michelin Car Service - )?TERSA( Llantas)? /i,""))} (${esc(x.gerente)})</span></div>`).join("")}</div>`:"";
+  const ciu=[...new Set((data||[]).map(x=>x.ciudad).filter(Boolean))];
+  $("ctaSedes").innerHTML=(data||[]).length?`<div class="hint" style="margin-bottom:4px">${data.length} ${data.length===1?"sede":"sedes"} en ${ciu.length} ${ciu.length===1?"ciudad":"ciudades"}: ${esc(ciu.join(", "))}</div>`+data.map(x=>{const sl=corta(x.sucursal);
+    return `<div class="sede"><div style="color:var(--ink)"><b>${esc(x.ciudad||"—")}</b> · ${esc(x.empresa)}${x.id===id?' <span class="chip" style="--c:var(--st-vis)">esta sede</span>':""}</div><div>Lo atiende: ${esc(k.modo==="centralizada"?respTxt(k):x.gerente+" ("+sl+")")}${k.modo==="centralizada"?` · sucursal local ${esc(sl)}`:""}</div></div>`}).join(""):"";
 }
 let ctaT=null;
 async function buscarCta(){const q=($("ctaQ")||{}).value||"";clearTimeout(ctaT);ctaT=setTimeout(async()=>{
@@ -1262,7 +1323,7 @@ $("form").addEventListener("change",actualizarForm);
 // ubicación del celular al guardar (opcional: si la niega o no hay señal, se guarda sin ella)
 const ubic=()=>new Promise(ok=>{if(!navigator.geolocation)return ok(null);
   navigator.geolocation.getCurrentPosition(p=>ok({lat:p.coords.latitude,lng:p.coords.longitude,acc:p.coords.accuracy}),()=>ok(null),{enableHighAccuracy:true,timeout:10000,maximumAge:0})});
-async function recargar(id){await cargar();render();if(id&&!$("ficha").hidden){const c=cli(id);if(c){$("fChip").innerHTML=chip(c.st);historial(id);cotBlock(id);regBlock(id)}}}
+async function recargar(id){await cargar();render();if(id&&!$("ficha").hidden){const c=cli(id);if(c){$("fChip").innerHTML=chip(c.st);resBlock(id);historial(id);cotBlock(id);regBlock(id)}}}
 const promMin=a=>{a=a.filter(x=>x.dur!=null);return a.length?Math.round(a.reduce((s,x)=>s+x.dur,0)/a.length):null};
 const hora=d=>new Date(d).toLocaleTimeString("es-MX",{hour:"numeric",minute:"2-digit"});
 const vtTxt=nv=>({en_sitio:` Verificada en sitio (a ${mts(nv&&nv.distancia_m)}).`,ubicacion_nueva:" Guardamos tu ubicación como la del cliente.",pin_reportado:" Quedó sin verificar y avisamos a tu regional para corregir la ubicación."}[nv&&nv.verificacion]||"");
