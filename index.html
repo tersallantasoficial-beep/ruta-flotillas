@@ -600,7 +600,7 @@ textarea{width:100%;font:inherit;padding:10px;border-radius:10px;border:1px soli
       <label for="lPass">Contraseña<input id="lPass" type="password" autocomplete="current-password" required></label>
       <button class="btn pri" type="submit" style="padding:12px">Entrar</button>
       <span class="toast" id="lErr" style="color:var(--st-esc)" hidden></span>
-      <span class="hint" style="font-size:11px">Versión 23 oct · check-out</span>
+      <span class="hint" style="font-size:11px">Versión 27 oct · ficha del cliente</span>
       <button type="button" class="btn" id="olvide" style="border:0;background:none;color:var(--muted);text-decoration:underline;padding:0;justify-self:start">Olvidé mi contraseña</button>
     </form>
     <form class="lg-card" id="passForm" hidden>
@@ -1040,7 +1040,7 @@ function resBlock(id){const borr=$("fObs")&&$("ficha").dataset.cli===id?$("fObs"
   const vs=VISITAS.filter(x=>x.cli===id).sort((a,b)=>b.fecha.localeCompare(a.fecha)),pm=promMin(vs),ult=gan.map(q=>q.cierre).sort().pop(),sum=a=>a.reduce((t,v)=>t+v,0);
   // año en curso contra el mismo periodo del año anterior (1 ene al día de hoy)
   const Y=+HOY.slice(0,4),md=HOY.slice(4),enA=(f,y)=>!!f&&f>=y+"-01-01"&&f<=y+md;
-  const vs2=(a,b)=>!b?(a?`sin registro en ${Y-1}`:`igual que ${Y-1}`):`<b style="color:var(${a>=b?"--st-vis":"--st-esc"});font-size:13px">${a>=b?"▲":"▼"} ${Math.abs(Math.round((a-b)/b*100))}%</b> vs mismo periodo ${Y-1}`;
+  const vs2=(a,b)=>!b?(a?`sin registro en ${Y-1}`:`sin registro en ${Y-1} ni ${Y}`):`<b style="color:var(${a>=b?"--st-vis":"--st-esc"});font-size:13px">${a>=b?"▲":"▼"} ${Math.abs(Math.round((a-b)/b*100))}%</b> vs mismo periodo ${Y-1}`;
   // todo sobre las cotizaciones hechas en el año: cotizadas = ganadas + perdidas + abiertas
   const qA=qs.filter(q=>enA(q.fecha,Y)),qB=qs.filter(q=>enA(q.fecha,Y-1)),gA=qA.filter(q=>q.estado==="ganada"),gB=qB.filter(q=>q.estado==="ganada"),pA=qA.filter(q=>q.estado==="perdida"),aA=qA.length-gA.length-pA.length;
   const cA=sum(qA.map(q=>q.monto)),cB=sum(qB.map(q=>q.monto)),vA=sum(gA.map(q=>q.ganado)),vB=sum(gB.map(q=>q.ganado)),n1=(n,s1,s2)=>n+" "+(n===1?s1:s2);
