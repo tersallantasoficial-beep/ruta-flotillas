@@ -16,7 +16,7 @@
   --bg:#eceff3; --panel:#ffffff; --soft:#f4f6f9; --soft2:#e4e8ee; --ink:#0f1b2d; --muted:#5a6578; --line:#dfe4ea;
   --rail:#0f1b2d; --rail-2:#17263d; --rail-fg:#e8edf4; --rail-mut:#8d9ab0;
   --accent:#f2b705; --accent-ink:#0f1b2d; --accent-soft:rgba(242,183,5,.16);
-  --st-disp:#8d97a8; --st-asig:#2d6fe0; --st-vis:#16a06a; --st-esc:#dc4646; --warn:#e08a0b; --st-seg:#7a4fe0;--st-act:#0b8a8a;
+  --on-vis:#fff; --st-disp:#5d6676; --st-asig:#1f57bd; --st-vis:#0a6b45; --st-esc:#b52e2e; --warn:#954e00; --st-seg:#7a4fe0;--st-act:#0a6e6e;
   --shadow:0 1px 2px rgba(15,27,45,.06),0 8px 24px -12px rgba(15,27,45,.18);
   --display:"Archivo","Arial Narrow",system-ui,sans-serif;
   --body:"Instrument Sans",system-ui,sans-serif;
@@ -25,12 +25,12 @@
 @media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
   --bg:#0a0f18; --panel:#111927; --soft:#162133; --soft2:#1f2c42; --ink:#e8edf4; --muted:#93a0b4; --line:#213049;
   --rail:#060a11; --rail-2:#0f1726; --accent-soft:rgba(242,183,5,.14);
-  --st-disp:#7c879a; --st-asig:#5b93f0; --st-vis:#34c28a; --st-esc:#f06a6a; --warn:#f0a43a; --st-seg:#a487f5;--st-act:#3cc4c4;
+  --on-vis:#0f1b2d; --st-disp:#7c879a; --st-asig:#5b93f0; --st-vis:#34c28a; --st-esc:#f06a6a; --warn:#f0a43a; --st-seg:#a487f5;--st-act:#3cc4c4;
   --shadow:0 1px 2px rgba(0,0,0,.4),0 10px 28px -14px rgba(0,0,0,.7); color-scheme:dark}}
 :root[data-theme="dark"]{
   --bg:#0a0f18; --panel:#111927; --soft:#162133; --soft2:#1f2c42; --ink:#e8edf4; --muted:#93a0b4; --line:#213049;
   --rail:#060a11; --rail-2:#0f1726; --accent-soft:rgba(242,183,5,.14);
-  --st-disp:#7c879a; --st-asig:#5b93f0; --st-vis:#34c28a; --st-esc:#f06a6a; --warn:#f0a43a; --st-seg:#a487f5;--st-act:#3cc4c4;
+  --on-vis:#0f1b2d; --st-disp:#7c879a; --st-asig:#5b93f0; --st-vis:#34c28a; --st-esc:#f06a6a; --warn:#f0a43a; --st-seg:#a487f5;--st-act:#3cc4c4;
   --shadow:0 1px 2px rgba(0,0,0,.4),0 10px 28px -14px rgba(0,0,0,.7); color-scheme:dark}
 *{box-sizing:border-box}
 html{-webkit-text-size-adjust:100%;text-size-adjust:100%}
@@ -125,7 +125,7 @@ h2{font-family:var(--display);font-variation-settings:"wdth" 110;font-weight:700
 .filters{display:flex;flex-wrap:wrap;gap:6px}
 .filters button{border:1px solid var(--line);background:var(--panel);border-radius:999px;padding:4px 10px 4px 8px;font-size:12px;cursor:pointer;display:inline-flex;gap:6px;align-items:center;color:var(--ink)}
 .filters button i{width:9px;height:9px;border-radius:50%;background:var(--c)}
-.filters button[aria-pressed="false"]{opacity:.45}
+.filters button[aria-pressed="false"]{background:var(--soft);color:var(--muted)}
 .filters button[aria-pressed="false"] i{background:transparent;box-shadow:inset 0 0 0 1.5px var(--c)}
 
 /* mapa */
@@ -179,6 +179,7 @@ h2{font-family:var(--display);font-variation-settings:"wdth" 110;font-weight:700
 .tbl{overflow-x:auto;margin:0 -18px;padding:0 18px}
 /* seguimiento de activos: en celular cada cliente es una tarjeta, sin deslizar de lado */
 @media (max-width:640px){.seg table{min-width:0}.seg thead{display:none}.seg tr{display:grid;grid-template-columns:1fr 1fr;gap:6px 12px;padding:12px 0;border-bottom:1px solid var(--line)}.seg td{border:0;padding:0}.seg td:first-child{grid-column:1/-1}.seg td[data-l]::before{content:attr(data-l);display:block;font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.06em}}
+@media (max-width:640px){.tarj table{min-width:0}.tarj thead{display:none}.tarj tr{display:grid;grid-template-columns:1fr 1fr;gap:6px 12px;padding:12px 0;border-bottom:1px solid var(--line)}.tarj td{border:0;padding:0}.tarj td:first-child{grid-column:1/-1}.tarj td[data-l]::before{content:attr(data-l);display:block;font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.06em}}
 table{width:100%;border-collapse:collapse;font-size:13px;min-width:720px}
 th{text-align:left;font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);font-weight:600;padding:10px 8px;border-bottom:1px solid var(--line)}
 td{padding:11px 8px;border-bottom:1px solid var(--line);vertical-align:middle}
@@ -221,13 +222,11 @@ a.btn{text-decoration:none;color:var(--ink);display:inline-flex;align-items:cent
 .fab{position:fixed;right:max(20px,env(safe-area-inset-right,0px));bottom:calc(20px + var(--barra,0px) + env(safe-area-inset-bottom,0px));width:60px;height:60px;border-radius:50%;border:0;background:var(--accent);color:#0f1b2d;box-shadow:0 10px 24px -8px rgba(0,0,0,.45);z-index:39;display:grid;place-items:center;cursor:pointer}
 .fab svg{width:28px;height:28px}
 .encurso{position:fixed;left:max(12px,env(safe-area-inset-left,0px));right:max(12px,env(safe-area-inset-right,0px));bottom:calc(12px + env(safe-area-inset-bottom,0px));z-index:39;display:grid;gap:8px;max-width:560px;margin:0 auto}
-.encurso button{display:flex;align-items:center;gap:12px;width:100%;padding:12px 14px;border:0;border-radius:14px;background:var(--st-vis);color:#0f1b2d;font:inherit;text-align:left;cursor:pointer;box-shadow:0 10px 24px -8px rgba(0,0,0,.5)}
+.encurso button{display:flex;align-items:center;gap:12px;width:100%;padding:12px 14px;border:0;border-radius:14px;background:var(--st-vis);color:var(--on-vis);font:inherit;text-align:left;cursor:pointer;box-shadow:0 10px 24px -8px rgba(0,0,0,.5)}
 .encurso button.tarde{background:#c62f2f;color:#fff}
-.encurso button.tarde .pt{background:#fff}
-.encurso button.tarde .go{background:rgba(255,255,255,.2)}
-.encurso .pt{flex:none;width:12px;height:12px;border-radius:50%;background:#0f1b2d;animation:latido 1.4s infinite}
+.encurso .pt{flex:none;width:12px;height:12px;border-radius:50%;background:currentColor;animation:latido 1.4s infinite}
 .encurso .sub{display:block;font-size:13px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.encurso .go{margin-left:auto;flex:none;font-weight:700;padding:8px 12px;border-radius:10px;background:rgba(15,27,45,.14)}
+.encurso .go{margin-left:auto;flex:none;font-weight:700;padding:8px 12px;border-radius:10px;background:color-mix(in srgb,currentColor 16%,transparent)}
 @keyframes latido{50%{opacity:.25}}
 @media (prefers-reduced-motion:reduce){.encurso .pt{animation:none}}
 .card.curso{border:2px solid var(--st-vis)}
@@ -355,7 +354,7 @@ textarea{width:100%;font:inherit;padding:10px;border-radius:10px;border:1px soli
 @media (prefers-reduced-motion:reduce){.live i{animation:none}}
 </style>
 
-<div class="app" id="app">
+<div class="app" id="app" inert>
   <aside class="rail">
     <div class="tread" aria-hidden="true"></div>
     <div class="logo"><div class="mark" aria-hidden="true"><i></i></div><div><b>Ruta Flotillas</b><small>Tersa Llantas</small></div></div>
@@ -451,9 +450,9 @@ textarea{width:100%;font:inherit;padding:10px;border-radius:10px;border:1px soli
       <section class="mod c12" id="clientes">
         <div class="tbl-tools">
           <h2 id="tituloLista">Clientes de la zona</h2>
-          <div class="ctrls"><div class="filters" id="filtrosTabla"></div><input class="search" id="busca" type="search" placeholder="Buscar empresa o giro"></div>
+          <div class="ctrls"><div class="filters" id="filtrosTabla"></div><input class="search" id="busca" type="search" placeholder="Buscar empresa o giro" aria-label="Buscar empresa o giro"></div>
         </div>
-        <div class="tbl"><table>
+        <div class="tbl tarj"><table>
           <thead><tr><th>Empresa</th><th>Giro</th><th>Flota</th><th>Sucursal</th><th>Km a sucursal</th><th>Estatus</th><th>Ubicación</th></tr></thead>
           <tbody id="lista"></tbody>
         </table></div>
@@ -524,7 +523,7 @@ textarea{width:100%;font:inherit;padding:10px;border-radius:10px;border:1px soli
         <label><input type="radio" name="aTipo" value="Cliente">Cliente de Tersa<br><small style="opacity:.75">Ya nos ha comprado</small></label></div></fieldset>
       <div class="alta-g">
         <label class="qlab full" for="aEmp">Nombre de la empresa *<input class="txt" id="aEmp" autocomplete="off" required></label>
-        <div class="aviso full" id="aDup" hidden></div>
+        <div class="aviso full" id="aDup" role="status" hidden></div>
         <label class="qlab" for="aSuc">Sucursal que lo atiende<select class="txt" id="aSuc"></select></label>
         <label class="qlab" for="aFlota">Unidades de su flota<input class="txt" id="aFlota" type="number" inputmode="numeric" min="1" placeholder="Ej. 25"></label>
       </div>
@@ -554,7 +553,7 @@ textarea{width:100%;font:inherit;padding:10px;border-radius:10px;border:1px soli
         <label class="qlab" for="aWeb">Sitio web<input class="txt" id="aWeb" inputmode="url" autocomplete="off"></label></div></fieldset>
       <label class="qlab" for="aNotas">Notas<textarea id="aNotas" placeholder="Cómo lo conociste, qué necesita, etc."></textarea></label>
       <label id="aListaL" style="display:flex;gap:8px;align-items:center;font-size:14px"><input type="checkbox" id="aLista"> Ponerlo en la lista de visitas de esta semana</label>
-      <div style="display:flex;gap:12px;align-items:center;flex-wrap:wrap"><button class="btn pri" type="submit">Guardar</button><span class="toast" id="aMsg" hidden></span></div>
+      <div style="display:flex;gap:12px;align-items:center;flex-wrap:wrap"><button class="btn pri" type="submit">Guardar</button><span class="toast" id="aMsg" role="status" hidden></span></div>
     </form>
   </div>
 </aside>
@@ -577,11 +576,11 @@ textarea{width:100%;font:inherit;padding:10px;border-radius:10px;border:1px soli
       <div id="fCk" style="display:grid;gap:8px"></div>
       <div id="fBody" style="display:grid;gap:12px">
       <div id="fQs" style="display:grid;gap:16px"></div>
-      <div class="aviso" id="fAviso" hidden></div>
-      <textarea id="fCom" placeholder="Comentario libre (opcional): algo que las opciones no cubran"></textarea>
+      <div class="aviso" id="fAviso" role="status" hidden></div>
+      <textarea id="fCom" aria-label="Comentario libre" placeholder="Comentario libre (opcional): algo que las opciones no cubran"></textarea>
       <div><button class="btn pri" type="submit">Terminar visita (check-out)</button></div>
       </div>
-      <span class="toast" id="toast" hidden></span>
+      <span class="toast" id="toast" role="status" hidden></span>
     </form>
     <div class="hist" id="fHist"></div>
   </div>
@@ -600,8 +599,8 @@ textarea{width:100%;font:inherit;padding:10px;border-radius:10px;border:1px soli
       <label for="lEmail">Correo<input id="lEmail" type="email" autocomplete="username" required></label>
       <label for="lPass">Contraseña<input id="lPass" type="password" autocomplete="current-password" required></label>
       <button class="btn pri" type="submit" style="padding:12px">Entrar</button>
-      <span class="toast" id="lErr" style="color:var(--st-esc)" hidden></span>
-      <span class="hint" style="font-size:11px">Versión 27 oct · crédito del cliente</span>
+      <span class="toast" id="lErr" role="alert" style="color:var(--st-esc)" hidden></span>
+      <span class="hint" style="font-size:11px">Versión 5 nov · accesibilidad</span>
       <button type="button" class="btn" id="olvide" style="border:0;background:none;color:var(--muted);text-decoration:underline;padding:0;justify-self:start">Olvidé mi contraseña</button>
     </form>
     <form class="lg-card" id="passForm" hidden>
@@ -609,7 +608,7 @@ textarea{width:100%;font:inherit;padding:10px;border-radius:10px;border:1px soli
       <label for="nPass">Contraseña nueva (mínimo 8 caracteres)<input id="nPass" type="password" autocomplete="new-password" minlength="8" required></label>
       <label for="nPass2">Repítela<input id="nPass2" type="password" autocomplete="new-password" minlength="8" required></label>
       <button class="btn pri" type="submit" style="padding:12px">Guardar y entrar</button>
-      <span class="toast" id="pErr" style="color:var(--st-esc)" hidden></span>
+      <span class="toast" id="pErr" role="alert" style="color:var(--st-esc)" hidden></span>
     </form>
   </div>
 </div>
@@ -903,7 +902,7 @@ function renderR(){
   const orden={esc:0,reint:1,asig:2,seg:3,vis:4,act:5,disp:6},q=busca.toLowerCase();
   const filas=list.filter(c=>(filtroT==="todos"||c.st===filtroT)&&(!q||c.nombre.toLowerCase().includes(q)||c.giro.toLowerCase().includes(q))).sort((a,b)=>orden[a.st]-orden[b.st]||ordKm(a,b));
   $("tituloLista").textContent=v==="all"?"Clientes de la zona":"Clientes de "+sucs[0].n;
-  $("lista").innerHTML=filas.slice(0,mostrar).map(c=>`<tr data-id="${c.id}"><td><b>${esc(c.nombre)}</b><span class="sub">${c.id}${c.arr?" · arrastrado":""}</span>${tipoTag(c)}</td><td>${c.giro}</td><td class="tn">${c.flota??"—"}</td><td>${c.suc.n}</td><td class="tn">${fk(c.km)}</td><td>${chip(c.st)}</td><td><a class="lnk" href="${maps(c)}" target="_blank" rel="noopener">Google Maps ↗</a></td></tr>`).join("")||'<tr><td colspan="7" class="empty">Sin resultados con ese filtro.</td></tr>';
+  $("lista").innerHTML=filas.slice(0,mostrar).map(c=>`<tr data-id="${c.id}"><td><b>${esc(c.nombre)}</b><span class="sub">${c.id}${c.arr?" · arrastrado":""}</span>${tipoTag(c)}</td><td data-l="Giro">${c.giro}</td><td class="tn" data-l="Flota">${c.flota??"—"}</td><td data-l="Sucursal">${c.suc.n}</td><td class="tn" data-l="Km a sucursal">${fk(c.km)}</td><td data-l="Estatus">${chip(c.st)}</td><td data-l="Ubicación"><a class="lnk" href="${maps(c)}" target="_blank" rel="noopener">Google Maps ↗</a></td></tr>`).join("")||'<tr><td colspan="7" class="empty">Sin resultados con ese filtro.</td></tr>';
   $("verMas").parentElement.hidden=filas.length<=10;
   $("verMas").textContent=mostrar<filas.length?`Ver las ${filas.length} empresas`:"Ver menos";
 }
@@ -1008,7 +1007,7 @@ function nav(){
 }
 function render(){
   const reg=rol==="reg";$("vReg").hidden=!reg;$("vGer").hidden=reg;$("vista").hidden=!reg;
-  reg?renderR():renderG(rol);barra();
+  reg?renderR():renderG(rol);barra();hacerEnfocables();
   const ids=new Set((reg?CL.filter(c=>SUC.some(x=>x.id===c.at)):CL.filter(c=>c.at===rol)).map(c=>c.id));
   $("zonaCard").innerHTML=`<small>${reg?"Mi zona":"Mi cartera"}</small><b class="num" style="font-size:22px">${ids.size}</b><span style="font-size:12px;color:var(--rail-mut)">empresas · ${[...ids].filter(i=>cli(i).st==="vis").length} visitadas</span>`;
 }
@@ -1066,7 +1065,7 @@ function resBlock(id){const borr=$("fObs")&&$("ficha").dataset.cli===id?$("fObs"
     <div class="chips">${c.cob.length?c.cob.map(e=>`<span class="chip" style="--c:var(--st-asig)">${esc(e)}</span>`).join(""):'<span class="hint">Estados de cobertura sin registrar.</span>'}</div>
     ${k?`<div class="hint">Es parte de la cuenta multisede <b>${esc(k.nombre)}</b>: abajo están sus sedes, en qué ciudad y quién atiende cada una.</div>`:""}
     <div class="lbl">Observaciones del cliente</div>
-    ${puedeAtender(c)?`<textarea id="fObs" maxlength="2000" rows="3" placeholder="Particularidades: horarios, cómo compra, con quién tratar, condiciones especiales…">${esc(c.obs)}</textarea>
+    ${puedeAtender(c)?`<textarea id="fObs" maxlength="2000" rows="3" aria-label="Observaciones del cliente" placeholder="Particularidades: horarios, cómo compra, con quién tratar, condiciones especiales…">${esc(c.obs)}</textarea>
     <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap"><button class="btn" type="button" id="fObsG">Guardar observaciones</button><span class="hint" id="fObsM">${obsTxt(c)}</span></div>`
     :`<div style="white-space:pre-wrap">${c.obs?esc(c.obs):'<span class="hint">Sin observaciones.</span>'}</div><span class="hint">${obsTxt(c)}</span>`}`;
   if(borr!=null&&$("fObs"))$("fObs").value=borr;  // no perder lo que estaba escribiendo si la ficha se refresca
@@ -1105,7 +1104,7 @@ function credBlock(id){
     if(k)h+=`<div class="hint">Su última solicitud no fue aprobada (${fecha(k.fin)}).</div>`;
     if(pidio)h+=`<div class="hint">En su visita del ${fecha(pidio.fecha)} dijo que pagaría a crédito.</div>`;
     h+=ok?`<div class="acts" style="margin:0"><button class="btn${pidio?" pri":""}" type="button" data-cred="nuevo">${k?"Volver a solicitar crédito":"¿Quiere crédito? Iniciar solicitud y pedir documentos"}</button></div>`:'<div class="hint">Sin línea de crédito.</div>'}
-  el.innerHTML=h+'<span class="toast" id="credMsg" hidden></span>';el.hidden=false}
+  el.innerHTML=h+'<span class="toast" id="credMsg" role="status" hidden></span>';el.hidden=false}
 async function credAccion(a){
   const id=$("ficha").dataset.cli,k=CRED[id],m=t=>{const x=$("credMsg");x.textContent=t;x.style.color="var(--st-esc)";x.hidden=false};
   let r;
@@ -1136,14 +1135,14 @@ async function ctaBlock(id){
     if(!puedeVincular){el.hidden=true;return}
     if(ctaModo==="vincular"){el.innerHTML=`<div class="lbl">Cuenta multisede</div>
       <div class="hint">¿Esta empresa tiene presencia en otras ciudades? Búscala para vincular esta sede, o crea la cuenta.</div>
-      <input class="txt" id="ctaQ" placeholder="Nombre de la empresa" value="${esc(c.nombre)}"><div id="ctaRes" style="display:grid;gap:6px"></div>
+      <input class="txt" id="ctaQ" aria-label="Nombre de la empresa" placeholder="Nombre de la empresa" value="${esc(c.nombre)}"><div id="ctaRes" style="display:grid;gap:6px"></div>
       <div class="lbl" style="margin-top:6px">O crear cuenta nueva</div>
       <label class="qlab" for="ctaNom">Nombre de la cuenta<input class="txt" id="ctaNom" value="${esc(c.nombre)}"></label>
       <div class="qlab">¿Cómo quiere el cliente que lo atiendan?</div>
       <div class="pills big"><label><input type="radio" name="ctaModo" value="centralizada">Un solo contacto<br><small style="opacity:.75">Centralizada: un gerente atiende todas sus sedes</small></label><label><input type="radio" name="ctaModo" value="por_zona" checked>Un vendedor por ciudad<br><small style="opacity:.75">Por zona: cada sede la atiende su sucursal</small></label></div>
       <label class="qlab" for="ctaResp" id="ctaRespL" hidden>Gerente responsable de toda la cuenta<select class="txt" id="ctaResp">${SUC.map(x=>`<option value="${x.id}"${x.id===c.suc.id?" selected":""}>${esc(x.n)} · ${esc(x.g)}</option>`).join("")}</select></label>
       <label class="qlab" for="ctaCon">Contacto principal de la cuenta (opcional)<input class="txt" id="ctaCon" placeholder="Nombre"></label>
-      <div class="acts"><button class="btn pri" type="button" data-cta="crear">Crear cuenta y vincular</button><button class="btn" type="button" data-cta="cancelar">Cancelar</button></div><span class="toast" id="ctaMsg" hidden></span>`;
+      <div class="acts"><button class="btn pri" type="button" data-cta="crear">Crear cuenta y vincular</button><button class="btn" type="button" data-cta="cancelar">Cancelar</button></div><span class="toast" id="ctaMsg" role="status" hidden></span>`;
       el.hidden=false;buscarCta();return}
     el.innerHTML=`<div class="acts" style="margin:0"><button class="btn" type="button" data-cta="abrir">¿Tiene sedes en otras ciudades? Vincular a cuenta multisede</button></div>`;el.hidden=false;return}
   el.innerHTML=`<div class="lbl">Cuenta multisede · ${esc(k.nombre)}</div>
@@ -1151,7 +1150,7 @@ async function ctaBlock(id){
     ${k.linea_autorizada?" Línea de crédito autorizada para toda la cuenta.":""}${k.contacto_nombre?` Contacto principal: ${esc(k.contacto_nombre)}.`:""}</div>
     ${ok?"":'<div class="hint">Esta sede es solo informativa para ti: las visitas y cotizaciones las registra quien atiende la cuenta.</div>'}
     <div id="ctaSedes" class="hint">Cargando sedes…</div>
-    ${puedeVincular&&(rol==="reg"||ok)?'<div class="acts"><button class="btn" type="button" data-cta="quitar">Quitar esta sede de la cuenta</button></div>':""}<span class="toast" id="ctaMsg" hidden></span>`;
+    ${puedeVincular&&(rol==="reg"||ok)?'<div class="acts"><button class="btn" type="button" data-cta="quitar">Quitar esta sede de la cuenta</button></div>':""}<span class="toast" id="ctaMsg" role="status" hidden></span>`;
   el.hidden=false;
   const{data}=await SB.rpc("sedes_cuenta",{cuenta:k.id});
   if($("ficha").dataset.cli!==id)return;
@@ -1197,7 +1196,7 @@ function cotBlock(id){
     <div class="hint" style="margin-top:6px">Si no tiene línea, la cotización se liga a la solicitud de crédito del cliente (o la inicia) y los documentos se marcan en la sección Crédito. La vigencia de ${VIG} días sigue corriendo mientras el cliente los junta; solo se pausa cuando están en Crédito y Cobranza.</div></div>
     <div class="acts"><button class="btn pri" type="button" data-cot="nueva">Registrar cotización</button></div>`}
   if(cer.length)h+=`<div class="lbl">Cotizaciones cerradas</div>`+cer.map(x=>`<div class="hi" style="--c:var(${x.estado==="ganada"?"--st-vis":"--st-esc"})"><div class="hi-h"><span>${x.id} · ${fecha(x.cierre)}</span><span>${x.estado==="ganada"?"Ganada":"Perdida"}</span></div><p>${x.estado==="ganada"?`Cotizado ${mxn(x.monto)} · cerrado ${mxn(x.ganado)}${x.factura?" · factura "+esc(x.factura):""}`:`${mxn(x.monto)} · ${x.motivo}`}</p></div>`).join("");
-  el.innerHTML=h+'<span class="toast" id="qMsg" hidden></span>';el.hidden=!h;
+  el.innerHTML=h+'<span class="toast" id="qMsg" role="status" hidden></span>';el.hidden=!h;
 }
 /* ---------- acciones de regional sobre clientes escalados ---------- */
 const esRegional=()=>YO&&["regional","admin","telemarketing"].includes(YO.rol);
@@ -1211,7 +1210,7 @@ function regBlock(id){
     ${c.tipo===ACT?"":`<div class="acts"><button class="btn pri" type="button" data-reg="lista">${c.st==="asig"||c.st==="reint"?"Reiniciar intentos y dejar en la lista":"Poner en la lista de esta semana"}</button><button class="btn" type="button" data-reg="cartera">Devolver a la cartera</button></div>`}
     <label class="qlab" for="rSuc">Reasignar a otra sucursal<select class="txt" id="rSuc">${otras.map(x=>`<option value="${x.id}">${esc(x.n)} · ${esc(x.g)}${c.lat!=null&&x.lat!=null?" · "+fk(dist(c,x))+" km":""}</option>`).join("")}</select></label>
     <div class="acts"><button class="btn" type="button" data-reg="mover">${c.tipo===ACT?"Reasignar a esa sucursal":"Reasignar y poner en su lista de esta semana"}</button></div>
-    <span class="toast" id="rMsg" hidden></span>`;
+    <span class="toast" id="rMsg" role="status" hidden></span>`;
   el.hidden=false;
 }
 async function regAccion(a){
@@ -1267,6 +1266,9 @@ document.addEventListener("click",e=>{
   const t=e.target.closest("[data-id]");if(t)abrir(t.dataset.id)});
 $("cerrar").onclick=cerrar;$("scrim").onclick=()=>{cerrar();cerrarAlta()};
 $("fCot").addEventListener("change",e=>{if(e.target.name==="qPago")$("qLinea").hidden=e.target.value!=="Crédito"});
+/* teclado: filas, tarjetas de actividad, cotizaciones y puntos del mapa se abren con Enter o Espacio */
+document.addEventListener("keydown",e=>{if((e.key==="Enter"||e.key===" ")&&e.target.matches("[data-id]:not(button):not(a):not(input)")){e.preventDefault();abrir(e.target.dataset.id)}});
+const hacerEnfocables=()=>document.querySelectorAll("tr[data-id],.ev[data-id],.qrow[data-id],circle[data-id]").forEach(e=>{e.tabIndex=0;if(e.tagName==="DIV")e.setAttribute("role","button")});
 /* ---------- buscador global ---------- */
 function buscar(){
   const raw=$("gq").value.trim(),t=sinAcento(raw).split(/\s+/).filter(Boolean),box=$("gres");
@@ -1336,7 +1338,7 @@ $("altaForm").addEventListener("submit",async e=>{e.preventDefault();const m=$("
   if(error)return err("No se guardó: "+(error.message.includes("row-level")?"no tienes permiso en esa sucursal.":error.message));
   cerrarAlta();await recargar();abrir(data.id);const t=$("toast");t.textContent=`Se agregó como ${data.tipo.toLowerCase()} (${data.id}). Ya puedes registrar su visita.`;t.style.color="var(--st-vis)";t.hidden=false});
 document.addEventListener("keydown",e=>{if(e.key!=="Escape")return;if(!$("alta").hidden)cerrarAlta();else if(!$("ficha").hidden)cerrar()});
-$("fQs").innerHTML=Q.map(q=>`<fieldset class="q" data-q="${q.k}"${q.si?` data-si="${q.si}"`:""}><legend>${q.t}${q.multi?" <span>· puedes elegir varias</span>":""}</legend><div class="pills${q.big?" big":""}">${q.ops.map((o,i)=>`<label><input type="${q.multi?"checkbox":"radio"}" name="${q.k}" value="${o}" id="${q.k}${i}">${o}</label>`).join("")}</div>${q.k==="horario"?'<input class="txt" id="fTel" placeholder="Nombre o teléfono del encargado, si lo conseguiste">':""}</fieldset>`).join("")+`<fieldset class="q" data-si="ef"><legend>¿Con quién hablaste? <span>· opcional</span></legend><input class="txt" id="fCNom" autocomplete="off" placeholder="Nombre"><div class="pills">${["Jefe de compras","Jefe de mantenimiento","Dueño","Otro"].map((o,i)=>`<label><input type="radio" name="puesto" value="${o}" id="puesto${i}">${o}</label>`).join("")}</div><input class="txt" id="fCCel" inputmode="tel" autocomplete="off" placeholder="Celular a 10 dígitos"></fieldset>`;
+$("fQs").innerHTML=Q.map(q=>`<fieldset class="q" data-q="${q.k}"${q.si?` data-si="${q.si}"`:""}><legend>${q.t}${q.multi?" <span>· puedes elegir varias</span>":""}</legend><div class="pills${q.big?" big":""}">${q.ops.map((o,i)=>`<label><input type="${q.multi?"checkbox":"radio"}" name="${q.k}" value="${o}" id="${q.k}${i}">${o}</label>`).join("")}</div>${q.k==="horario"?'<input class="txt" id="fTel" placeholder="Nombre o teléfono del encargado, si lo conseguiste" aria-label="Nombre o teléfono del encargado">':""}</fieldset>`).join("")+`<fieldset class="q" data-si="ef"><legend>¿Con quién hablaste? <span>· opcional</span></legend><input class="txt" id="fCNom" autocomplete="off" placeholder="Nombre" aria-label="Nombre de quien atendió"><div class="pills">${["Jefe de compras","Jefe de mantenimiento","Dueño","Otro"].map((o,i)=>`<label><input type="radio" name="puesto" value="${o}" id="puesto${i}">${o}</label>`).join("")}</div><input class="txt" id="fCCel" inputmode="tel" autocomplete="off" placeholder="Celular a 10 dígitos" aria-label="Celular de quien atendió"></fieldset>`;
 const val=k=>($("form").querySelector(`input[name="${k}"]:checked`)||{}).value;
 const vals=k=>[...$("form").querySelectorAll(`input[name="${k}"]:checked`)].map(x=>x.value);
 function actualizarForm(){
@@ -1438,7 +1440,7 @@ async function entrar(){
   const nm=p.nombre||nombreDe(p.correo);
   $("quien").textContent=nm;$("rolTxt").textContent={gerente:"Gerente de sucursal",regional:"Regional",admin:"Administrador",telemarketing:"Telemarketing"}[p.rol];$("avatar").textContent=iniciales(nm);
   $("vista").innerHTML='<option value="all">Todas las sucursales</option>'+SUC.map(x=>`<option value="${x.id}">${esc(x.n)} · ${esc(x.g)}</option>`).join("");
-  $("vista").value="all";mostrar=10;msgLogin("");nav();render();$("login").hidden=true;$("fab").hidden=false;window.scrollTo(0,0);
+  $("vista").value="all";mostrar=10;msgLogin("");nav();render();$("login").hidden=true;$("app").inert=false;$("fab").hidden=false;window.scrollTo(0,0);
 }
 $("loginForm").addEventListener("submit",async e=>{e.preventDefault();
   msgLogin("Entrando…",true);
@@ -1454,7 +1456,7 @@ $("passForm").addEventListener("submit",async e=>{e.preventDefault();const a=$("
   const{error}=await SB.auth.updateUser({password:a});
   if(error){m.textContent="No se guardó: "+error.message;m.hidden=false;return}
   $("passForm").hidden=true;$("loginForm").hidden=false;history.replaceState(null,"",location.pathname);entrar()});
-$("salir").onclick=async()=>{cerrar();cerrarAlta();$("fab").hidden=true;CHK={};$("enCurso").hidden=true;document.body.style.paddingBottom="";document.body.style.setProperty("--barra","0px");await SB.auth.signOut();YO=null;$("login").hidden=false};
+$("salir").onclick=async()=>{cerrar();cerrarAlta();$("fab").hidden=true;CHK={};$("enCurso").hidden=true;document.body.style.paddingBottom="";document.body.style.setProperty("--barra","0px");await SB.auth.signOut();YO=null;$("login").hidden=false;$("app").inert=true};
 // al volver a la pestaña se actualiza lo que otros registraron
 document.addEventListener("visibilitychange",()=>{if(!document.hidden&&YO)recargar($("ficha").hidden?null:$("ficha").dataset.cli)});
 (async()=>{const{data:{session}}=await SB.auth.getSession();
