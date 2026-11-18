@@ -291,7 +291,7 @@ textarea{width:100%;font:inherit;padding:10px;border-radius:10px;border:1px soli
 .hi p{margin:2px 0 0;font-size:13px}
 
 /* acceso */
-.login{position:fixed;inset:0;z-index:60;display:grid;grid-template-columns:1.1fr 1fr;background:var(--panel);overflow-y:auto}
+.login{position:fixed;inset:0;min-height:100dvh;z-index:60;display:grid;grid-template-columns:1.1fr 1fr;background:var(--panel);overflow-y:auto}
 .lg-art{background:var(--rail);color:var(--rail-fg);position:relative;overflow:hidden;padding:48px;display:flex;flex-direction:column;justify-content:space-between;gap:32px}
 .lg-art .tread{height:100%;opacity:.55;-webkit-mask:radial-gradient(circle at 80% 30%,#000,transparent 70%);mask:radial-gradient(circle at 80% 30%,#000,transparent 70%)}
 .lg-art > :not(.tread){position:relative}
@@ -393,7 +393,7 @@ textarea{width:100%;font:inherit;padding:10px;border-radius:10px;border:1px soli
 @media (prefers-reduced-motion:reduce){.live i{animation:none}}
 </style>
 
-<div class="app" id="app" inert>
+<div class="app" id="app" inert hidden>
   <aside class="rail">
     <div class="tread" aria-hidden="true"></div>
     <div class="logo"><div class="mark" aria-hidden="true"><i></i></div><div><b>Ruta Flotillas</b><small>Tersa Llantas</small></div></div>
@@ -1498,7 +1498,7 @@ async function entrar(){
   const nm=p.nombre||nombreDe(p.correo);
   $("quien").textContent=nm;$("rolTxt").textContent={gerente:"Gerente de sucursal",regional:"Regional",admin:"Administrador",telemarketing:"Telemarketing"}[p.rol];$("avatar").textContent=iniciales(nm);
   $("vista").innerHTML='<option value="all">Todas las sucursales</option>'+SUC.map(x=>`<option value="${x.id}">${esc(x.n)} · ${esc(x.g)}</option>`).join("");
-  $("vista").value="all";mostrar=10;msgLogin("");nav();render();$("login").hidden=true;$("app").inert=false;$("fab").hidden=false;window.scrollTo(0,0);
+  $("vista").value="all";mostrar=10;msgLogin("");nav();render();$("login").hidden=true;$("app").hidden=false;$("app").inert=false;$("fab").hidden=false;window.scrollTo(0,0);
 }
 $("loginForm").addEventListener("submit",async e=>{e.preventDefault();
   msgLogin("Entrando…",true);
@@ -1516,7 +1516,7 @@ $("passForm").addEventListener("submit",async e=>{e.preventDefault();const a=$("
   const{error}=await SB.auth.updateUser({password:a});
   if(error){m.textContent="No se guardó: "+error.message;m.hidden=false;return}
   $("passForm").hidden=true;$("loginForm").hidden=false;history.replaceState(null,"",location.pathname);entrar()});
-$("salir").onclick=async()=>{cerrar();cerrarAlta();$("fab").hidden=true;CHK={};$("enCurso").hidden=true;document.body.style.paddingBottom="";document.body.style.setProperty("--barra","0px");await SB.auth.signOut();YO=null;$("login").hidden=false;$("app").inert=true};
+$("salir").onclick=async()=>{cerrar();cerrarAlta();$("fab").hidden=true;CHK={};$("enCurso").hidden=true;document.body.style.paddingBottom="";document.body.style.setProperty("--barra","0px");await SB.auth.signOut();YO=null;$("login").hidden=false;$("app").hidden=true;$("app").inert=true};
 // al volver a la pestaña se actualiza lo que otros registraron
 document.addEventListener("visibilitychange",()=>{if(!document.hidden&&YO)recargar($("ficha").hidden?null:$("ficha").dataset.cli)});
 (async()=>{const{data:{session}}=await SB.auth.getSession();
