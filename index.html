@@ -59,6 +59,62 @@ button,input,select{font:inherit;color:inherit}
 .nav a:hover{background:var(--rail-2);color:var(--rail-fg)}
 .nav a.on{background:var(--rail-2);color:var(--rail-fg);box-shadow:inset 3px 0 0 var(--accent)}
 .nav svg{width:18px;height:18px;flex:none}
+.nav button{display:flex;align-items:center;gap:10px;padding:9px 10px;border-radius:8px;color:var(--rail-mut);background:none;border:0;font:inherit;font-weight:500;text-align:left;cursor:pointer;width:100%}
+.nav button:hover{background:var(--rail-2);color:var(--rail-fg)}
+.nav button.on{background:var(--rail-2);color:var(--rail-fg);box-shadow:inset 3px 0 0 var(--accent)}
+.fuera{display:none!important}
+.ana-cols{display:grid;grid-template-columns:minmax(0,1.7fr) minmax(0,1fr);gap:14px;margin-top:14px}
+.ana-box{background:var(--soft);border-radius:14px;padding:14px 16px;min-width:0}
+.ana-cmp table{min-width:860px}.ana-cmp td{vertical-align:top}.ana-cmp .acc{display:grid;gap:4px;min-width:220px}
+.ana-cmp .acc span{font-size:12px;line-height:1.35;padding:4px 8px;border-radius:8px;background:color-mix(in srgb,var(--c) 12%,transparent);border-left:3px solid var(--c)}
+.ana-cmp button.lnk{background:none;border:0;padding:6px 0;font:inherit;color:var(--ink);cursor:pointer;text-align:left;white-space:normal;min-height:44px}
+.ana-cmp .pos{font-weight:800;color:var(--muted);margin-right:6px}
+@media (max-width:640px){.ana-cmp td.cmp-acc,.ana-cmp td.cmp-q{grid-column:1/-1}.ana-cmp .acc{min-width:0}}
+.ana-cols3{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px;margin-top:14px}
+@media (max-width:900px){.ana-cols3{grid-template-columns:1fr}}
+.mstat .spark{display:block;width:100%;height:28px;margin-top:6px}
+.stack{display:flex;height:22px;border-radius:8px;overflow:hidden;background:var(--soft2);margin:12px 0 10px}
+.stack i{display:block;height:100%;background:var(--c)}
+.leyl{list-style:none;margin:0;padding:0;display:grid;gap:6px;font-size:13px}
+.leyl li{display:grid;grid-template-columns:10px minmax(0,1fr) auto 64px;gap:8px;align-items:center}.leyl li i{width:10px;height:10px;border-radius:3px;background:var(--c)}.leyl .hint{text-align:right}
+.cols{display:grid;grid-template-columns:repeat(7,1fr);gap:6px;align-items:end;height:160px;margin-top:10px}
+.col{display:flex;flex-direction:column;align-items:center;justify-content:flex-end;height:100%;gap:4px;min-width:0}
+.col i{display:block;width:70%;max-width:34px;border-radius:6px 6px 2px 2px;background:var(--st-asig)}.col .cv{font-size:12px;font-weight:700}
+.pf-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(270px,1fr));gap:14px}
+.pf{background:var(--soft);border-radius:16px;padding:16px;display:flex;flex-direction:column;gap:12px;border-top:4px solid var(--c);min-width:0}
+.pf-h{display:grid;grid-template-columns:64px minmax(0,1fr) auto;gap:12px;align-items:center}
+.pf-av{position:relative;width:64px;height:64px;color:var(--c)}.pf-av.vacia{color:var(--muted)}
+.pf-av .pf-ring{position:absolute;inset:0;width:100%;height:100%}.pf-av>svg:last-child{position:absolute;inset:16px;width:32px;height:32px}
+.pf-n{min-width:0}.pf-n b{display:block;font-size:15px;line-height:1.25;overflow-wrap:anywhere}.pf-n span{font-size:12px;color:var(--muted)}
+.pf-sc{text-align:right}.pf-sc b{display:block;font-size:20px;color:var(--c)}.pf-sc span{font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.06em}
+.pf-ck{list-style:none;margin:0;padding:0;display:grid;gap:7px}
+.pf-ck li{display:grid;grid-template-columns:22px minmax(0,1fr) auto;gap:8px;align-items:center;font-size:13px;line-height:1.3}
+.pf-ck li b{font-size:12px;white-space:nowrap}
+.pf-ic{width:22px;height:22px;border-radius:50%;display:grid;place-items:center;font-size:12px;font-weight:800}
+.pf-ck .si .pf-ic{background:var(--st-vis);color:#fff}.pf-ck .no .pf-ic{background:var(--st-esc);color:#fff}.pf-ck .na .pf-ic{background:var(--soft2);color:var(--muted)}.pf-ck .na{color:var(--muted)}
+.pf-b{margin-top:auto;min-height:44px}
+/* movimiento al crear las gráficas: solo cuando se abre una sección o cambia el periodo/la vista (clase .anim por 1.8 s) */
+@keyframes rf-crece{from{transform:scaleX(0)}}@keyframes rf-sube{from{transform:scaleY(0)}}
+@keyframes rf-revela{from{clip-path:inset(0 100% 0 0)}to{clip-path:inset(0 0 0 0)}}
+@keyframes rf-entra{from{opacity:0;transform:translateY(10px)}}
+@keyframes rf-dona{from{stroke-dasharray:0 400}}@keyframes rf-gauge{from{stroke-dasharray:0 100}}@keyframes rf-anillo{from{stroke-dasharray:0 var(--C)}}
+.anim .br-track i,.anim .meter i,.anim .stack i{transform-origin:left;animation:rf-crece .9s cubic-bezier(.2,.8,.2,1) var(--d,0ms) both}
+.anim .col i{transform-origin:bottom;animation:rf-sube .8s cubic-bezier(.2,.8,.2,1) var(--d,0ms) both}
+.anim .revela{animation:rf-revela 1.2s cubic-bezier(.4,0,.2,1) both}
+.anim .dseg{animation:rf-dona .9s ease-out var(--d,0ms) both}.anim .garc{animation:rf-gauge 1.2s cubic-bezier(.2,.8,.2,1) both}
+.anim .pf-arc{animation:rf-anillo 1.1s cubic-bezier(.2,.8,.2,1) calc(var(--i,0)*70ms + 150ms) both}
+.anim .pf,.anim .mstat,.anim .ana-box{animation:rf-entra .5s ease-out calc(var(--i,0)*60ms) both}
+@media (prefers-reduced-motion:reduce){.anim *{animation:none!important}}
+.ana-seg button{padding:5px 10px;font-size:12px}
+.delta{display:inline-flex;gap:3px;align-items:center;font-size:12px;font-weight:700;padding:2px 7px;border-radius:999px;background:color-mix(in srgb,var(--c) 14%,transparent);color:var(--c);width:max-content}
+.dona{display:grid;grid-template-columns:150px minmax(0,1fr);gap:14px;align-items:center;margin-top:8px}
+.dona ul{list-style:none;margin:0;padding:0;display:grid;gap:6px;font-size:13px}
+.dona li{display:grid;grid-template-columns:10px minmax(0,1fr) auto;gap:8px;align-items:center}
+.dona li i{width:10px;height:10px;border-radius:3px;background:var(--c)}
+@media (max-width:900px){.ana-cols{grid-template-columns:1fr}}
+@media (max-width:640px){.eb-sep{display:none}#busca{min-height:44px}td .lnk{display:inline-block;padding:12px 0}}
+@media (max-width:420px){.dona{grid-template-columns:1fr;justify-items:center}.dona ul{width:100%}}
+.us-ed{display:grid;gap:8px;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));align-items:end;margin-top:8px}
 .zona{margin-top:auto;display:grid;gap:10px;position:relative}
 .zona-card{background:var(--rail-2);border-radius:10px;padding:12px;display:grid;gap:6px}
 .zona-card small{color:var(--rail-mut);font-size:11px;letter-spacing:.06em;text-transform:uppercase}
@@ -219,9 +275,9 @@ a.btn{text-decoration:none;color:var(--ink);display:inline-flex;align-items:cent
 .acts{display:flex;gap:8px;flex-wrap:wrap}
 
 /* ficha */
-.fab{position:fixed;right:max(20px,env(safe-area-inset-right,0px));bottom:calc(20px + var(--barra,0px) + env(safe-area-inset-bottom,0px));width:60px;height:60px;border-radius:50%;border:0;background:var(--accent);color:#0f1b2d;box-shadow:0 10px 24px -8px rgba(0,0,0,.45);z-index:39;display:grid;place-items:center;cursor:pointer}
+.fab{position:fixed;right:max(20px,env(safe-area-inset-right,0px));bottom:calc(20px + var(--barra,0px) + var(--tabs,0px) + env(safe-area-inset-bottom,0px));width:60px;height:60px;border-radius:50%;border:0;background:var(--accent);color:#0f1b2d;box-shadow:0 10px 24px -8px rgba(0,0,0,.45);z-index:39;display:grid;place-items:center;cursor:pointer}
 .fab svg{width:28px;height:28px}
-.encurso{position:fixed;left:max(12px,env(safe-area-inset-left,0px));right:max(12px,env(safe-area-inset-right,0px));bottom:calc(12px + env(safe-area-inset-bottom,0px));z-index:39;display:grid;gap:8px;max-width:560px;margin:0 auto}
+.encurso{position:fixed;left:max(12px,env(safe-area-inset-left,0px));right:max(12px,env(safe-area-inset-right,0px));bottom:calc(12px + var(--tabs,0px) + env(safe-area-inset-bottom,0px));z-index:39;display:grid;gap:8px;max-width:560px;margin:0 auto}
 .encurso button{display:flex;align-items:center;gap:12px;width:100%;padding:12px 14px;border:0;border-radius:14px;background:var(--st-vis);color:var(--on-vis);font:inherit;text-align:left;cursor:pointer;box-shadow:0 10px 24px -8px rgba(0,0,0,.5)}
 .encurso button.tarde{background:#c62f2f;color:#fff}
 .encurso .pt{flex:none;width:12px;height:12px;border-radius:50%;background:currentColor;animation:latido 1.4s infinite}
@@ -350,9 +406,14 @@ textarea{width:100%;font:inherit;padding:10px;border-radius:10px;border:1px soli
   .rail{position:sticky;top:0;height:auto;flex-direction:row;align-items:center;gap:12px;padding:10px max(16px,env(safe-area-inset-right,0px)) 10px max(16px,env(safe-area-inset-left,0px));z-index:30;top:env(safe-area-inset-top,0px)}
   body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);z-index:31;background:var(--rail)}
   .tread{display:none}.logo small{display:none}
-  .nav{display:flex;overflow-x:auto;flex:1;gap:2px;scrollbar-width:none}
-  .nav a{padding:7px 9px;white-space:nowrap;font-size:13px}.nav a.on{box-shadow:inset 0 -2px 0 var(--accent)}
-  .nav svg{display:none}
+  /* en celular las secciones van en una barra fija abajo, como app */
+  .nav{position:fixed;left:0;right:0;bottom:0;z-index:38;display:grid;grid-auto-flow:column;grid-auto-columns:1fr;gap:0;background:var(--rail);
+    border-top:1px solid rgba(255,255,255,.08);padding:4px max(4px,env(safe-area-inset-right,0px)) calc(4px + env(safe-area-inset-bottom,0px)) max(4px,env(safe-area-inset-left,0px))}
+  .nav button{flex-direction:column;gap:3px;padding:7px 2px;font-size:10.5px;justify-content:center;text-align:center;min-height:52px;border-radius:10px;white-space:nowrap}
+  .nav button.on{box-shadow:none;color:var(--accent);background:var(--rail-2)}
+  .nav svg{display:block;width:21px;height:21px}
+  body{--tabs:calc(62px + env(safe-area-inset-bottom,0px))}
+  .main{padding-bottom:calc(24px + var(--tabs))}
   .zona{margin:0}.zona-card{display:none}.me div{display:none}
   .main{padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));gap:14px}
   .login{grid-template-columns:1fr}.lg-art{padding:32px 20px;min-height:auto}
@@ -382,7 +443,6 @@ textarea{width:100%;font:inherit;padding:10px;border-radius:10px;border:1px soli
   .dr-b{padding:16px max(16px,env(safe-area-inset-left,0px)) calc(24px + env(safe-area-inset-bottom,0px)) max(16px,env(safe-area-inset-right,0px))}
 }
 @media (max-width:640px){
-  .nav{display:none} /* en celular la página se recorre hacia abajo; el menú sobra */
   .ghero{grid-template-columns:auto minmax(0,1fr);gap:14px 16px;padding:16px}
   #gRing svg{width:92px;height:92px}
   .ghero h2{font-size:20px}
@@ -391,6 +451,32 @@ textarea{width:100%;font:inherit;padding:10px;border-radius:10px;border:1px soli
   h1{font-size:26px}
 }
 @media (prefers-reduced-motion:reduce){.live i{animation:none}}
+
+/* ---- profundidad: superficies con luz arriba, sombras en capas y fondo con brillo suave (no cambia el layout) ---- */
+:root{--hi:rgba(255,255,255,.75);--edge:rgba(15,27,45,.07);--lift:0 1px 1px rgba(15,27,45,.04),0 2px 6px -2px rgba(15,27,45,.08),0 18px 36px -22px rgba(15,27,45,.28);
+  --glow1:rgba(31,87,189,.10);--glow2:rgba(242,183,5,.10)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--hi:rgba(255,255,255,.05);--edge:rgba(255,255,255,.06);--lift:0 1px 1px rgba(0,0,0,.4),0 18px 40px -20px rgba(0,0,0,.85);--glow1:rgba(91,147,240,.10);--glow2:rgba(242,183,5,.06)}}
+:root[data-theme="dark"]{--hi:rgba(255,255,255,.05);--edge:rgba(255,255,255,.06);--lift:0 1px 1px rgba(0,0,0,.4),0 18px 40px -20px rgba(0,0,0,.85);--glow1:rgba(91,147,240,.10);--glow2:rgba(242,183,5,.06)}
+body{background:radial-gradient(1100px 600px at 85% -10%,var(--glow1),transparent 60%),radial-gradient(900px 520px at 10% 110%,var(--glow2),transparent 60%),var(--bg);background-attachment:fixed}
+.mod:not(.ghero){background:linear-gradient(180deg,var(--panel),color-mix(in srgb,var(--panel) 92%,var(--soft)))}
+.mod{border-color:var(--edge);border-radius:18px;box-shadow:inset 0 1px 0 var(--hi),var(--lift)}
+.mstat,.ana-box,.pf{background:linear-gradient(160deg,color-mix(in srgb,var(--panel) 55%,var(--soft)),var(--soft));border:1px solid var(--edge);box-shadow:inset 0 1px 0 var(--hi),0 1px 2px rgba(15,27,45,.05)}
+.mstat{border-radius:14px}.ana-box{border-radius:16px}
+.mstat .num,.pf-sc b{letter-spacing:-.02em}
+.seg,.sel,.search,.fechas input{background:color-mix(in srgb,var(--panel) 82%,transparent);-webkit-backdrop-filter:blur(10px) saturate(1.4);backdrop-filter:blur(10px) saturate(1.4);border-color:var(--edge);box-shadow:inset 0 1px 0 var(--hi),var(--shadow)}
+.ghero{background:radial-gradient(520px 260px at 92% 0%,rgba(242,183,5,.22),transparent 60%),radial-gradient(600px 300px at 0% 100%,rgba(91,147,240,.26),transparent 65%),linear-gradient(150deg,#1a3157,#0f1b2d);color:#fff;--panel:#fff;--ink:#0f1b2d;border:1px solid rgba(255,255,255,.08)}
+.ghero,.mod.hero{--st-vis:#34c28a;--st-esc:#f06a6a;--warn:#f0a43a;--st-asig:#7fb0ff;--on-vis:#0f1b2d}
+/* tarjeta principal del regional: misma atmósfera que el login (oscura con brillo), en claro y oscuro */
+.mod.hero{background:radial-gradient(520px 260px at 95% 0%,rgba(242,183,5,.20),transparent 60%),radial-gradient(600px 320px at 0% 110%,rgba(91,147,240,.28),transparent 65%),linear-gradient(150deg,#1a3157,#0f1b2d);
+  border-color:rgba(255,255,255,.08);color:#fff;--ink:#fff;--muted:rgba(255,255,255,.68);--soft2:rgba(255,255,255,.14);--line:rgba(255,255,255,.14);--panel:#0f1b2d}
+.seg button[aria-pressed="true"]{box-shadow:0 4px 12px -4px rgba(15,27,45,.45)}
+.br-track i,.meter i,.stack i,.col i{background-image:linear-gradient(180deg,rgba(255,255,255,.18),rgba(255,255,255,0))}
+.pf-av::before{content:"";position:absolute;inset:6px;border-radius:50%;background:radial-gradient(circle,color-mix(in srgb,var(--c) 22%,transparent),transparent 70%)}
+.pf-ic{box-shadow:0 2px 6px -2px color-mix(in srgb,currentColor 0%,rgba(15,27,45,.35))}
+@media (hover:hover) and (min-width:900px){
+  .mstat,.ana-box,.pf,.rk{transition:transform .25s cubic-bezier(.2,.8,.2,1),box-shadow .25s}
+  .mstat:hover,.ana-box:hover,.pf:hover{transform:translateY(-2px);box-shadow:inset 0 1px 0 var(--hi),var(--lift)}}
+@media (prefers-reduced-motion:reduce){.mstat,.ana-box,.pf,.rk{transition:none}.mstat:hover,.ana-box:hover,.pf:hover{transform:none}}
 </style>
 
 <div class="app" id="app" inert hidden>
@@ -407,7 +493,7 @@ textarea{width:100%;font:inherit;padding:10px;border-radius:10px;border:1px soli
   <main class="main">
     <div class="top" id="resumen">
       <div>
-        <div class="eyebrow"><span class="live"><i></i>En vivo</span><span>·</span><span id="subTop">Tijuana · 5 sucursales</span></div>
+        <div class="eyebrow"><span class="live"><i></i>En vivo</span><span class="eb-sep">·</span><span id="subTop">Tijuana · 5 sucursales</span></div>
         <h1 id="titulo">Resumen de zona</h1>
       </div>
       <div class="ctrls">
@@ -428,12 +514,12 @@ textarea{width:100%;font:inherit;padding:10px;border-radius:10px;border:1px soli
 
     <!-- REGIONAL -->
     <div class="grid" id="vReg">
-      <section class="mod hero" id="heroR"></section>
-      <section class="mod tile" id="t1"></section>
-      <section class="mod tile" id="t2"></section>
-      <section class="mod tile" id="t3"></section>
+      <section data-sec="resumen" class="mod hero" id="heroR"></section>
+      <section data-sec="resumen" class="mod tile" id="t1"></section>
+      <section data-sec="resumen" class="mod tile" id="t2"></section>
+      <section data-sec="resumen" class="mod tile" id="t3"></section>
 
-      <section class="mod c12" id="cotSec">
+      <section data-sec="ventas" class="mod c12" id="cotSec">
         <div class="mod-h"><h2>Cotizaciones</h2><span class="hint" id="cotHint"></span><button class="btn" type="button" id="csvVentas">Descargar ventas (CSV)</button></div>
         <div class="money" id="cotStats"></div>
         <div class="cot-cols">
@@ -443,50 +529,75 @@ textarea{width:100%;font:inherit;padding:10px;border-radius:10px;border:1px soli
         <div id="cotTram"></div>
       </section>
 
-      <section class="mod c8" id="mapaSec">
+      <section data-sec="analitica" class="mod c12" id="anaSec">
+        <div class="mod-h"><h2>Cómo va la zona</h2><span class="hint" id="anaHint"></span></div>
+        <div class="money" id="anaKpi"></div>
+        <div class="ana-cols">
+          <div class="ana-box"><div class="mod-h" style="margin:0 0 6px"><b id="anaLtit">Tendencia</b><div class="seg ana-seg" role="group" aria-label="Qué graficar" id="anaMet">
+            <button type="button" data-ana="vis" aria-pressed="true">Visitas</button><button type="button" data-ana="cot" aria-pressed="false">Cotizado</button><button type="button" data-ana="gan" aria-pressed="false">Vendido</button></div></div>
+            <div id="anaLinea"></div></div>
+          <div class="ana-box"><b>¿Cómo terminaron las visitas?</b><div id="anaDona"></div></div>
+        </div>
+        <div class="ana-cols3">
+          <div class="ana-box"><b>Meta de visitas a prospectos</b><div id="anaMeta"></div></div>
+          <div class="ana-box"><b>Cotizaciones del periodo</b><span class="hint" style="display:block">Cuántas se ganaron, perdieron o siguen abiertas</span><div id="anaEstados"></div></div>
+          <div class="ana-box"><b>Visitas por día</b><span class="hint" style="display:block">Qué días sale más el equipo</span><div id="anaDias"></div></div>
+        </div>
+        <div class="ana-cols">
+          <div class="ana-box"><b>Embudo del periodo</b><span class="hint" style="display:block;margin-bottom:8px">Clientes visitados en el periodo y hasta dónde llegaron; el % es cuántos pasan del paso anterior</span><div class="bars" id="anaEmbudo"></div></div>
+          <div class="ana-box"><b id="anaTopT">Gerentes que más vendieron</b><div class="bars" id="anaTop" style="margin-top:8px"></div></div>
+        </div>
+        <div class="ana-box" id="anaCmpBox" style="margin-top:14px"><div class="mod-h" style="margin:0 0 4px"><b id="anaCmpT">Comparativo</b><span class="hint" id="anaCmpH"></span></div>
+          <div class="tbl tarj ana-cmp" id="anaCmp"></div></div>
+      </section>
+      <section data-sec="analitica" class="mod c12" id="mapaSec">
         <div class="mod-h"><h2>Mapa de cartera</h2><div class="filters" id="filtrosMapa"></div></div>
         <div class="map"><svg id="mapa" viewBox="0 0 640 400" role="img" aria-label="Mapa de clientes por estatus"></svg><div class="map-badge" id="mapBadge"></div></div>
       </section>
-      <section class="mod c4" id="equipo">
+      <section data-sec="equipo" class="mod c12" id="fichasSec">
+        <div class="mod-h"><h2 id="fichasT">Fichas del equipo</h2><span class="hint" id="fichasH"></span></div>
+        <div class="pf-grid" id="fichas"></div>
+      </section>
+      <section data-sec="equipo" class="mod c12" id="equipo">
         <div class="mod-h"><h2>Ranking de gerentes</h2><span class="hint" id="rankHint"></span></div>
         <div class="rank" id="rank"></div>
       </section>
-      <section class="mod c12" id="tiempos">
+      <section data-sec="equipo" class="mod c12" id="tiempos">
         <div class="mod-h"><h2>Tiempo en visitas</h2><span class="hint" id="tiemposHint"></span></div>
         <div id="tiemposT"></div>
       </section>
 
-      <section class="mod c5">
-        <div class="mod-h"><h2>Visitas por semana</h2><span class="hint">Últimas 8 semanas</span></div>
+      <section class="mod c5" data-sec="analitica">
+        <div class="mod-h"><h2>Visitas por semana</h2><span class="hint">Últimas 8 semanas, por tipo de cliente</span></div>
         <div class="chart" id="trend"></div>
         <div class="legend" id="trendLeg"></div>
       </section>
-      <section class="mod c4">
+      <section class="mod c4" data-sec="analitica">
         <div class="mod-h"><h2>Embudo de cartera</h2><span class="hint">Acumulado</span></div>
         <div class="bars" id="funnel"></div>
       </section>
-      <section class="mod c3">
+      <section class="mod c3" data-sec="analitica">
         <div class="mod-h"><h2>Por giro</h2></div>
         <div class="bars" id="giros"></div>
         <div class="legend"><span style="--c:var(--st-vis)"><i></i>Visitados</span><span style="--c:var(--soft2)"><i></i>Cartera</span></div>
       </section>
 
-      <section class="mod c12" id="actSec">
+      <section data-sec="equipo" class="mod c12" id="actSec">
         <div class="mod-h"><h2>Clientes activos · visita mensual</h2><span class="hint" id="actSecHint"></span></div>
         <div class="bars" id="actBars"></div>
         <div class="legend"><span style="--c:var(--st-act)"><i></i>Visitados en los últimos 30 días</span><span style="--c:var(--soft2)"><i></i>Pendientes</span></div>
         <div id="actDet"></div>
       </section>
-      <section class="mod c5">
+      <section class="mod c5" data-sec="resumen">
         <div class="mod-h"><h2>Requieren tu atención</h2><span class="hint">Toca un cliente para reasignarlo o regresarlo a la lista</span></div>
         <div class="feed" id="alertas"></div>
       </section>
-      <section class="mod c7" id="actividad">
+      <section data-sec="resumen" class="mod c7" id="actividad">
         <div class="mod-h"><h2>Actividad del equipo</h2><span class="hint" id="actHint"></span></div>
         <div class="feed" id="feed"></div>
       </section>
 
-      <section class="mod c12" id="clientes">
+      <section data-sec="clientes" class="mod c12" id="clientes">
         <div class="tbl-tools">
           <h2 id="tituloLista">Clientes de la zona</h2>
           <div class="ctrls"><div class="filters" id="filtrosTabla"></div><input class="search" id="busca" type="search" placeholder="Buscar empresa o giro" aria-label="Buscar empresa o giro"></div>
@@ -497,11 +608,17 @@ textarea{width:100%;font:inherit;padding:10px;border-radius:10px;border:1px soli
         </table></div>
         <div class="more"><button class="btn" type="button" id="verMas"></button></div>
       </section>
+
+      <section data-sec="usuarios" class="mod c12" id="usuariosSec">
+        <div class="mod-h"><h2>Usuarios</h2><span class="hint" id="usHint"></span></div>
+        <div class="money" id="usStats"></div>
+        <div id="usLista"><div class="hint">Cargando usuarios…</div></div>
+      </section>
     </div>
 
     <!-- GERENTE -->
     <div class="grid" id="vGer" hidden>
-      <section class="mod ghero" id="miSemana">
+      <section data-sec="semana" class="mod ghero" id="miSemana">
         <div class="tread" aria-hidden="true"></div>
         <div id="gRing"></div>
         <div>
@@ -511,34 +628,34 @@ textarea{width:100%;font:inherit;padding:10px;border-radius:10px;border:1px soli
         </div>
         <div class="next" id="gNext"></div>
       </section>
-      <section class="c12" style="display:grid;gap:12px">
+      <section class="c12" style="display:grid;gap:12px" data-sec="semana">
         <div class="mod-h"><h2>Tus visitas de esta semana</h2><button class="btn" type="button" id="cercaMi">Ordenar por cercanía a mí</button></div>
         <span class="hint" id="ordenHint">Reintentos y arrastrados primero, luego por cercanía a tu sucursal</span>
         <div class="cards" id="gCards"></div>
       </section>
-      <section class="c12" style="display:grid;gap:12px" id="gActSec">
+      <section data-sec="gclientes" class="c12" style="display:grid;gap:12px" id="gActSec">
         <div class="mod-h"><h2>Clientes activos · visita una vez al mes</h2></div>
         <span class="hint" id="gActHint"></span>
         <div class="cards" id="gAct"></div>
       </section>
-      <section class="mod c12" id="gAjenas" hidden>
+      <section data-sec="gclientes" class="mod c12" id="gAjenas" hidden>
         <div class="mod-h"><h2>Sedes que atiende otro gerente</h2><span class="hint">Cuentas centralizadas: el cliente pidió un solo contacto. Solo informativo.</span></div>
         <div id="gAjenasL"></div>
       </section>
-      <section class="mod c12" id="gActHist">
+      <section data-sec="gclientes" class="mod c12" id="gActHist">
         <div class="mod-h"><h2>Seguimiento de tus clientes activos</h2><span class="hint">Toca un cliente para ver todas sus visitas</span></div>
         <div id="gActTabla"></div>
       </section>
-      <section class="mod c12" id="gCotSec">
+      <section data-sec="cotiz" class="mod c12" id="gCotSec">
         <div class="mod-h"><h2>Tus cotizaciones</h2><span class="hint">Vigencia de 7 días; solo se pausa mientras Crédito y Cobranza verifica</span></div>
         <div id="gCots"></div>
       </section>
-      <section class="mod c7" id="gMapaSec">
+      <section data-sec="zona" class="mod c7" id="gMapaSec">
         <div class="mod-h"><h2>Tu zona</h2><span class="hint">Anillo de 5 km alrededor de tu sucursal</span></div>
         <div class="map"><svg id="gMapa" viewBox="0 0 640 400" role="img" aria-label="Mapa de tus clientes"></svg></div>
         <div class="legend" id="gLeyenda"></div>
       </section>
-      <section class="mod c5" id="gVisitas">
+      <section data-sec="zona" class="mod c5" id="gVisitas">
         <div class="mod-h"><h2>Tus últimas visitas</h2></div>
         <div class="feed" id="gFeed"></div>
       </section>
@@ -657,7 +774,7 @@ textarea{width:100%;font:inherit;padding:10px;border-radius:10px;border:1px soli
       <button class="btn pri" type="submit" style="padding:12px">Entrar</button>
       <span class="toast" id="lErr" role="alert" style="color:var(--st-esc)" hidden></span>
       <span class="hint" style="font-size:12px">¿No tienes acceso? Pídeselo a tu regional: las cuentas solo se crean por invitación.</span>
-      <span class="hint" style="font-size:11px">Versión 18 nov · nuevo acceso</span>
+      <span class="hint" style="font-size:11px">Versión 19 nov · analítica y fichas</span>
       <button type="button" class="btn" id="olvide" style="border:0;background:none;color:var(--muted);text-decoration:underline;padding:0;justify-self:start">Olvidé mi contraseña</button>
     </form>
     <form class="lg-card" id="passForm" hidden>
@@ -790,6 +907,8 @@ $("fDesde").value=RANGOS.mes[0];$("fHasta").value=HOY;
 let modo="semana",desde=RANGOS.semana[0],hasta=RANGOS.semana[1]; // la meta es semanal: se abre en la semana
 function addDias(f,n){const d=new Date(f+"T12:00:00");d.setDate(d.getDate()+n);return d.toISOString().slice(0,10)}
 const dias=()=>Math.round((new Date(hasta)-new Date(desde))/864e5)+1;
+const enVista=(x,v=$("vista").value)=>v==="all"||(v.startsWith("z:")?x.reg===v.slice(2):x.id===v); // x = sucursal
+const zonaNom=r=>r?NOMS[r]||nombreDe(r):"Sin regional";
 const metaRango=()=>Math.max(1,Math.round(dias()/7*10)); // meta de 10 por semana, prorrateada al periodo
 const visitasDe=(ids,a=desde,b=hasta)=>VISITAS.filter(x=>x.fecha>=a&&x.fecha<=b&&ids.has(x.cli));
 const semaforo=(n,m)=>n/m>=.7?["--st-vis","En ruta"]:n/m>=.4?["--warn","Atrasado"]:["--st-esc","Crítico"];
@@ -812,7 +931,10 @@ const ICON={
   equipo:'<circle cx="9" cy="8" r="3.5" fill="none" stroke="currentColor" stroke-width="2"/><path d="M2.5 20c.8-3.5 3.4-5.5 6.5-5.5s5.7 2 6.5 5.5M16 4.5a3.5 3.5 0 0 1 0 7M18 14.8c2 .7 3.2 2.5 3.5 5.2" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>',
   actividad:'<path d="M3 12h4l3-8 4 16 3-8h4" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>',
   clientes:'<path d="M3 6h18M3 12h18M3 18h12" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>',
-  ruta:'<circle cx="6" cy="18" r="3" fill="none" stroke="currentColor" stroke-width="2"/><circle cx="18" cy="6" r="3" fill="none" stroke="currentColor" stroke-width="2"/><path d="M9 18h6a3 3 0 0 0 0-6H9a3 3 0 0 1 0-6h6" fill="none" stroke="currentColor" stroke-width="2"/>'
+  ruta:'<circle cx="6" cy="18" r="3" fill="none" stroke="currentColor" stroke-width="2"/><circle cx="18" cy="6" r="3" fill="none" stroke="currentColor" stroke-width="2"/><path d="M9 18h6a3 3 0 0 0 0-6H9a3 3 0 0 1 0-6h6" fill="none" stroke="currentColor" stroke-width="2"/>',
+  ventas:'<path d="M3 7h18v12H3zM3 11h18M7 15h4" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/>',
+  analitica:'<path d="M4 20V10M10 20V4M16 20v-7M22 20H2" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>',
+  usuarios:'<path d="M12 3 4 6v6c0 4.4 3.4 8.2 8 9 4.6-.8 8-4.6 8-9V6z" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/><circle cx="12" cy="10" r="2.5" fill="none" stroke="currentColor" stroke-width="2"/><path d="M8 16.5c.8-1.6 2.2-2.5 4-2.5s3.2.9 4 2.5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>'
 };
 const svgI=k=>`<svg viewBox="0 0 24 24" aria-hidden="true">${ICON[k]}</svg>`;
 
@@ -840,11 +962,11 @@ function mapa(svgId,pts,sucs,hi){
   // calles de fondo: trazos fijos que sugieren la traza urbana
   const calles=[[0,90,640,60],[0,250,640,300],[120,0,170,400],[400,0,360,400],[0,370,640,330],[540,0,600,400],[0,160,300,180],[300,180,640,140]];
   g+=calles.map(([a,b,c,d],i)=>`<line x1="${a}" y1="${b}" x2="${c}" y2="${d}" stroke="var(--soft2)" stroke-width="${i<2?9:5}" stroke-linecap="round"/>`).join("");
-  for(const x of sucs){const on=hi==="all"||x.id===hi;if(!on)continue;
+  for(const x of sucs){const on=enVista(x,hi);if(!on)continue;
     g+=`<circle cx="${X(x.lng)}" cy="${Y(x.lat)}" r="${R5}" fill="var(--accent-soft)" stroke="var(--accent)" stroke-opacity=".55" stroke-dasharray="4 5"/>`}
   for(const c of pts){if(!visibles.has(c.st))continue;const on=hi==="all"||c.suc.id===hi;
     g+=`<circle data-id="${c.id}" cx="${X(c.lng).toFixed(1)}" cy="${Y(c.lat).toFixed(1)}" r="${on?7:4}" fill="var(${ST[c.st].c})" opacity="${on?1:.2}" stroke="var(--panel)" stroke-width="2" style="cursor:pointer"><title>${esc(c.nombre)} · ${ST[c.st].t}${c.km!=null?" · "+fk(c.km)+" km":""}</title></circle>`}
-  for(const x of sucs){const on=hi==="all"||x.id===hi,px=X(x.lng),py=Y(x.lat);
+  for(const x of sucs){const on=enVista(x,hi),px=X(x.lng),py=Y(x.lat);
     g+=`<g opacity="${on?1:.4}"><rect x="${px-9}" y="${py-9}" width="18" height="18" rx="4" fill="var(--ink)" transform="rotate(45 ${px} ${py})"/><circle cx="${px}" cy="${py}" r="3.5" fill="var(--accent)"/>
       <text x="${px}" y="${py-16}" text-anchor="middle" font-size="12" font-weight="700" font-family="Instrument Sans,sans-serif" fill="var(--ink)" paint-order="stroke" stroke="var(--soft)" stroke-width="4">${x.n}</text></g>`}
   g+=`<g transform="translate(${W-96},${H-22})"><line x1="0" y1="0" x2="${R5}" y2="0" stroke="var(--muted)" stroke-width="2"/><line x1="0" y1="-4" x2="0" y2="4" stroke="var(--muted)" stroke-width="2"/><line x1="${R5}" y1="-4" x2="${R5}" y2="4" stroke="var(--muted)" stroke-width="2"/><text x="${R5/2}" y="-8" text-anchor="middle" font-size="11" font-family="IBM Plex Mono,monospace" fill="var(--muted)">5 km</text></g>`;
@@ -864,7 +986,7 @@ function gmapa(svgId,pts,sucs,hi){
   const COL=Object.fromEntries(Object.keys(ST).map(k=>[k,colorDe(ST[k].c)]));
   m.map.data.setStyle(f=>({title:cli(f.getProperty("id")).nombre,icon:{path:google.maps.SymbolPath.CIRCLE,scale:f.getProperty("on")?6:4,fillColor:COL[f.getProperty("st")],fillOpacity:f.getProperty("on")?1:.25,strokeColor:"#ffffff",strokeWeight:1.5}}));
   P.forEach(c=>{if(hi==="all"||c.suc.id===hi)b.extend({lat:c.lat,lng:c.lng})});
-  for(const x of sucs.filter(x=>x.lat!=null)){const on=hi==="all"||x.id===hi;
+  for(const x of sucs.filter(x=>x.lat!=null)){const on=enVista(x,hi);
     m.extra.push(new google.maps.Marker({map:m.map,position:{lat:x.lat,lng:x.lng},title:"Sucursal "+x.n,zIndex:999,opacity:on?1:.45,
       icon:{path:"M0,-9 9,0 0,9 -9,0z",fillColor:"#0f1b2d",fillOpacity:1,strokeColor:"#f2b705",strokeWeight:2.5,scale:1}}));
     if(on){m.extra.push(new google.maps.Circle({map:m.map,center:{lat:x.lat,lng:x.lng},radius:5000,strokeColor:"#f2b705",strokeOpacity:.6,strokeWeight:1,fillColor:"#f2b705",fillOpacity:.07,clickable:false}));b.extend({lat:x.lat,lng:x.lng})}}
@@ -873,6 +995,163 @@ function gmapa(svgId,pts,sucs,hi){
 }
 
 /* ---------- tendencia ---------- */
+/* ---------- analítica: indicadores contra el periodo anterior, tendencia, resultados, embudo y top ---------- */
+let anaM="vis",alTodas=false;
+document.addEventListener("click",e=>{if(e.target.closest("[data-al]")){alTodas=!alTodas;render()}});
+function analitica(list,ids,sucs){
+  const n=dias(),pa=addDias(desde,-n),pb=addDias(desde,-1),en=(f,a,b)=>!!f&&f>=a&&f<=b,sum=(a,k)=>a.reduce((t,x)=>t+(k?x[k]:x),0);
+  const V=(a,b)=>visitasDe(ids,a,b),Q=(a,b)=>COTS.filter(q=>ids.has(q.cli)&&en(q.fecha,a,b)),G=(a,b)=>COTS.filter(q=>ids.has(q.cli)&&q.estado==="ganada"&&en(q.cierre,a,b));
+  const cerr=(a,b)=>COTS.filter(q=>ids.has(q.cli)&&q.estado!=="abierta"&&en(q.cierre,a,b));
+  const v1=V(desde,hasta),v0=V(pa,pb),q1=Q(desde,hasta),q0=Q(pa,pb),g1=G(desde,hasta),g0=G(pa,pb),c1=cerr(desde,hasta),c0=cerr(pa,pb);
+  const tasa=(g,c)=>c.length?g.length/c.length*100:null,sit=v=>v.length?v.filter(x=>x.ver==="en_sitio"||x.ver==="ubicacion_nueva").length/v.length*100:null;
+  const dur=v=>{const d=v.filter(x=>x.dur!=null);return d.length?sum(d,"dur")/d.length:null};
+  const delta=(a,b,pts,neutro)=>{if(a==null||b==null)return'<span class="hint">sin periodo anterior</span>';const d=pts?a-b:b?(a-b)/b*100:null;
+    if(d==null)return a?'<span class="hint">sin registro antes</span>':'<span class="hint">igual que antes</span>';
+    return `<span class="delta" style="--c:var(${neutro?"--muted":d>=0?"--st-vis":"--st-esc"})">${d>=0?"▲":"▼"} ${Math.abs(Math.round(d))}${pts?" pts":"%"}</span>`};
+  $("anaHint").textContent=`${rangoTxt()} contra los ${n} días anteriores`;
+  const K=[["Visitas",v1.length,v0.length,x=>x.toLocaleString("es-MX")],["Cotizado",sum(q1,"monto"),sum(q0,"monto"),corto],["Vendido",sum(g1,"ganado"),sum(g0,"ganado"),corto],
+    ["Tasa de cierre",tasa(g1,c1),tasa(g0,c0),x=>Math.round(x)+"%",1],["Visitas en sitio (GPS)",sit(v1),sit(v0),x=>Math.round(x)+"%",1],["Duración promedio",dur(v1),dur(v0),x=>Math.round(x)+" min",0,1]];
+  // tendencia: este periodo contra el anterior, alineados día por día (o por semana si el periodo es largo)
+  const paso=n>45?7:1,k=Math.ceil(n/paso),valM=(M,a,b)=>M==="vis"?V(a,b).length:M==="cot"?sum(Q(a,b),"monto"):sum(G(a,b),"ganado");
+  const serM=(M,ini)=>Array.from({length:k},(_,i)=>{const a=addDias(ini,i*paso);return valM(M,a,addDias(a,paso-1))}),ser=ini=>serM(anaM,ini);
+  // mini tendencia dentro de cada indicador de volumen
+  const spark=M=>{const z=serM(M,desde),mz=Math.max(1,...z);if(z.length<2)return"";const pt=z.map((v,i)=>`${(i/(z.length-1)*100).toFixed(1)},${(26-v/mz*22).toFixed(1)}`).join(" ");
+    return `<svg class="spark revela" viewBox="0 0 100 28" preserveAspectRatio="none" aria-hidden="true"><polygon points="0,28 ${pt} 100,28" fill="var(--st-asig)" opacity=".12"/><polyline points="${pt}" fill="none" stroke="var(--st-asig)" stroke-width="1.6" vector-effect="non-scaling-stroke"/></svg>`};
+  $("anaKpi").innerHTML=K.map(([l,a,b,f,pts,neu],i)=>`<div class="mstat" style="--i:${i}"><span class="lbl">${l}</span><b class="num">${a==null?"—":f(a)}</b>${delta(a,b,pts,neu)}${i<3?spark(["vis","cot","gan"][i]):""}</div>`).join("");
+  const s1=ser(desde),s0=ser(pa),mx=Math.max(1,...s1,...s0),W=600,H=180,X=i=>k<2?W/2:i/(k-1)*W,Y=v=>H-6-v/mx*(H-20);
+  const linea=s=>s.map((v,i)=>`${X(i).toFixed(1)},${Y(v).toFixed(1)}`).join(" "),fmt=anaM==="vis"?x=>x:corto;
+  $("anaLtit").textContent=anaM==="vis"?"Visitas":anaM==="cot"?"Cotizado":"Vendido";
+  const lab=i=>{const d=addDias(desde,i*paso);return fecha(d)};
+  $("anaLinea").innerHTML=`<svg class="revela" viewBox="0 0 ${W} ${H}" preserveAspectRatio="none" style="width:100%;height:190px;display:block" role="img" aria-label="Tendencia del periodo contra el anterior">
+    ${[.25,.5,.75,1].map(t=>`<line x1="0" x2="${W}" y1="${Y(mx*t)}" y2="${Y(mx*t)}" stroke="var(--line)" stroke-width="1" vector-effect="non-scaling-stroke"/>`).join("")}
+    <polygon points="0,${H} ${linea(s1)} ${W},${H}" fill="var(--st-asig)" opacity=".10"/>
+    <polyline points="${linea(s0)}" fill="none" stroke="var(--muted)" stroke-width="2" stroke-dasharray="6 5" vector-effect="non-scaling-stroke"/>
+    <polyline points="${linea(s1)}" fill="none" stroke="var(--st-asig)" stroke-width="2.5" vector-effect="non-scaling-stroke" stroke-linejoin="round"/>
+    ${s1.map((v,i)=>`<circle cx="${X(i)}" cy="${Y(v)}" r="7" fill="transparent"><title>${lab(i)}: ${fmt(v)} (antes ${fmt(s0[i])})</title></circle>`).join("")}
+  </svg>
+  <div style="display:flex;justify-content:space-between;font-size:11px;color:var(--muted);margin-top:4px"><span>${lab(0)}</span>${k>2?`<span>${lab(Math.floor((k-1)/2))}</span>`:""}<span>${lab(k-1)}</span></div>
+  <div class="legend" style="margin-top:6px"><span style="--c:var(--st-asig)"><i></i>Este periodo · máx ${fmt(Math.max(...s1))}</span><span style="--c:var(--muted)"><i></i>Periodo anterior (punteado)</span></div>`;
+  // resultados de las visitas
+  const cats=Object.keys(RES),PAL=["--st-vis","--st-asig","--st-disp","--muted","--warn","--st-esc"],cnt=cats.map(c=>v1.filter(x=>x.res===c).length),tot=sum(cnt),R0=54,C=2*Math.PI*R0;let acc=0;
+  $("anaDona").innerHTML=tot?`<div class="dona"><svg viewBox="0 0 140 140" width="150" height="150" role="img" aria-label="Resultado de las visitas">
+    <circle cx="70" cy="70" r="${R0}" fill="none" stroke="var(--soft2)" stroke-width="16"/>
+    ${cnt.map((c,i)=>{if(!c)return"";const l=c/tot*C,el=`<circle cx="70" cy="70" r="${R0}" fill="none" stroke="var(${PAL[i]})" stroke-width="16" stroke-dasharray="${l} ${C-l}" stroke-dashoffset="${-acc}" transform="rotate(-90 70 70)" class="dseg" style="--d:${i*90}ms"><title>${cats[i]}: ${c}</title></circle>`;acc+=l;return el}).join("")}
+    <text x="70" y="68" text-anchor="middle" font-size="24" font-weight="800" fill="var(--ink)">${tot}</text><text x="70" y="86" text-anchor="middle" font-size="11" fill="var(--muted)">visitas</text></svg>
+    <ul>${cats.map((c,i)=>`<li style="--c:var(${PAL[i]})"><i></i><span>${c}</span><b class="num">${Math.round(cnt[i]/tot*100)}%</b></li>`).join("")}</ul></div>`:'<div class="empty">Sin visitas en este periodo.</div>';
+  // embudo del periodo
+  // por cliente y como subconjuntos, para que cada paso sea parte del anterior (nunca más de 100%)
+  const cv=new Set(v1.map(x=>x.cli)),ca=new Set(v1.filter(x=>x.res!=="No se encontró"&&x.res!=="Dirección no existe").map(x=>x.cli));
+  const cq=new Set(q1.map(q=>q.cli).filter(c=>ca.has(c))),cg=new Set(g1.map(q=>q.cli).filter(c=>cq.has(c)));
+  const E=[["Clientes visitados",cv.size],["Los atendió alguien",ca.size],["Se les cotizó",cq.size],["Compraron",cg.size]],e0=Math.max(1,E[0][1]);
+  $("anaEmbudo").innerHTML=E.map(([l,x],i)=>`<div class="br"><div class="br-top"><span>${l}</span><span><b class="tn" style="color:var(--ink)">${x}</b>${i&&E[i-1][1]?` · ${Math.round(x/E[i-1][1]*100)}%`:""}</span></div><div class="br-track"><i style="width:${x/e0*100}%;background:var(--st-asig);opacity:${1-i*.15}"></i></div></div>`).join("");
+  // medidor de la meta de visitas a prospectos (misma meta que el ranking)
+  const vp=visitasDe(new Set(list.filter(prosp).map(c=>c.id))).length,meta=metaRango()*sucs.length,av=Math.min(vp/meta,1),[gc,gt]=semaforo(vp,meta);
+  $("anaMeta").innerHTML=`<svg viewBox="0 0 200 116" style="width:100%;max-width:260px;display:block;margin:6px auto 0" role="img" aria-label="Avance de la meta: ${vp} de ${meta}">
+    <path d="M20 100 A80 80 0 0 1 180 100" fill="none" stroke="var(--soft2)" stroke-width="16" stroke-linecap="round"/>
+    <path class="garc" d="M20 100 A80 80 0 0 1 180 100" fill="none" stroke="var(${gc})" stroke-width="16" stroke-linecap="round" pathLength="100" stroke-dasharray="${(av*100).toFixed(1)} 100"/>
+    <text x="100" y="86" text-anchor="middle" font-size="30" font-weight="800" fill="var(--ink)">${Math.round(vp/meta*100)}%</text>
+    <text x="100" y="106" text-anchor="middle" font-size="12" fill="var(--muted)">${vp} de ${meta} visitas</text></svg>
+    <div style="text-align:center;margin-top:4px"><span class="delta" style="--c:var(${gc})">${gt}</span></div>`;
+  // cotizaciones del periodo por estado (composición)
+  const est=[["Ganadas","ganada","--st-vis"],["Perdidas","perdida","--st-esc"],["Abiertas","abierta","--st-asig"]].map(([t,e,c])=>{const a=q1.filter(q=>q.estado===e);return{t,c,n:a.length,m:sum(a,"monto")}}),nq=Math.max(1,q1.length);
+  $("anaEstados").innerHTML=q1.length?`<div class="stack">${est.filter(x=>x.n).map((x,i)=>`<i class="sbar" style="--c:var(${x.c});width:${x.n/nq*100}%;--d:${i*120}ms" title="${x.t}: ${x.n}"></i>`).join("")}</div>
+    <ul class="leyl">${est.map(x=>`<li style="--c:var(${x.c})"><i></i><span>${x.t}</span><b class="num">${x.n}</b><span class="hint">${corto(x.m)}</span></li>`).join("")}</ul>`:'<div class="empty">Sin cotizaciones en este periodo.</div>';
+  // visitas por día de la semana (columnas)
+  const DS=["Dom","Lun","Mar","Mié","Jue","Vie","Sáb"],cd=[0,0,0,0,0,0,0];for(const x of v1)cd[new Date(x.fecha+"T12:00").getDay()]++;
+  const ord=[1,2,3,4,5,6,0],mc=Math.max(1,...cd);
+  $("anaDias").innerHTML=`<div class="cols">${ord.map((d,i)=>`<div class="col"><span class="num cv">${cd[d]}</span><i style="height:${Math.max(cd[d]/mc*100,cd[d]?4:1)}%;--d:${i*60}ms" title="${DS[d]}: ${cd[d]}"></i><span class="hint">${DS[d]}</span></div>`).join("")}</div>`;
+  // top: gerentes (toda la zona) o clientes (un gerente)
+  const una=sucs.length===1;$("anaTopT").textContent=una?"Clientes que más compraron":"Gerentes que más vendieron";
+  const grp={};for(const q of g1){const c=cli(q.cli),key=una?c.id:c.at;(grp[key]=grp[key]||{t:0,n:0}).t+=q.ganado;grp[key].n++}
+  const top=Object.entries(grp).sort((a,b)=>b[1].t-a[1].t).slice(0,6),tm=Math.max(1,...top.map(x=>x[1].t));
+  $("anaTop").innerHTML=top.length?top.map(([k2,x])=>{const nm=una?cli(k2).nombre:(SUC.find(s=>s.id===k2)||{}).g||k2;
+    return `<div class="br"><div class="br-top"><span>${esc(nm)}</span><span><b class="tn" style="color:var(--ink)">${corto(x.t)}</b> · ${x.n} ${x.n===1?"venta":"ventas"}</span></div><div class="br-track"><i style="width:${x.t/tm*100}%;background:var(--st-vis)"></i></div></div>`}).join(""):'<div class="empty">Sin ventas ganadas en este periodo.</div>';
+}
+/* indicadores de un grupo de sucursales en el periodo (una sucursal = un gerente; varias = una zona) */
+function stats(sl){
+  const n=dias(),pa=addDias(desde,-n),pb=addDias(desde,-1),m=metaRango(),en=(f,a,b)=>!!f&&f>=a&&f<=b,ok=v=>v.ver==="en_sitio"||v.ver==="ubicacion_nueva";
+  const cl=CL.filter(c=>sl.some(x=>x.id===c.at)),ids=new Set(cl.map(c=>c.id)),idsP=new Set(cl.filter(prosp).map(c=>c.id));
+  const v1=visitasDe(idsP),v0=visitasDe(idsP,pa,pb).length,vt=visitasDe(ids),Q=COTS.filter(q=>ids.has(q.cli)),q1=Q.filter(q=>en(q.fecha,desde,hasta));
+  const g1=Q.filter(q=>q.estado==="ganada"&&en(q.cierre,desde,hasta)),g0=Q.filter(q=>q.estado==="ganada"&&en(q.cierre,pa,pb)),c1=Q.filter(q=>q.estado!=="abierta"&&en(q.cierre,desde,hasta));
+  const act=cl.filter(c=>c.tipo===ACT),sinG=sl.filter(x=>x.g.startsWith("Sin gerente")),vend=g1.reduce((t,q)=>t+q.ganado,0),vend0=g0.reduce((t,q)=>t+q.ganado,0);
+  return{cl,sl,m,meta:m*sl.length,vis:v1.length,v0,vt,nq:q1.length,cot:q1.reduce((t,q)=>t+q.monto,0),g1,c1,vend,vend0,sinG,
+    sit:vt.length?Math.round(vt.filter(ok).length/vt.length*100):null,cierre:c1.length?Math.round(g1.length/c1.length*100):null,
+    esc_:cl.filter(c=>c.st==="esc").length,abiertas:Q.filter(q=>q.estado==="abierta").length,
+    act:act.length,actOk:act.filter(c=>mesDe(c).ok).length,ck:vt.length?Math.round(vt.filter(x=>x.dur!=null).length/vt.length*100):null,
+    visG:x=>visitasDe(new Set(cl.filter(c=>c.at===x.id&&prosp(c)).map(c=>c.id))).length}
+}
+/* checklist de una ficha: [cumple (true/false/null = no aplica), qué se mide, valor] */
+function checklist(t,esZona){
+  const L=[[t.vis>=t.meta,"Meta de visitas a prospectos",`${t.vis}/${t.meta}`]];
+  if(esZona){const gs=t.sl.filter(x=>!x.g.startsWith("Sin gerente")),enRuta=gs.filter(x=>t.visG(x)>=t.m*.7).length;
+    L.push([gs.length?enRuta/gs.length>=.7:null,"Gerentes en ruta (70% de su meta)",`${enRuta} de ${gs.length}`])}
+  L.push([t.sit==null?null:t.sit>=80,"Check-in en sitio (80%+)",t.sit==null?"sin visitas":t.sit+"%"],
+    [t.act?t.actOk/t.act>=.8:null,"Activos visitados este mes (80%+)",t.act?`${t.actOk} de ${t.act}`:"sin activos"],
+    [t.c1.length?t.cierre>=30:null,"Tasa de cierre (30%+)",t.c1.length?`${t.cierre}% · ${t.g1.length}/${t.c1.length}`:"sin cierres"],
+    [t.esc_===0,"Sin clientes reasignados por falta de seguimiento",t.esc_?`${t.esc_} pendientes`:"al día"]);
+  if(esZona)L.push([t.sinG.length===0,"Todas sus sucursales con gerente",t.sinG.length?`${t.sinG.length} sin gerente`:"completas"]);
+  else L.push([t.ck==null?null:t.ck>=90,"Visitas cerradas con check-out (90%+)",t.ck==null?"sin visitas":t.ck+"%"]);
+  return L;
+}
+const PERSONA='<svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="8" r="4.2" fill="currentColor"/><path d="M3.8 21c.6-4.4 4-7 8.2-7s7.6 2.6 8.2 7" fill="currentColor"/></svg>';
+function fichas(sucs,v){
+  const zonas=[...new Set(sucs.map(x=>x.reg))],porZona=v==="all"&&zonas.length>1;
+  const G=porZona?zonas.map(r=>({k:"z:"+r,nom:zonaNom(r),rol:"Regional",sub:`${sucs.filter(x=>x.reg===r).length} sucursales`,s:sucs.filter(x=>x.reg===r)}))
+    :sucs.map(x=>({k:x.id,nom:x.g.startsWith("Sin gerente")?"Sin gerente":x.g,rol:"Gerente de sucursal",sub:x.n,s:[x],vacia:x.g.startsWith("Sin gerente")}));
+  $("fichasT").textContent=porZona?"Fichas de regionales":"Fichas de gerentes";
+  $("fichasH").textContent=`${rangoTxt()} · ✓ cumple · ✗ no cumple · toca una ficha para ${porZona?"ver a sus gerentes":"ver su sucursal"}`;
+  const F=G.map(g=>{const t=stats(g.s),L=checklist(t,porZona),ap=L.filter(x=>x[0]!=null),okN=ap.filter(x=>x[0]).length,p=ap.length?okN/ap.length:0;return{g,t,L,okN,nAp:ap.length,p}}).sort((a,b)=>b.p-a.p||b.t.vis-a.t.vis);
+  $("fichas").innerHTML=F.map(({g,L,okN,nAp,p},i)=>{const c=p>=.8?"--st-vis":p>=.5?"--warn":"--st-esc",R0=27,C=2*Math.PI*R0;
+    return `<article class="pf" style="--c:var(${c});--i:${i}">
+      <div class="pf-h"><div class="pf-av${g.vacia?" vacia":""}"><svg viewBox="0 0 64 64" class="pf-ring" aria-hidden="true"><circle cx="32" cy="32" r="${R0}" fill="none" stroke="var(--soft2)" stroke-width="5"/>
+        <circle class="pf-arc" cx="32" cy="32" r="${R0}" fill="none" stroke="var(${c})" stroke-width="5" stroke-linecap="round" stroke-dasharray="${(p*C).toFixed(1)} ${C.toFixed(1)}" transform="rotate(-90 32 32)" style="--C:${C.toFixed(1)}"/></svg>${PERSONA}</div>
+        <div class="pf-n"><b>${esc(g.nom)}</b><span>${g.rol} · ${esc(g.sub)}</span></div>
+        <div class="pf-sc"><b class="num">${okN}/${nAp}</b><span>cumple</span></div></div>
+      <ul class="pf-ck">${L.map(([ok,t,val])=>`<li class="${ok==null?"na":ok?"si":"no"}"><span class="pf-ic" aria-label="${ok==null?"No aplica":ok?"Cumple":"No cumple"}">${ok==null?"–":ok?"✓":"✗"}</span><span>${t}</span><b>${esc(String(val))}</b></li>`).join("")}</ul>
+      <button type="button" class="btn pf-b" data-suc="${g.k}" data-vsec="${porZona?"equipo":"resumen"}" data-ir="${porZona?"fichasSec":"titulo"}">${porZona?"Ver a sus gerentes":"Ver su sucursal"}</button></article>`}).join("");
+}
+/* comparativo entre zonas (todas) o entre sucursales (una zona o un regional), con acciones e implicados */
+function comparar(sucs,v){
+  const zonas=[...new Set(sucs.map(x=>x.reg))],porZona=v==="all"&&zonas.length>1,box=$("anaCmpBox");
+  if(!porZona&&sucs.length<2){box.hidden=true;return}box.hidden=false;
+  const n=dias(),pa=addDias(desde,-n),pb=addDias(desde,-1),m=metaRango(),en=(f,a,b)=>!!f&&f>=a&&f<=b;
+  const grupos=porZona?zonas.map(r=>({k:"z:"+r,nom:"Zona de "+zonaNom(r),s:sucs.filter(x=>x.reg===r)})):sucs.map(x=>({k:x.id,nom:x.n,s:[x]}));
+  const pct=(a,b)=>b?Math.round((a-b)/b*100):null,fl=d=>d==null?"":`<span class="delta" style="--c:var(${d>=0?"--st-vis":"--st-esc"})">${d>=0?"▲":"▼"} ${Math.abs(d)}%</span>`;
+  const F=grupos.map(g=>{const cl=CL.filter(c=>g.s.some(x=>x.id===c.at)),ids=new Set(cl.map(c=>c.id)),idsP=new Set(cl.filter(prosp).map(c=>c.id));
+    const v1=visitasDe(idsP),v0=visitasDe(idsP,pa,pb).length,vt=visitasDe(ids),Q=COTS.filter(q=>ids.has(q.cli)),q1=Q.filter(q=>en(q.fecha,desde,hasta));
+    const g1=Q.filter(q=>q.estado==="ganada"&&en(q.cierre,desde,hasta)),g0=Q.filter(q=>q.estado==="ganada"&&en(q.cierre,pa,pb)),c1=Q.filter(q=>q.estado!=="abierta"&&en(q.cierre,desde,hasta));
+    const meta=m*g.s.length,sit=vt.length?Math.round(vt.filter(x=>x.ver==="en_sitio"||x.ver==="ubicacion_nueva").length/vt.length*100):null;
+    const esc_=cl.filter(c=>c.st==="esc").length,abiertas=Q.filter(q=>q.estado==="abierta").length,vend=g1.reduce((t,q)=>t+q.ganado,0),vend0=g0.reduce((t,q)=>t+q.ganado,0);
+    // gerentes de esta zona por debajo de la mitad de la meta
+    const lista=a=>a.length>4?a.slice(0,4).join(", ")+` y ${a.length-4} más`:a.join(", "),sinG=g.s.filter(x=>x.g.startsWith("Sin gerente"));
+    const flojos=g.s.filter(x=>!x.g.startsWith("Sin gerente")).filter(x=>visitasDe(new Set(cl.filter(c=>c.at===x.id&&prosp(c)).map(c=>c.id))).length<m/2).map(x=>x.g);
+    const A=[],rojo="--st-esc",amb="--warn",ok="--st-vis",resp=porZona?zonaNom(g.s[0].reg):g.s[0].g;
+    if(v1.length<meta*.5)A.push([rojo,`Visitas muy abajo de la meta (${v1.length} de ${meta}).`+(porZona&&flojos.length?` Gerentes abajo de la mitad: ${lista(flojos)}.`:` Revisar su agenda con ${resp}.`)]);
+    else if(v1.length<meta)A.push([amb,`Le faltan ${meta-v1.length} visitas para la meta.`+(porZona&&flojos.length?` Abajo de la mitad: ${lista(flojos)}.`:"")]);
+    const dv=pct(v1.length,v0);if(dv!=null&&dv<=-20)A.push([amb,`Bajó ${-dv}% sus visitas contra el periodo anterior.`]);
+    if(esc_)A.push([rojo,`${esc_} ${esc_===1?"cliente reasignado":"clientes reasignados"} al regional por falta de seguimiento: ${porZona?"que "+zonaNom(g.s[0].reg)+" los atienda o reasigne":"hablar con "+g.s[0].g}.`]);
+    if(sit!=null&&vt.length>=3&&sit<60)A.push([amb,`Solo ${sit}% de visitas con check-in en sitio: pedir que registren con GPS.`]);
+    if(c1.length>=3&&g1.length/c1.length<.3)A.push([amb,`Cierra poco: ${g1.length} de ${c1.length} cotizaciones resueltas se ganaron.`]);
+    if(abiertas>=5)A.push([amb,`${abiertas} cotizaciones abiertas por dar seguimiento.`]);
+    if(sinG.length)A.push([rojo,`${sinG.length===1?"Sucursal":"Sucursales"} sin gerente: ${lista(sinG.map(x=>x.n))}. Asignar responsable.`]);
+    if(!A.length)A.push([ok,"Va bien: sin focos rojos en el periodo."]);
+    return{g,resp,vis:v1.length,meta,dv,cot:q1.reduce((t,q)=>t+q.monto,0),nq:q1.length,vend,dvend:pct(vend,vend0),cierre:c1.length?Math.round(g1.length/c1.length*100):null,sit,esc_,A,
+      gentes:porZona?`${g.s.length-sinG.length} gerentes`+(sinG.length?` · ${sinG.length} sin gerente`:""):null}});
+  F.sort((a,b)=>b.vend-a.vend||b.vis/b.meta-a.vis/a.meta);
+  $("anaCmpT").textContent=porZona?"Cómo compiten las zonas":"Cómo compiten las sucursales";
+  $("anaCmpH").textContent=`${rangoTxt()} · ordenado por lo vendido · toca ${porZona?"una zona":"una sucursal"} para verla sola`;
+  $("anaCmp").innerHTML=`<table><thead><tr><th>${porZona?"Zona":"Sucursal"}</th><th>A cargo</th><th>Visitas a prospectos / meta</th><th>Cotizado</th><th>Vendido</th><th>Cierre</th><th>En sitio</th><th>Reasignados</th><th>Qué hacer</th></tr></thead><tbody>${F.map((r,i)=>`<tr>
+    <td><button type="button" class="lnk" data-suc="${r.g.k}" data-vsec="analitica" data-ir="titulo"><span class="pos">${i+1}</span><b>${esc(r.g.nom)}</b></button><div class="hint">${r.g.s.length} ${r.g.s.length===1?"sucursal":"sucursales"}</div></td>
+    <td data-l="A cargo"><b>${esc(r.resp)}</b>${r.gentes?`<div class="hint">Regional · ${esc(r.gentes)}</div>`:`<div class="hint">${porZona?"":"Regional: "+esc(zonaNom(r.g.s[0].reg))}</div>`}</td>
+    <td data-l="Visitas / meta"><b class="num">${r.vis}/${r.meta}</b> ${fl(r.dv)}<div class="meter" style="margin-top:4px"><i style="width:${Math.min(r.vis/r.meta,1)*100}%"></i></div></td>
+    <td data-l="Cotizado"><b class="num">${corto(r.cot)}</b><div class="hint">${r.nq} ${r.nq===1?"cotización":"cotizaciones"}</div></td>
+    <td data-l="Vendido"><b class="num">${corto(r.vend)}</b> ${fl(r.dvend)}</td>
+    <td data-l="Cierre"><b class="num">${r.cierre==null?"—":r.cierre+"%"}</b></td>
+    <td data-l="En sitio"><b class="num">${r.sit==null?"—":r.sit+"%"}</b></td>
+    <td data-l="Reasignados"><b class="num" style="${r.esc_?"color:var(--st-esc)":""}">${r.esc_}</b></td>
+    <td class="cmp-acc" data-l="Qué hacer"><div class="acc">${r.A.map(([c,t])=>`<span style="--c:var(${c})">${esc(t)}</span>`).join("")}</div></td></tr>`).join("")}</tbody></table>`;
+}
+document.addEventListener("click",e=>{const b=e.target.closest("[data-ana]");if(!b)return;anaM=b.dataset.ana;document.querySelectorAll("[data-ana]").forEach(x=>x.setAttribute("aria-pressed",x===b));render();animar()});
 function tendencia(ids){
   // una línea por tipo de cliente (según su tipo actual)
   const SER=[["Prospectos",c=>c.tipo==="Prospecto","--st-asig"],["Inactivos",c=>c.tipo==="Cliente inactivo","--st-esc"],["Activos",c=>c.tipo===ACT,"--st-act"]];
@@ -892,13 +1171,13 @@ function tendencia(ids){
 
 /* ---------- regional ---------- */
 function renderR(){
-  const v=$("vista").value,list=v==="all"?CL.filter(c=>SUC.some(x=>x.id===c.at)):CL.filter(c=>c.at===v),sucs=v==="all"?SUC:SUC.filter(x=>x.id===v);
+  const v=$("vista").value,sucs=SUC.filter(x=>enVista(x,v)),list=CL.filter(c=>sucs.some(x=>x.id===c.at)),zona=v.startsWith("z:");
   const ids=new Set(list.map(c=>c.id)),idsP=new Set(list.filter(prosp).map(c=>c.id)),m=metaRango(),meta=m*sucs.length;
   const visT=visitasDe(ids),vis=visitasDe(idsP),n=vis.length;
   const pa=addDias(desde,-dias()),pb=addDias(desde,-1),prev=visitasDe(idsP,pa,pb).length;
   const d=n-prev,[col,tag]=semaforo(n,meta);
-  $("titulo").textContent=v==="all"?"Resumen de zona":sucs[0].g;
-  $("subTop").textContent=v==="all"?`${SUC.length} sucursales · ${list.length.toLocaleString("es-MX")} empresas`:`Sucursal ${sucs[0].n} · ${list.length} empresas`;
+  $("titulo").textContent=v==="all"?(YO.rol==="regional"?"Resumen de zona":"Resumen general"):zona?"Zona de "+zonaNom(v.slice(2)):sucs[0].g;
+  $("subTop").textContent=v==="all"||zona?`${sucs.length} sucursales · ${list.length.toLocaleString("es-MX")} empresas`:`Sucursal ${sucs[0].n} · ${list.length} empresas`;
   $("heroR").innerHTML=`<div style="color:var(--ink)">${ring(n,meta,124,col,"var(--soft2)")}</div>
     <div style="display:grid;gap:8px"><div class="lbl">Visitas · ${rangoTxt()}</div>
     <div class="big num">${n}<span> / ${meta}</span></div>
@@ -933,10 +1212,10 @@ function renderR(){
   $("rankHint").textContent=`Meta ${m} · ${rangoTxt()}`;
   const rk=SUC.map(x=>{const vv=visitasDe(new Set(CL.filter(c=>c.at===x.id&&prosp(c)).map(c=>c.id))),nn=vv.length,ok=vv.filter(z=>z.ver==="en_sitio"||z.ver==="ubicacion_nueva").length;return{x,nn,pv:nn?Math.round(ok/nn*100):null}}).sort((a,b)=>b.nn-a.nn);
   $("rank").innerHTML=rk.map(({x,nn,pv},i)=>{const[c,t]=semaforo(nn,m);
-    return `<button class="rk" type="button" data-suc="${x.id}" data-ir="titulo" style="--c:var(${c});opacity:${v==="all"||v===x.id?1:.4}"><span class="pos">${String(i+1).padStart(2,"0")}</span><span class="nm"><b>${x.g}</b><span class="meter"><i style="width:${Math.min(nn/m,1)*100}%"></i></span></span><span class="sc"><b class="num">${nn}/${m}</b><span class="chip">${t}</span>${pv!=null?`<span class="hint" style="font-size:11px">${pv}% en sitio</span>`:""}</span></button>`}).join("");
+    return `<button class="rk" type="button" data-suc="${x.id}" data-vsec="resumen" data-ir="titulo" style="--c:var(${c});opacity:${enVista(x,v)?1:.4}"><span class="pos">${String(i+1).padStart(2,"0")}</span><span class="nm"><b>${x.g}</b><span class="meter"><i style="width:${Math.min(nn/m,1)*100}%"></i></span></span><span class="sc"><b class="num">${nn}/${m}</b><span class="chip">${t}</span>${pv!=null?`<span class="hint" style="font-size:11px">${pv}% en sitio</span>`:""}</span></button>`}).join("");
 
   tiempos(v);
-  tendencia(ids);
+  tendencia(ids);analitica(list,ids,sucs);comparar(sucs,v);fichas(sucs,v);
 
   // embudo acumulado: cada etapa es subconjunto de la anterior
   const conVisita=new Set(VISITAS.filter(x=>ids.has(x.cli)).map(x=>x.cli));
@@ -951,7 +1230,7 @@ function renderR(){
     return `<div class="br" title="${g}: ${vv} visitados de ${tot}"><div class="br-top"><span>${g}</span><span class="tn">${vv}/${tot}</span></div><div class="br-track"><i style="width:${tot/gmax*100}%;background:var(--soft2);filter:brightness(.92)"></i><i style="width:${vv/gmax*100}%;background:var(--st-vis)"></i></div></div>`}).join("");
 
   const escs=list.filter(c=>c.st==="esc"||c.revisar);
-  $("alertas").innerHTML=escs.length?escs.map(c=>`<div class="ev" data-id="${c.id}" style="--c:var(--st-esc)"><span class="dot">!</span><div><div class="ev-h"><b>${esc(c.nombre)}</b><span>${c.suc.g}</span></div><p>${c.revisar?"El gerente reportó que la ubicación del cliente está mal":c.motivo||"2 semanas asignado sin visita. Reasignar o visitar esta semana."} · ${c.giro} · ${fk(c.km)} km</p></div></div>`).join(""):'<div class="empty">Nada escalado. Todo el equipo va al corriente.</div>';
+  $("alertas").innerHTML=escs.length?escs.slice(0,alTodas?escs.length:8).map(c=>`<div class="ev" data-id="${c.id}" style="--c:var(--st-esc)"><span class="dot">!</span><div><div class="ev-h"><b>${esc(c.nombre)}</b><span>${c.suc.g}</span></div><p>${c.revisar?"El gerente reportó que la ubicación del cliente está mal":c.motivo||"2 semanas asignado sin visita. Reasignar o visitar esta semana."} · ${c.giro} · ${fk(c.km)} km</p></div></div>`).join("")+(escs.length>8?`<button type="button" class="btn" data-al style="margin-top:8px;width:100%;min-height:44px">${alTodas?"Ver menos":`Ver los ${escs.length}`}</button>`:""):'<div class="empty">Nada escalado. Todo el equipo va al corriente.</div>';
 
   $("actHint").textContent=`${visT.length} visitas · ${rangoTxt()}`;
   $("feed").innerHTML=feed(visT,6,true);
@@ -959,7 +1238,7 @@ function renderR(){
 
   const orden={esc:0,reint:1,asig:2,seg:3,vis:4,act:5,disp:6},q=busca.toLowerCase();
   const filas=list.filter(c=>(filtroT==="todos"||c.st===filtroT)&&(!q||c.nombre.toLowerCase().includes(q)||c.giro.toLowerCase().includes(q))).sort((a,b)=>orden[a.st]-orden[b.st]||ordKm(a,b));
-  $("tituloLista").textContent=v==="all"?"Clientes de la zona":"Clientes de "+sucs[0].n;
+  $("tituloLista").textContent=v==="all"?"Clientes de la zona":zona?"Clientes de la zona de "+zonaNom(v.slice(2)):"Clientes de "+sucs[0].n;
   $("lista").innerHTML=filas.slice(0,mostrar).map(c=>`<tr data-id="${c.id}"><td><b>${esc(c.nombre)}</b><span class="sub">${c.id}${c.arr?" · arrastrado":""}</span>${tipoTag(c)}</td><td data-l="Giro">${c.giro}</td><td class="tn" data-l="Flota">${c.flota??"—"}</td><td data-l="Sucursal">${c.suc.n}</td><td class="tn" data-l="Km a sucursal">${fk(c.km)}</td><td data-l="Estatus">${chip(c.st)}</td><td data-l="Ubicación"><a class="lnk" href="${maps(c)}" target="_blank" rel="noopener">Google Maps ↗</a></td></tr>`).join("")||'<tr><td colspan="7" class="empty">Sin resultados con ese filtro.</td></tr>';
   $("verMas").parentElement.hidden=filas.length<=10;
   $("verMas").textContent=mostrar<filas.length?`Ver las ${filas.length} empresas`:"Ver menos";
@@ -984,7 +1263,7 @@ function actTabla(arr){
 // duración de visitas por gerente (check-in → check-out) y check-ins que se quedaron sin check-out
 const hm=m=>!m?"—":m<60?m+" min":Math.floor(m/60)+" h "+String(m%60).padStart(2,"0")+" min";
 function tiempos(v){
-  const fil=SUC.filter(x=>v==="all"||x.id===v).map(x=>{const ids=new Set(CL.filter(c=>c.at===x.id).map(c=>c.id)),vv=visitasDe(ids).filter(z=>z.dur!=null);
+  const fil=SUC.filter(x=>enVista(x,v)).map(x=>{const ids=new Set(CL.filter(c=>c.at===x.id).map(c=>c.id)),vv=visitasDe(ids).filter(z=>z.dur!=null);
     const cl=new Set(vv.map(z=>z.cli)).size,tot=vv.reduce((s,z)=>s+z.dur,0);
     const sin=CKS.filter(k=>k.abandonado&&ids.has(k.cliente_id)&&(d=>d>=desde&&d<=hasta)(new Date(k.inicio).toLocaleDateString("en-CA"))).length;
     return{x,n:vv.length,tot,pm:vv.length?Math.round(tot/vv.length):null,pc:cl?Math.round(tot/cl):null,cl,sin}}).filter(r=>r.n||r.sin).sort((a,b)=>b.n-a.n);
@@ -993,6 +1272,45 @@ function tiempos(v){
   $("tiemposT").innerHTML=fil.length?`<div class="tbl seg"><table><thead><tr><th>Gerente</th><th>Visitas medidas</th><th>Clientes distintos</th><th>Tiempo total en visitas</th><th>Duración promedio de una visita</th><th>Tiempo promedio por cliente (suma de sus visitas)</th><th>Visitas sin cerrar</th></tr></thead><tbody>${fil.map(r=>`<tr><td><b>${esc(r.x.g)}</b><span class="sub">${esc(r.x.n)}</span></td><td data-l="Visitas medidas">${r.n}</td><td data-l="Clientes distintos">${r.cl}</td><td data-l="Tiempo total en visitas">${hm(r.tot)}</td><td data-l="Duración promedio de una visita">${r.pm!=null?r.pm+" min":"—"}</td><td data-l="Tiempo promedio por cliente">${r.pc!=null?r.pc+" min":"—"}</td><td data-l="Visitas sin cerrar"${r.sin?' style="color:var(--st-esc);font-weight:600"':""}>${r.sin}</td></tr>`).join("")}</tbody></table></div>
     <div class="hint" style="margin-top:8px"><b>Visitas medidas:</b> visitas con check-in y check-out. <b>Clientes distintos:</b> cuántas empresas diferentes visitó (si fue 2 veces a la misma, cuenta 1). <b>Duración promedio de una visita:</b> cuánto tarda en promedio cada visita. <b>Tiempo promedio por cliente:</b> todo el tiempo dedicado a cada empresa en el periodo, sumando sus visitas (tiempo total ÷ clientes distintos). <b>Visitas sin cerrar:</b> hizo check-in y nunca check-out; se cierran solas a las 12 horas.</div>`:'<div class="empty">Aún no hay visitas con check-out en este periodo.</div>'}
 // panel de crédito: por solicitud del cliente (con la cotización ligada más reciente, si hay)
+/* ---------- usuarios: actividad del equipo y, para administración, rol y sucursal ---------- */
+const hace=t=>{if(!t)return"Nunca";const d=new Date(t),dd=Math.floor((Date.now()-d)/864e5),h=d.toLocaleTimeString("es-MX",{hour:"numeric",minute:"2-digit"});
+  return dd<=0&&new Date().toDateString()===d.toDateString()?"Hoy, "+h:dd<=1?"Ayer, "+h:dd<7?`Hace ${dd} días`:fecha(d.toLocaleDateString("en-CA"))};
+const ROLTXT={gerente:"Gerente de sucursal",regional:"Regional",admin:"Administración",telemarketing:"Telemarketing"};
+let US=[],usEdit=null;
+async function usuarios(){
+  const{data,error}=await SB.rpc("usuarios_equipo");
+  if(error){$("usLista").innerHTML=`<div class="aviso" style="--c:var(--st-esc)">No se pudo cargar: ${esc(error.message)}. ¿Ya se corrió el SQL 24?</div>`;return}
+  US=data||[];pintarUsuarios()}
+function estadoUs(u){
+  if(u.estado==="sin_invitacion")return["Sin invitación","--st-disp"];
+  if(u.estado==="invitacion_pendiente")return["Invitación pendiente","--st-asig"];
+  const d=u.ultimo_acceso||u.ultimo_login?Math.floor((Date.now()-new Date(u.ultimo_acceso||u.ultimo_login))/864e5):999;
+  return d<=7?["Activo","--st-vis"]:[`Sin entrar hace ${d} días`,"--warn"]}
+function pintarUsuarios(){
+  const adm=YO.rol==="admin",ests=US.map(estadoUs),cuenta=t=>ests.filter(e=>e[0]===t).length;
+  $("usHint").textContent=adm?"Todos los usuarios. Solo administración cambia rol y sucursal; las invitaciones se mandan desde Supabase.":"Los gerentes de tus sucursales.";
+  $("usStats").innerHTML=[["Activos esta semana",cuenta("Activo"),"entraron en los últimos 7 días"],["Sin entrar más de 7 días",ests.filter(e=>e[0].startsWith("Sin entrar")).length,"tienen cuenta pero no la usan"],
+    ["Invitación pendiente",cuenta("Invitación pendiente"),"nunca han entrado"],["Sin invitación",cuenta("Sin invitación"),"tienen perfil pero no cuenta"]]
+    .map(([l,v,s2])=>`<div class="mstat"><span class="lbl">${l}</span><b class="num">${v}</b><span>${s2}</span></div>`).join("");
+  $("usLista").innerHTML=`<div class="tbl tarj"><table><thead><tr><th>Usuario</th><th>Rol</th><th>Sucursal</th><th>Último inicio de sesión</th><th>Última vez en la página</th><th>Última visita registrada</th><th>Estado</th>${adm?"<th></th>":""}</tr></thead><tbody>${US.map((u,i)=>{const[t,c]=estadoUs(u);
+    return `<tr><td><b>${esc(u.nombre||"Sin nombre")}</b><span class="sub">${esc(u.correo)}</span></td><td data-l="Rol">${ROLTXT[u.rol]||u.rol}</td><td data-l="Sucursal">${u.sucursal?esc(corta(u.sucursal)):"—"}</td>
+    <td data-l="Último inicio de sesión">${hace(u.ultimo_login)}</td><td data-l="Última vez en la página">${hace(u.ultimo_acceso)}</td>
+    <td data-l="Última visita registrada">${u.rol==="gerente"?`${hace(u.ultima_visita)}<span class="sub">${u.visitas_30d} en 30 días</span>`:"—"}</td>
+    <td data-l="Estado"><span class="chip" style="--c:var(${c})">${t}</span></td>${adm?`<td><button class="btn" type="button" data-us="${i}">Editar</button></td>`:""}</tr>
+    ${usEdit===i?`<tr><td colspan="8"><div class="us-ed"><label class="qlab">Rol<select class="txt" id="usRol">${["gerente","regional","admin"].map(r=>`<option value="${r}"${u.rol===r?" selected":""}>${ROLTXT[r]}</option>`).join("")}</select></label>
+      <label class="qlab">Sucursal (solo gerentes)<select class="txt" id="usSuc"><option value="">—</option>${SUC.map(x=>`<option value="${x.id}"${u.id_sucursal===x.id?" selected":""}>${esc(x.n)} · ${esc(x.g)}</option>`).join("")}</select></label>
+      <div class="acts" style="margin:0"><button class="btn pri" type="button" data-us-ok="${i}">Guardar</button><button class="btn" type="button" data-us-no>Cancelar</button></div></div><span class="toast" id="usMsg" role="status" hidden></span></td></tr>`:""}`}).join("")}</tbody></table></div>`}
+document.addEventListener("click",async e=>{
+  const ed=e.target.closest("[data-us]");if(ed){usEdit=+ed.dataset.us;pintarUsuarios();return}
+  if(e.target.closest("[data-us-no]")){usEdit=null;pintarUsuarios();return}
+  const ok=e.target.closest("[data-us-ok]");if(!ok)return;
+  const u=US[+ok.dataset.usOk],r=$("usRol").value,sc=$("usSuc").value||null,m=$("usMsg"),err=t=>{m.textContent=t;m.style.color="var(--st-esc)";m.hidden=false};
+  if(r==="gerente"&&!sc)return err("Elige la sucursal del gerente.");
+  const otro=r==="gerente"&&US.find(x=>x.correo!==u.correo&&x.rol==="gerente"&&x.id_sucursal===sc);
+  if(otro&&!confirm(`${corta((SUC.find(x=>x.id===sc)||{}).n||sc)} ya tiene como gerente a ${otro.nombre||otro.correo}. Si sigues, ${u.nombre||u.correo} queda como su gerente. ¿Continuar?`))return;
+  ok.disabled=true;const{error}=await SB.rpc("editar_usuario",{usuario:u.correo,nuevo_rol:r,nueva_sucursal:r==="gerente"?sc:null});ok.disabled=false;
+  if(error)return err("No se guardó: "+error.message);
+  usEdit=null;await usuarios();recargar()});
 function tramPanel(cots,ids){
   const qs=CREDS.filter(k=>ids.has(k.cliente_id)).map(k=>{const q=cots.filter(x=>x.cli===k.cliente_id&&x.ini).sort((a,b)=>b.fecha.localeCompare(a.fecha))[0];
     return{cli:k.cliente_id,id:q?q.id:"Solicitud de crédito",fecha:q?q.fecha:k.inicio,monto:q?q.monto:0,estado:k.fin?"cerrada":"abierta",ini:k.inicio,docsOk:k.docs_completos,fin:k.fin,res:k.resultado,docs:k.documentos||{},sinCot:!q}});
@@ -1010,7 +1328,7 @@ function cartera(list){
   $("actSecHint").textContent=`${ok} de ${a.length} visitados en los últimos 30 días`;
   const filas=SUC.map(x=>{const t=a.filter(c=>c.at===x.id);return{x,t:t.length,v:t.filter(c=>mesDe(c).ok).length}}).filter(r=>r.t).sort((p,q)=>p.v/p.t-q.v/q.t||q.t-p.t);
   $("actBars").innerHTML=filas.map(({x,t,v})=>`<button type="button" class="br brbtn" data-suc="${x.id}" data-ir="actSec"><div class="br-top"><span>${esc(x.g.startsWith("Sin gerente")?x.g:x.g+" · "+x.n)}</span><span class="tn">${v}/${t}</span></div><div class="br-track"><i style="width:100%;background:var(--soft2)"></i><i style="width:${v/t*100}%;background:var(--st-act)"></i></div></button>`).join("");
-  const vs=$("vista").value,sx=SUC.find(x=>x.id===vs);
+  const vs=SUC.some(x=>x.id===$("vista").value)?$("vista").value:"all",sx=SUC.find(x=>x.id===vs);
   $("actDet").innerHTML=vs!=="all"?(sx?`<div class="mod-h" style="margin:8px 0"><b>Clientes activos de ${esc(sx.g)} · ${esc(sx.n)}</b><button class="btn" type="button" data-suc="${vs}" data-ir="actSec">Ver todas las sucursales</button></div>`:"")+actTabla(a):'<div class="hint">Toca una sucursal para ver sus clientes activos: última visita, quién la hizo y qué resultó. Toca un cliente para ver su historial completo.</div>'}
 
 /* ---------- gerente ---------- */
@@ -1059,13 +1377,43 @@ function renderG(id){
 }
 
 /* ---------- controles ---------- */
+// secciones: en lugar de una sola página larga, cada vista se divide y se muestra una a la vez
+const SECS=()=>rol==="reg"?[["resumen","Resumen","resumen"],["equipo","Equipo","equipo"],["ventas","Ventas","ventas"],["analitica","Analítica","analitica"],["clientes","Clientes","clientes"],
+    ...(["admin","regional"].includes(YO.rol)?[["usuarios","Usuarios","usuarios"]]:[])]
+  :[["semana","Mi semana","ruta"],["gclientes","Mis clientes","clientes"],["cotiz","Cotizaciones","ventas"],["zona","Mi zona","mapa"]];
+let SEC=null,TIT="";
 function nav(){
-  const items=rol==="reg"?[["resumen","Resumen"],["mapa","Mapa",'mapaSec'],["equipo","Equipo"],["actividad","Actividad"],["clientes","Clientes"]]:[["ruta","Mi semana","miSemana"],["mapa","Mi zona","gMapaSec"],["actividad","Mis visitas","gVisitas"]];
-  $("nav").innerHTML=items.map(([ic,t,id],i)=>`<a href="#${id||ic}" class="${i?"":"on"}">${svgI(ic)}${t}</a>`).join("");
+  const items=SECS();let g=null;try{g=localStorage.getItem("rf.sec."+rol)}catch(e){}
+  SEC=items.some(x=>x[0]===g)?g:items[0][0];
+  $("nav").innerHTML=items.map(([k,t,ic])=>`<button type="button" data-ver="${k}" aria-current="${k===SEC}" class="${k===SEC?"on":""}">${svgI(ic)}<span>${t}</span></button>`).join("");
 }
+/* animación: contar cifras de 0 a su valor y redibujar gráficas, en lo que está a la vista */
+let tAnim=0;
+function animar(){
+  if(matchMedia("(prefers-reduced-motion: reduce)").matches)return;
+  const b=document.body;b.classList.remove("anim");void b.offsetWidth;b.classList.add("anim");clearTimeout(tAnim);tAnim=setTimeout(()=>b.classList.remove("anim"),1900);
+  const vis=[...document.querySelectorAll("#vReg [data-sec]:not(.fuera) .num,#vGer [data-sec]:not(.fuera) .num")].filter(e=>e.offsetParent&&!e.children.length);
+  const t0=performance.now(),D=900;
+  const A=vis.map(e=>{const m=e.textContent.match(/^(\D*?)(\d[\d,]*(?:\.\d+)?)([\s\S]*)$/);if(!m)return null;
+    const n=+m[2].replace(/,/g,""),dec=(m[2].split(".")[1]||"").length,coma=m[2].includes(",");return{e,pre:m[1],n,dec,coma,post:m[3],fin:e.textContent}}).filter(Boolean);
+  const paso=t=>{const k=Math.min((t-t0)/D,1),q=1-Math.pow(1-k,3);
+    for(const a of A){if(!a.e.isConnected)continue;if(k>=1){a.e.textContent=a.fin;continue}const x=a.n*q;
+      a.e.textContent=a.pre+(a.coma?Math.round(x).toLocaleString("es-MX"):x.toFixed(a.dec))+a.post}
+    if(k<1)requestAnimationFrame(paso)};
+  if(A.length)requestAnimationFrame(paso);
+}
+function verSec(k,arriba=true){
+  SEC=k;try{localStorage.setItem("rf.sec."+rol,k)}catch(e){}
+  const v=$(rol==="reg"?"vReg":"vGer");v.querySelectorAll("[data-sec]").forEach(x=>x.classList.toggle("fuera",x.dataset.sec!==k));
+  document.querySelectorAll("#nav [data-ver]").forEach(b=>{const on=b.dataset.ver===k;b.classList.toggle("on",on);b.setAttribute("aria-current",on)});
+  const t=(SECS().find(x=>x[0]===k)||[])[1];
+  const base=k==="resumen"||k==="semana";
+  $("titulo").textContent=base?TIT:rol==="reg"?t+($("vista").value==="all"?"":$("vista").value.startsWith("z:")?" · Zona de "+zonaNom($("vista").value.slice(2)):" · "+(SUC.find(x=>x.id===$("vista").value)||{}).g):t;
+  if(k==="usuarios")usuarios();
+  if(arriba){window.scrollTo(0,0);animar()}}
 function render(){
   const reg=rol==="reg";$("vReg").hidden=!reg;$("vGer").hidden=reg;$("vista").hidden=!reg;
-  reg?renderR():renderG(rol);barra();hacerEnfocables();
+  reg?renderR():renderG(rol);TIT=$("titulo").textContent;barra();hacerEnfocables();if(SEC)verSec(SEC,false);
   const ids=new Set((reg?CL.filter(c=>SUC.some(x=>x.id===c.at)):CL.filter(c=>c.at===rol)).map(c=>c.id));
   $("zonaCard").innerHTML=`<small>${reg?"Mi zona":"Mi cartera"}</small><b class="num" style="font-size:22px">${ids.size}</b><span style="font-size:12px;color:var(--rail-mut)">empresas · ${[...ids].filter(i=>cli(i).st==="vis").length} visitadas</span>`;
 }
@@ -1318,8 +1666,9 @@ document.addEventListener("click",e=>{
   const ft=e.target.closest("[data-ft]");if(ft){filtroT=ft.dataset.ft;mostrar=10;document.querySelectorAll("[data-ft]").forEach(b=>b.setAttribute("aria-pressed",b===ft));render();return}
   const sc=e.target.closest("[data-suc]");if(sc){$("vista").value=$("vista").value===sc.dataset.suc?"all":sc.dataset.suc;mostrar=10;render();
     // en celular el detalle queda abajo: se lleva la vista ahí para que se note el cambio
+    if(sc.dataset.vsec)verSec(sc.dataset.vsec);
     if(sc.dataset.ir)$(sc.dataset.ir).scrollIntoView({behavior:"smooth",block:"start"});return}
-  const na=e.target.closest(".nav a");if(na){document.querySelectorAll(".nav a").forEach(a=>a.classList.toggle("on",a===na))}
+  const nv=e.target.closest("[data-ver]");if(nv&&nv.closest("#nav")){verSec(nv.dataset.ver);return}
   if(e.target.closest("a,button:not([data-id])"))return;
   const t=e.target.closest("[data-id]");if(t)abrir(t.dataset.id)});
 $("cerrar").onclick=cerrar;$("scrim").onclick=()=>{cerrar();cerrarAlta()};
@@ -1361,7 +1710,7 @@ function abrirAlta(){
   $("altaForm").reset();altaPos=null;$("aGpsTxt").textContent="Úsala solo si estás en el lugar del cliente.";$("aDup").hidden=$("aMsg").hidden=true;
   const mias=rol==="reg"?SUC:SUC.filter(x=>x.id===rol);
   $("aSuc").innerHTML=mias.map(x=>`<option value="${x.id}">${esc(x.n)} · ${esc(x.g)}</option>`).join("");$("aSuc").disabled=mias.length<2;
-  if(rol==="reg"&&$("vista").value!=="all")$("aSuc").value=$("vista").value;
+  if(rol==="reg"&&SUC.some(x=>x.id===$("vista").value))$("aSuc").value=$("vista").value;
   altaTipo();$("alta").hidden=$("scrim").hidden=false;$("aEmp").focus()}
 function cerrarAlta(){$("alta").hidden=true;if($("ficha").hidden)$("scrim").hidden=true}
 function altaTipo(){const cl=document.querySelector("input[name=aTipo]:checked").value==="Cliente";$("aSap").hidden=!cl;
@@ -1465,7 +1814,7 @@ $("form").addEventListener("submit",async e=>{e.preventDefault();
   t.style.color="var(--st-vis)";$("form").reset();actualizarForm()});
 // ventas ganadas del periodo y la vista elegida, para cotejar con facturación
 $("csvVentas").onclick=()=>{if(!YO||!["regional","admin"].includes(YO.rol))return;
-  const v=$("vista").value,ids=new Set(CL.filter(c=>v==="all"||c.suc.id===v).map(c=>c.id));
+  const v=$("vista").value,ids=new Set(CL.filter(c=>enVista(c.suc,v)).map(c=>c.id));
   const filas=COTS.filter(q=>ids.has(q.cli)&&q.estado==="ganada"&&q.cierre>=desde&&q.cierre<=hasta).sort((a,b)=>a.cierre.localeCompare(b.cierre));
   const cab=["folio","factura","fecha_cierre","monto_ganado","monto_cotizado","fecha_cotizacion","cliente_id","empresa","codigo_erp","razon_social","sucursal","gerente","forma_pago","dias_tramite_credito"];
   const q=x=>{const t=x==null?"":String(x);return /[",\n]/.test(t)?'"'+t.replace(/"/g,'""')+'"':t};
@@ -1477,11 +1826,11 @@ $("cercaMi").onclick=async()=>{const b=$("cercaMi");b.disabled=true;b.textConten
   YOPOS=await ubic();b.disabled=false;b.textContent=YOPOS?"Actualizar mi ubicación":"Ordenar por cercanía a mí";
   $("ordenHint").textContent=YOPOS?"Ordenados por cercanía a donde estás ahora":"No se pudo obtener tu ubicación. Revisa que el navegador tenga permiso de ubicación.";render()};
 $("verMas").onclick=()=>{mostrar=mostrar===10?Infinity:10;render()};
-$("vista").onchange=()=>{mostrar=10;render()};
+$("vista").onchange=()=>{mostrar=10;render();animar()};
 $("busca").oninput=e=>{busca=e.target.value;mostrar=10;render()};
 function aplicarRango(){$("fechas").hidden=modo!=="otro";
   if(modo==="otro"){const a=$("fDesde").value,b=$("fHasta").value;if(!a||!b||a>b)return;desde=a;hasta=b}else[desde,hasta]=RANGOS[modo];
-  render()}
+  render();animar()}
 $("seg").onclick=e=>{const b=e.target.closest("[data-r]");if(!b)return;modo=b.dataset.r;$("seg").querySelectorAll("button").forEach(x=>x.setAttribute("aria-pressed",x===b));aplicarRango()};
 $("fDesde").onchange=aplicarRango;$("fHasta").onchange=aplicarRango;
 
@@ -1493,12 +1842,15 @@ async function entrar(){
   if(error||!p){await SB.auth.signOut();$("loginForm").hidden=false;$("passForm").hidden=true;return msgLogin(error?"No se pudo leer tu perfil: "+error.message:`El correo ${user.email} no está dado de alta en perfiles. Pide que te den de alta.`)}
   YO=p;msgLogin("Cargando tu información…",true);
   try{await cargar()}catch(x){return msgLogin("No se pudo cargar la información: "+x.message)}
+  SB.rpc("marcar_acceso").then(()=>{},()=>{});  // última vez en la página (sección Usuarios)
   rol=p.rol==="gerente"?p.id_sucursal:"reg";$("csvVentas").hidden=!["regional","admin"].includes(p.rol);
   if(!GM)await cargarMaps();
   const nm=p.nombre||nombreDe(p.correo);
   $("quien").textContent=nm;$("rolTxt").textContent={gerente:"Gerente de sucursal",regional:"Regional",admin:"Administrador",telemarketing:"Telemarketing"}[p.rol];$("avatar").textContent=iniciales(nm);
-  $("vista").innerHTML='<option value="all">Todas las sucursales</option>'+SUC.map(x=>`<option value="${x.id}">${esc(x.n)} · ${esc(x.g)}</option>`).join("");
-  $("vista").value="all";mostrar=10;msgLogin("");nav();render();$("login").hidden=true;$("app").hidden=false;$("app").inert=false;$("fab").hidden=false;window.scrollTo(0,0);
+  const ZS=[...new Set(SUC.map(x=>x.reg))].sort((a,b)=>zonaNom(a).localeCompare(zonaNom(b))),op=x=>`<option value="${x.id}">${esc(x.n)} · ${esc(x.g)}</option>`;
+  $("vista").innerHTML='<option value="all">Todas las sucursales</option>'+(ZS.length>1?'<optgroup label="Zonas">'+ZS.map(r=>`<option value="z:${r}">Zona de ${esc(zonaNom(r))} · ${SUC.filter(x=>x.reg===r).length} suc.</option>`).join("")+"</optgroup>"
+    +ZS.map(r=>`<optgroup label="Sucursales · zona de ${esc(zonaNom(r))}">${SUC.filter(x=>x.reg===r).map(op).join("")}</optgroup>`).join(""):SUC.map(op).join(""));
+  $("vista").value="all";mostrar=10;msgLogin("");nav();render();$("login").hidden=true;$("app").hidden=false;$("app").inert=false;$("fab").hidden=false;window.scrollTo(0,0);animar();
 }
 $("loginForm").addEventListener("submit",async e=>{e.preventDefault();
   msgLogin("Entrando…",true);
