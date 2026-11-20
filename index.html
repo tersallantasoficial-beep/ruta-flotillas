@@ -106,6 +106,24 @@ button,input,select{font:inherit;color:inherit}
 .tour-acts{display:grid;grid-template-columns:auto 1fr auto auto;gap:8px}.tour-acts .btn{min-height:44px;background:#fff;color:#0f1b2d;border-color:#dfe4ea}.tour-acts .btn.pri{background:#f2b705;border-color:#f2b705}
 @keyframes rf-pop{from{opacity:0;transform:scale(.92)}}
 @media (prefers-reduced-motion:reduce){.tour-hole{transition:none}.tour-bub{animation:none}}
+.campana.asist{background:linear-gradient(150deg,#1a3157,#0f1b2d);color:#f2b705;border-color:transparent}
+.chat{height:min(80vh,720px)}.chat .notif-h .hint{display:block;font-size:12px}
+.chat-b{flex:1;overflow:auto;padding:14px 18px;display:flex;flex-direction:column;gap:10px;overscroll-behavior:contain}
+.msg{max-width:88%;padding:10px 13px;border-radius:16px;font-size:14px;line-height:1.45;overflow-wrap:anywhere}
+.msg.bot{align-self:flex-start;background:var(--soft);border:1px solid var(--line);border-bottom-left-radius:4px}
+.msg.yo{align-self:flex-end;background:#0f1b2d;color:#fff;border-bottom-right-radius:4px}
+.msg.err{border-color:color-mix(in srgb,var(--st-esc) 40%,transparent);color:var(--st-esc)}
+.msg .li{display:inline}
+.pens{display:flex;gap:4px}.pens i{width:7px;height:7px;border-radius:50%;background:var(--muted);animation:rf-pt 1s infinite}.pens i:nth-child(2){animation-delay:.15s}.pens i:nth-child(3){animation-delay:.3s}
+@keyframes rf-pt{0%,80%,100%{opacity:.25}40%{opacity:1}}
+.sugs{display:flex;flex-wrap:wrap;gap:8px}
+.chip-s{border:1px solid var(--line);background:var(--panel);color:var(--ink);border-radius:999px;padding:10px 14px;font-size:13px;cursor:pointer;min-height:44px;text-align:left}
+.chip-s:hover{border-color:var(--st-asig)}
+.chat-f{display:flex;gap:8px;padding:12px 14px;border-top:1px solid var(--line)}
+.chat-f textarea{flex:1;resize:none;font:inherit;font-size:16px;border:1px solid var(--line);border-radius:12px;padding:10px 12px;background:var(--panel);color:var(--ink);min-height:44px;max-height:120px}
+.chat-f .btn{min-height:44px}
+@media (max-width:640px){.chat{height:88dvh}}
+@media (prefers-reduced-motion:reduce){.pens i{animation:none;opacity:.6}}
 .tit-row{display:flex;align-items:center;gap:12px}
 .campana{position:relative;flex:none;width:44px;height:44px;border-radius:50%;border:1px solid var(--edge,var(--line));background:color-mix(in srgb,var(--panel) 85%,transparent);color:var(--ink);display:grid;place-items:center;cursor:pointer;box-shadow:var(--shadow)}
 .campana svg{width:22px;height:22px}#ayuda b{font-size:18px;font-family:var(--display)}.campana:hover{background:var(--panel)}
@@ -534,7 +552,7 @@ body{background:radial-gradient(1100px 600px at 85% -10%,var(--glow1),transparen
     <div class="top" id="resumen">
       <div>
         <div class="eyebrow"><span class="live"><i></i>En vivo</span><span class="eb-sep">·</span><span id="subTop">Tijuana · 5 sucursales</span></div>
-        <div class="tit-row"><h1 id="titulo">Resumen de zona</h1><button type="button" class="campana" id="campana" aria-label="Avisos" aria-haspopup="dialog" hidden><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3a6 6 0 0 0-6 6v3.6L4.4 15.4A1 1 0 0 0 5.3 17h13.4a1 1 0 0 0 .9-1.6L18 12.6V9a6 6 0 0 0-6-6Z" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/><path d="M9.8 19.5a2.4 2.4 0 0 0 4.4 0" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg><span class="cb" id="campanaN" hidden></span></button><button type="button" class="campana" id="ayuda" aria-label="Ver el recorrido de ayuda" title="Recorrido de ayuda"><b aria-hidden="true">?</b></button></div>
+        <div class="tit-row"><h1 id="titulo">Resumen de zona</h1><button type="button" class="campana" id="campana" aria-label="Avisos" aria-haspopup="dialog" hidden><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3a6 6 0 0 0-6 6v3.6L4.4 15.4A1 1 0 0 0 5.3 17h13.4a1 1 0 0 0 .9-1.6L18 12.6V9a6 6 0 0 0-6-6Z" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/><path d="M9.8 19.5a2.4 2.4 0 0 0 4.4 0" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg><span class="cb" id="campanaN" hidden></span></button><button type="button" class="campana asist" id="asist" aria-label="Asistente: pregúntale a Ruta" aria-haspopup="dialog" hidden><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 5.5A2.5 2.5 0 0 1 6.5 3h11A2.5 2.5 0 0 1 20 5.5v8a2.5 2.5 0 0 1-2.5 2.5H10l-4.2 3.6c-.5.4-1.3.1-1.3-.6V16A2.5 2.5 0 0 1 4 13.5v-8Z" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/><path d="M8.5 8.5h7M8.5 11.5h4.5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg></button><button type="button" class="campana" id="ayuda" aria-label="Ver el recorrido de ayuda" title="Recorrido de ayuda"><b aria-hidden="true">?</b></button></div>
       </div>
       <div class="ctrls">
         <div class="gsearch" role="search"><input class="search" id="gq" type="search" autocomplete="off" placeholder="Buscar cliente, código SAP, ciudad o folio" aria-label="Buscar cliente" aria-controls="gres"><div class="gres" id="gres" hidden></div></div>
@@ -762,6 +780,11 @@ body{background:radial-gradient(1100px 600px at 85% -10%,var(--glow1),transparen
     <div class="tour-acts"><button type="button" class="btn" id="tourSaltar">Cerrar</button><span></span><button type="button" class="btn" id="tourAtras">Atrás</button><button type="button" class="btn pri" id="tourSig">Siguiente</button></div>
   </div>
 </div>
+<dialog class="notif chat" id="chat" aria-labelledby="chatT">
+  <div class="notif-h"><div><h2 id="chatT">Pregúntale a Ruta</h2><span class="hint" id="chatCupo">Asistente con IA · solo lee tus datos</span></div><button type="button" class="ghost-x" id="chatX" aria-label="Cerrar asistente">✕</button></div>
+  <div class="chat-b" id="chatB" aria-live="polite"></div>
+  <form class="chat-f" id="chatF"><textarea id="chatQ" rows="1" maxlength="1000" placeholder="Escribe tu pregunta…" aria-label="Tu pregunta"></textarea><button type="submit" class="btn pri" id="chatEnv" aria-label="Enviar">Enviar</button></form>
+</dialog>
 <dialog class="notif" id="notif" aria-labelledby="notifT">
   <div class="notif-h"><h2 id="notifT">Avisos</h2><button type="button" class="ghost-x" id="notifX" aria-label="Cerrar avisos">✕</button></div>
   <div class="notif-b" id="notifB"></div>
@@ -827,7 +850,7 @@ body{background:radial-gradient(1100px 600px at 85% -10%,var(--glow1),transparen
       <button class="btn pri" type="submit" style="padding:12px">Entrar</button>
       <span class="toast" id="lErr" role="alert" style="color:var(--st-esc)" hidden></span>
       <span class="hint" style="font-size:12px">¿No tienes acceso? Pídeselo a tu regional: las cuentas solo se crean por invitación.</span>
-      <span class="hint" style="font-size:11px">Versión 19 nov · recorrido</span>
+      <span class="hint" style="font-size:11px">Versión 19 nov · asistente</span>
       <button type="button" class="btn" id="olvide" style="border:0;background:none;color:var(--muted);text-decoration:underline;padding:0;justify-self:start">Olvidé mi contraseña</button>
     </form>
     <form class="lg-card" id="passForm" hidden>
@@ -1448,6 +1471,7 @@ const pasosTour=()=>{const n=($("quien").textContent||"").split(" ")[0];
   [null,`Hola, ${n} 👋`,"Te enseño en un minuto cómo moverte por Ruta Flotillas. Usa «Siguiente» o cierra cuando quieras; puedes volver a verlo con el botón «?» de arriba."],
   ["#heroR","Cómo va tu zona","Avance de visitas de la semana contra la meta (10 por gerente). El color te dice si van en ruta, atrasados o críticos.","resumen"],
   ["#campana","Tus avisos","Aquí llegan las ubicaciones que un gerente reportó mal (tú apruebas o rechazas), los clientes reasignados a ti y los activos sin visita."],
+  ["#asist","Pregúntale a Ruta","Asistente con IA: pregúntale en tus palabras por clientes, ventas, cotizaciones o cómo hacer algo. Solo ve lo mismo que tú."],
   ["#alertas","Requieren tu atención","Clientes que el gerente no pudo atender. Toca uno para regresarlo a su lista, devolverlo a la cartera o reasignarlo.","resumen"],
   ["#seg","Periodo","Cambia entre semana, mes, mes pasado o fechas. Todos los números y gráficas se recalculan."],
   ["#vista",YO.rol==="regional"?"Sucursal":"Zona o sucursal",YO.rol==="regional"?"Ve toda tu zona o una sola sucursal.":"Ve todo, una zona (regional) o una sola sucursal."],
@@ -1460,13 +1484,14 @@ const pasosTour=()=>{const n=($("quien").textContent||"").split(" ")[0];
   ["#miSemana","Tu semana","Cuántas visitas llevas de tu meta de 10, lo que te falta y tu siguiente parada con «Cómo llegar».","semana"],
   ["#gCards .card","Tus clientes de la semana","Al llegar con el cliente toca «Llegué» (check-in con GPS). Al terminar llenas la visita y tocas «Terminar visita»; así se mide cuánto duró.","semana"],
   ["#gq","Buscador","Encuentra cualquier cliente tuyo y abre su ficha: historial, cotizaciones, crédito y observaciones."],
+  ["#asist","Pregúntale a Ruta","Asistente con IA: pregúntale, por ejemplo, «¿qué clientes tengo pendientes?» o «¿cuánto llevo vendido este mes?». Solo ve tus datos."],
   ["#seg","Periodo","Cambia entre semana, mes o fechas para ver tus números."],
   ["#nav","Secciones","Mi semana, Mis clientes (activos), Cotizaciones y Mi zona (mapa)."],
   ["#fab","Agregar","Da de alta un cliente o prospecto nuevo con el botón +."],
   [null,"¡Listo!","Si quieres que este recorrido ya no salga al entrar, marca «No volver a mostrar» y toca «Terminar»."]]};
 let TP=[],TI=0;
 function tourAuto(){let visto=null;try{visto=localStorage.getItem(TOUR_K())}catch(e){}if(!visto)setTimeout(tour,900)}
-function tour(){TP=pasosTour().filter(([sel])=>!sel||document.querySelector(sel));TI=0;$("tourNo").checked=false;$("tour").hidden=false;pasoTour()}
+function tour(){TP=pasosTour().filter(([sel])=>{if(!sel)return true;const e=document.querySelector(sel);return !!e&&!e.closest("[hidden]")});TI=0;$("tourNo").checked=false;$("tour").hidden=false;pasoTour()}
 function pasoTour(){
   const [sel,t,x,sec]=TP[TI],ult=TI===TP.length-1;
   if(sec&&SEC!==sec)verSec(sec);
@@ -1496,6 +1521,32 @@ $("tourSaltar").onclick=cerrarTour;
 $("ayuda").onclick=tour;
 addEventListener("keydown",e=>{if($("tour").hidden)return;if(e.key==="Escape")cerrarTour();else if(e.key==="ArrowRight")$("tourSig").click();else if(e.key==="ArrowLeft")$("tourAtras").click()});
 addEventListener("resize",()=>{if(!$("tour").hidden)pasoTour()});
+/* ---------- asistente con IA: la función «asistente» de Supabase consulta con la sesión del usuario (sus permisos) ---------- */
+const CHATH=[];
+const SUGS=()=>rol==="reg"?["¿Cuánto vendió cada sucursal este mes?","¿Qué clientes están reasignados a mí?","¿Qué cotizaciones abiertas hay?"]:["¿Qué clientes tengo pendientes esta semana?","¿Cuánto llevo vendido este mes?","¿Cómo registro una visita?"];
+function md(t){return esc(t).replace(/\*\*(.+?)\*\*/g,"<b>$1</b>").replace(/^[-•] (.*)$/gm,"<span class=\"li\">• $1</span>").replace(/\n/g,"<br>")}
+function pintarChat(pensando){
+  const b=$("chatB");
+  b.innerHTML=(CHATH.length?"":`<div class="msg bot">Hola, soy <b>Ruta</b>. Pregúntame por tus clientes, visitas, cotizaciones, crédito o cómo usar la plataforma. Solo veo lo mismo que tú ves.</div><div class="sugs">${SUGS().map(x=>`<button type="button" class="chip-s" data-sug="${esc(x)}">${esc(x)}</button>`).join("")}</div>`)
+    +CHATH.map(m=>`<div class="msg ${m.rol==="user"?"yo":m.err?"bot err":"bot"}">${m.rol==="user"?esc(m.texto):md(m.texto)}</div>`).join("")
+    +(pensando?'<div class="msg bot pens" aria-label="Pensando"><i></i><i></i><i></i></div>':"");
+  b.scrollTop=b.scrollHeight;
+}
+async function preguntar(q){
+  q=q.trim();if(!q)return;const hist=CHATH.filter(m=>!m.err).slice(-6).map(({rol,texto})=>({rol,texto}));
+  CHATH.push({rol:"user",texto:q});$("chatQ").value="";$("chatEnv").disabled=true;pintarChat(true);
+  let texto,err=false;
+  try{const{data,error}=await SB.functions.invoke("asistente",{body:{pregunta:q,historial:hist}});
+    if(error){let m="";try{m=(await error.context.json()).error}catch(e){}throw new Error(m||"No pude contactar al asistente. Revisa tu conexión.")}
+    texto=data.respuesta;if(data.cupo!=null)$("chatCupo").textContent=`Te quedan ${data.cupo} preguntas hoy`;
+  }catch(e){texto=e.message;err=true}
+  CHATH.push({rol:"assistant",texto,err});$("chatEnv").disabled=false;pintarChat();$("chatQ").focus();
+}
+$("asist").onclick=()=>{pintarChat();$("chat").showModal();$("chatQ").focus()};
+$("chatX").onclick=()=>$("chat").close();
+$("chat").addEventListener("click",e=>{if(e.target===$("chat"))$("chat").close();const g=e.target.closest("[data-sug]");if(g)preguntar(g.dataset.sug)});
+$("chatF").onsubmit=e=>{e.preventDefault();if(!$("chatEnv").disabled)preguntar($("chatQ").value)};
+$("chatQ").addEventListener("keydown",e=>{if(e.key==="Enter"&&!e.shiftKey){e.preventDefault();$("chatF").requestSubmit()}});
 /* ---------- campanita de avisos (regional y administración) ---------- */
 const LISTOS=[]; // resueltos mientras el panel está abierto: se muestran como confirmación
 const gmap=(la,ln)=>`https://www.google.com/maps/search/?api=1&query=${la},${ln}`;
@@ -2003,7 +2054,8 @@ async function entrar(){
   if(error||!p){await SB.auth.signOut();$("loginForm").hidden=false;$("passForm").hidden=true;return msgLogin(error?"No se pudo leer tu perfil: "+error.message:`El correo ${user.email} no está dado de alta en perfiles. Pide que te den de alta.`)}
   YO=p;msgLogin("Cargando tu información…",true);
   try{await cargar()}catch(x){return msgLogin("No se pudo cargar la información: "+x.message)}
-  SB.rpc("marcar_acceso").then(()=>{},()=>{});  // última vez en la página (sección Usuarios)
+  SB.rpc("marcar_acceso").then(()=>{},()=>{});
+  SB.rpc("asistente_habilitado").then(({data})=>{$("asist").hidden=data!==true},()=>{});  // sin SQL 26 o fuera del piloto: no aparece  // última vez en la página (sección Usuarios)
   rol=p.rol==="gerente"?p.id_sucursal:"reg";$("csvVentas").hidden=!["regional","admin"].includes(p.rol);
   if(!GM)await cargarMaps();
   const nm=p.nombre||nombreDe(p.correo);
