@@ -1541,7 +1541,11 @@ async function preguntar(q){
   CHATH.push({rol:"user",texto:q});$("chatQ").value="";$("chatEnv").disabled=true;pintarChat(true);
   let texto,err=false;
   try{const{data,error}=await SB.functions.invoke("asistente",{body:{pregunta:q,historial:hist}});
-    if(error){let m="";try{m=(await error.context.json()).error}catch(e){}throw new Error(m||"No pude contactar al asistente. Revisa tu conexión.")}
+    if(error){const st=error.context&&error.context.status;let m="";
+      try{const j=await error.context.json();m=(j.error||j.msg||j.message||"")+(j.detalle?` (detalle: ${j.detalle})`:"")}catch(e){}
+      // sin mensaje propio: decir qué falló para poder corregirlo
+      if(!m)m=error.name==="FunctionsFetchError"?"No pude llegar a la función «asistente» en Supabase: revisa que exista con ese nombre exacto y que esté publicada.":st===404?"La función «asistente» no existe en Supabase (revisa el nombre).":st===401?"Tu sesión venció: sal y vuelve a entrar.":st?`La función «asistente» respondió con error ${st}. Revisa sus Logs en Supabase.`:(error.message||"No pude contactar al asistente.");
+      throw new Error(m)}
     texto=data.respuesta;if(data.cupo!=null)$("chatCupo").textContent=`Te quedan ${data.cupo} preguntas hoy`;
   }catch(e){texto=e.message;err=true}
   CHATH.push({rol:"assistant",texto,err});$("chatEnv").disabled=false;pintarChat();$("chatQ").focus();
