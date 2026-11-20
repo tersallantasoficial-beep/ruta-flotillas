@@ -4,6 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="theme-color" content="#0f1b2d">
+<script>try{var t=localStorage.getItem("rf.tema");if(t==="light"||t==="dark")document.documentElement.dataset.theme=t}catch(e){}</script>
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="Ruta Flotillas">
@@ -25,12 +26,12 @@
 @media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
   --bg:#0a0f18; --panel:#111927; --soft:#162133; --soft2:#1f2c42; --ink:#e8edf4; --muted:#93a0b4; --line:#213049;
   --rail:#060a11; --rail-2:#0f1726; --accent-soft:rgba(242,183,5,.14);
-  --on-vis:#0f1b2d; --st-disp:#7c879a; --st-asig:#5b93f0; --st-vis:#34c28a; --st-esc:#f06a6a; --warn:#f0a43a; --st-seg:#a487f5;--st-act:#3cc4c4;
+  --on-vis:#0f1b2d; --st-disp:#7c879a; --st-asig:#7aabf7; --st-vis:#34c28a; --st-esc:#f06a6a; --warn:#f0a43a; --st-seg:#a487f5;--st-act:#3cc4c4;
   --shadow:0 1px 2px rgba(0,0,0,.4),0 10px 28px -14px rgba(0,0,0,.7); color-scheme:dark}}
 :root[data-theme="dark"]{
   --bg:#0a0f18; --panel:#111927; --soft:#162133; --soft2:#1f2c42; --ink:#e8edf4; --muted:#93a0b4; --line:#213049;
   --rail:#060a11; --rail-2:#0f1726; --accent-soft:rgba(242,183,5,.14);
-  --on-vis:#0f1b2d; --st-disp:#7c879a; --st-asig:#5b93f0; --st-vis:#34c28a; --st-esc:#f06a6a; --warn:#f0a43a; --st-seg:#a487f5;--st-act:#3cc4c4;
+  --on-vis:#0f1b2d; --st-disp:#7c879a; --st-asig:#7aabf7; --st-vis:#34c28a; --st-esc:#f06a6a; --warn:#f0a43a; --st-seg:#a487f5;--st-act:#3cc4c4;
   --shadow:0 1px 2px rgba(0,0,0,.4),0 10px 28px -14px rgba(0,0,0,.7); color-scheme:dark}
 *{box-sizing:border-box}
 html{-webkit-text-size-adjust:100%;text-size-adjust:100%}
@@ -102,6 +103,17 @@ button,input,select{font:inherit;color:inherit}
 .tm-kpi span{font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted)}.tm-kpi b{font-size:17px;white-space:nowrap}
 .tm-pie{display:flex;gap:8px;align-items:center;font-size:13px;font-weight:600;margin-top:auto}
 .tm-pie.si .pf-ic{background:var(--st-vis);color:#fff}.tm-pie.no .pf-ic{background:var(--st-esc);color:#fff}.tm-pie.no{color:var(--st-esc)}
+.us-quien{display:flex;gap:10px;align-items:center;min-width:0}.us-quien>div{min-width:0}.us-quien .sub{overflow-wrap:anywhere}
+.us-av{width:36px;height:36px;flex:none;border-radius:50%;display:grid;place-items:center;font-size:13px;font-weight:800;background:color-mix(in srgb,var(--c) 16%,var(--panel));color:var(--c);border:2px solid color-mix(in srgb,var(--c) 45%,transparent)}
+@media (max-width:640px){
+  .us-tbl tbody{display:grid;gap:12px}
+  .us-tbl tr.us-row{background:var(--soft);border:1px solid var(--line);border-left:5px solid var(--c);border-radius:14px;padding:14px 14px 12px;gap:10px 12px;box-shadow:0 1px 2px rgba(15,27,45,.06)}
+  .us-tbl tr.us-row td:first-child{padding-bottom:10px;border-bottom:1px solid var(--line);order:-2}
+  .us-tbl tr.us-row td:first-child b{font-size:16px}
+  .us-tbl tr.us-row td[data-l="Estado"]{grid-column:1/-1;order:-1}
+  .us-tbl tr.us-row td:last-child .btn{width:100%;min-height:44px}
+  .us-tbl tr:not(.us-row){background:var(--panel);border:1px dashed var(--line);border-radius:14px;padding:12px}
+}
 .tm-ayuda{margin-top:12px}.tm-ayuda summary{cursor:pointer;font-weight:600;font-size:13px;min-height:44px;display:flex;align-items:center}
 .tour{position:fixed;inset:0;z-index:200}
 .tour-hole{position:fixed;border-radius:14px;box-shadow:0 0 0 9999px rgba(10,15,24,.62);outline:2px solid #f2b705;outline-offset:2px;transition:all .3s cubic-bezier(.2,.8,.2,1);pointer-events:none}
@@ -140,7 +152,11 @@ button,input,select{font:inherit;color:inherit}
 @media (prefers-reduced-motion:reduce){.pens i{animation:none;opacity:.6}}
 .tit-row{display:flex;align-items:center;gap:12px}
 .campana{position:relative;flex:none;width:44px;height:44px;border-radius:50%;border:1px solid var(--edge,var(--line));background:color-mix(in srgb,var(--panel) 85%,transparent);color:var(--ink);display:grid;place-items:center;cursor:pointer;box-shadow:var(--shadow)}
-.campana svg{width:22px;height:22px}#ayuda b{font-size:18px;font-family:var(--display)}.campana:hover{background:var(--panel)}
+.campana svg{width:22px;height:22px}
+/* el ícono muestra a qué tema cambias: luna en claro, sol en oscuro */
+#tema .ico-sol{display:none}
+:root[data-theme="dark"] #tema .ico-sol{display:block}:root[data-theme="dark"] #tema .ico-luna{display:none}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]) #tema .ico-sol{display:block}:root:not([data-theme="light"]) #tema .ico-luna{display:none}}#ayuda b{font-size:18px;font-family:var(--display)}.campana:hover{background:var(--panel)}
 .campana .cb{position:absolute;top:-4px;right:-4px;min-width:20px;height:20px;padding:0 5px;border-radius:999px;background:var(--st-esc);color:#fff;font-size:11px;font-weight:800;display:grid;place-items:center;border:2px solid var(--bg)}
 .campana.urge .cb{animation:rf-late 1.6s ease-in-out infinite}
 @keyframes rf-late{0%,100%{box-shadow:0 0 0 0 color-mix(in srgb,var(--st-esc) 55%,transparent)}50%{box-shadow:0 0 0 6px transparent}}
@@ -566,7 +582,7 @@ body{background:radial-gradient(1100px 600px at 85% -10%,var(--glow1),transparen
     <div class="top" id="resumen">
       <div>
         <div class="eyebrow"><span class="live"><i></i>En vivo</span><span class="eb-sep">·</span><span id="subTop">Tijuana · 5 sucursales</span></div>
-        <div class="tit-row"><h1 id="titulo">Resumen de zona</h1><button type="button" class="campana" id="campana" aria-label="Avisos" aria-haspopup="dialog" hidden><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3a6 6 0 0 0-6 6v3.6L4.4 15.4A1 1 0 0 0 5.3 17h13.4a1 1 0 0 0 .9-1.6L18 12.6V9a6 6 0 0 0-6-6Z" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/><path d="M9.8 19.5a2.4 2.4 0 0 0 4.4 0" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg><span class="cb" id="campanaN" hidden></span></button><button type="button" class="campana asist" id="asist" aria-label="Tersa Boy, asistente con IA" aria-haspopup="dialog" hidden><img class="tb-img" src="tersa-boy.png" alt="" onerror="this.remove()"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 5.5A2.5 2.5 0 0 1 6.5 3h11A2.5 2.5 0 0 1 20 5.5v8a2.5 2.5 0 0 1-2.5 2.5H10l-4.2 3.6c-.5.4-1.3.1-1.3-.6V16A2.5 2.5 0 0 1 4 13.5v-8Z" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/><path d="M8.5 8.5h7M8.5 11.5h4.5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg></button><button type="button" class="campana" id="ayuda" aria-label="Ver el recorrido de ayuda" title="Recorrido de ayuda"><b aria-hidden="true">?</b></button></div>
+        <div class="tit-row"><h1 id="titulo">Resumen de zona</h1><button type="button" class="campana" id="campana" aria-label="Avisos" aria-haspopup="dialog" hidden><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3a6 6 0 0 0-6 6v3.6L4.4 15.4A1 1 0 0 0 5.3 17h13.4a1 1 0 0 0 .9-1.6L18 12.6V9a6 6 0 0 0-6-6Z" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/><path d="M9.8 19.5a2.4 2.4 0 0 0 4.4 0" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg><span class="cb" id="campanaN" hidden></span></button><button type="button" class="campana asist" id="asist" aria-label="Tersa Boy, asistente con IA" aria-haspopup="dialog" hidden><img class="tb-img" src="tersa-boy.png" alt="" onerror="this.remove()"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 5.5A2.5 2.5 0 0 1 6.5 3h11A2.5 2.5 0 0 1 20 5.5v8a2.5 2.5 0 0 1-2.5 2.5H10l-4.2 3.6c-.5.4-1.3.1-1.3-.6V16A2.5 2.5 0 0 1 4 13.5v-8Z" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/><path d="M8.5 8.5h7M8.5 11.5h4.5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg></button><button type="button" class="campana" id="tema" aria-label="Cambiar tema"><svg class="ico-sol" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="4.2" fill="none" stroke="currentColor" stroke-width="1.8"/><path d="M12 2.5v2.2M12 19.3v2.2M2.5 12h2.2M19.3 12h2.2M5.3 5.3l1.6 1.6M17.1 17.1l1.6 1.6M5.3 18.7l1.6-1.6M17.1 6.9l1.6-1.6" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg><svg class="ico-luna" viewBox="0 0 24 24" aria-hidden="true"><path d="M20 14.5A8 8 0 0 1 9.5 4a8 8 0 1 0 10.5 10.5Z" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/></svg></button><button type="button" class="campana" id="ayuda" aria-label="Ver el recorrido de ayuda" title="Recorrido de ayuda"><b aria-hidden="true">?</b></button></div>
       </div>
       <div class="ctrls">
         <div class="gsearch" role="search"><input class="search" id="gq" type="search" autocomplete="off" placeholder="Buscar cliente, código SAP, ciudad o folio" aria-label="Buscar cliente" aria-controls="gres"><div class="gres" id="gres" hidden></div></div>
@@ -864,7 +880,7 @@ body{background:radial-gradient(1100px 600px at 85% -10%,var(--glow1),transparen
       <button class="btn pri" type="submit" style="padding:12px">Entrar</button>
       <span class="toast" id="lErr" role="alert" style="color:var(--st-esc)" hidden></span>
       <span class="hint" style="font-size:12px">¿No tienes acceso? Pídeselo a tu regional: las cuentas solo se crean por invitación.</span>
-      <span class="hint" style="font-size:11px">Versión 20 nov · tiempos en fichas</span>
+      <span class="hint" style="font-size:11px">Versión 20 nov · tema y usuarios</span>
       <button type="button" class="btn" id="olvide" style="border:0;background:none;color:var(--muted);text-decoration:underline;padding:0;justify-self:start">Olvidé mi contraseña</button>
     </form>
     <form class="lg-card" id="passForm" hidden>
@@ -1398,8 +1414,8 @@ function pintarUsuarios(){
   $("usStats").innerHTML=[["Activos esta semana",cuenta("Activo"),"entraron en los últimos 7 días"],["Sin entrar más de 7 días",ests.filter(e=>e[0].startsWith("Sin entrar")).length,"tienen cuenta pero no la usan"],
     ["Invitación pendiente",cuenta("Invitación pendiente"),"nunca han entrado"],["Sin invitación",cuenta("Sin invitación"),"tienen perfil pero no cuenta"]]
     .map(([l,v,s2])=>`<div class="mstat"><span class="lbl">${l}</span><b class="num">${v}</b><span>${s2}</span></div>`).join("");
-  $("usLista").innerHTML=`<div class="tbl tarj"><table><thead><tr><th>Usuario</th><th>Rol</th><th>Sucursal</th><th>Último inicio de sesión</th><th>Última vez en la página</th><th>Última visita registrada</th><th>Estado</th>${adm?"<th></th>":""}</tr></thead><tbody>${US.map((u,i)=>{const[t,c]=estadoUs(u);
-    return `<tr><td><b>${esc(u.nombre||"Sin nombre")}</b><span class="sub">${esc(u.correo)}</span></td><td data-l="Rol">${ROLTXT[u.rol]||u.rol}</td><td data-l="Sucursal">${u.sucursal?esc(corta(u.sucursal)):"—"}</td>
+  $("usLista").innerHTML=`<div class="tbl tarj us-tbl"><table><thead><tr><th>Usuario</th><th>Rol</th><th>Sucursal</th><th>Último inicio de sesión</th><th>Última vez en la página</th><th>Última visita registrada</th><th>Estado</th>${adm?"<th></th>":""}</tr></thead><tbody>${US.map((u,i)=>{const[t,c]=estadoUs(u);
+    return `<tr class="us-row" style="--c:var(${c})"><td><div class="us-quien"><span class="us-av" aria-hidden="true">${esc(iniciales(u.nombre||u.correo))}</span><div><b>${esc(u.nombre||"Sin nombre")}</b><span class="sub">${esc(u.correo)}</span></div></div></td><td data-l="Rol">${ROLTXT[u.rol]||u.rol}</td><td data-l="Sucursal">${u.sucursal?esc(corta(u.sucursal)):"—"}</td>
     <td data-l="Último inicio de sesión">${hace(u.ultimo_login)}</td><td data-l="Última vez en la página">${hace(u.ultimo_acceso)}</td>
     <td data-l="Última visita registrada">${u.rol==="gerente"?`${hace(u.ultima_visita)}<span class="sub">${u.visitas_30d} en 30 días</span>`:"—"}</td>
     <td data-l="Estado"><span class="chip" style="--c:var(${c})">${t}</span></td>${adm?`<td><button class="btn" type="button" data-us="${i}">Editar</button></td>`:""}</tr>
@@ -1581,6 +1597,11 @@ $("chatX").onclick=()=>$("chat").close();
 $("chat").addEventListener("click",e=>{if(e.target===$("chat"))$("chat").close();const g=e.target.closest("[data-sug]");if(g)preguntar(g.dataset.sug)});
 $("chatF").onsubmit=e=>{e.preventDefault();if(!$("chatEnv").disabled)preguntar($("chatQ").value)};
 $("chatQ").addEventListener("keydown",e=>{if(e.key==="Enter"&&!e.shiftKey){e.preventDefault();$("chatF").requestSubmit()}});
+/* ---------- tema claro / oscuro (cada quien lo elige; sin elegir, sigue al celular) ---------- */
+const temaActual=()=>document.documentElement.dataset.theme||(matchMedia("(prefers-color-scheme: dark)").matches?"dark":"light");
+function pintarTema(){const t=temaActual();$("tema").setAttribute("aria-label",t==="dark"?"Cambiar a tema claro":"Cambiar a tema oscuro");$("tema").title=$("tema").getAttribute("aria-label")}
+$("tema").onclick=()=>{const t=temaActual()==="dark"?"light":"dark";document.documentElement.dataset.theme=t;try{localStorage.setItem("rf.tema",t)}catch(e){}pintarTema()};
+matchMedia("(prefers-color-scheme: dark)").addEventListener("change",pintarTema);pintarTema();
 /* ---------- campanita de avisos (regional y administración) ---------- */
 const LISTOS=[]; // resueltos mientras el panel está abierto: se muestran como confirmación
 const gmap=(la,ln)=>`https://www.google.com/maps/search/?api=1&query=${la},${ln}`;
@@ -1661,7 +1682,7 @@ function render(){
   const reg=rol==="reg";$("vReg").hidden=!reg;$("vGer").hidden=reg;$("vista").hidden=!reg;
   reg?renderR():renderG(rol);TIT=$("titulo").textContent;barra();avisos();hacerEnfocables();if(SEC)verSec(SEC,false);
   const ids=new Set((reg?CL.filter(c=>SUC.some(x=>x.id===c.at)):CL.filter(c=>c.at===rol)).map(c=>c.id));
-  $("zonaCard").innerHTML=`<small>${reg?"Mi zona":"Mi cartera"}</small><b class="num" style="font-size:22px">${ids.size}</b><span style="font-size:12px;color:var(--rail-mut)">empresas · ${[...ids].filter(i=>cli(i).st==="vis").length} visitadas</span>`;
+  $("zonaCard").innerHTML=`<small>${!reg?"Mi cartera":YO.rol==="regional"?"Mi zona":"Todas las zonas"}</small><b class="num" style="font-size:22px">${ids.size}</b><span style="font-size:12px;color:var(--rail-mut)">empresas · ${[...ids].filter(i=>cli(i).st==="vis").length} visitadas</span>`;
 }
 
 $("filtrosMapa").innerHTML=Object.entries(ST).map(([k,x])=>`<button type="button" data-st="${k}" aria-pressed="true" style="--c:var(${x.c})"><i></i>${x.t}</button>`).join("");
