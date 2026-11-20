@@ -435,7 +435,8 @@ textarea{width:100%;font:inherit;padding:10px;border-radius:10px;border:1px soli
 .hi p{margin:2px 0 0;font-size:13px}
 
 /* acceso */
-.login{position:fixed;inset:0;min-height:100dvh;z-index:60;display:grid;grid-template-columns:1.1fr 1fr;background:var(--panel);overflow-y:auto}
+.login{position:fixed;inset:0;min-height:100dvh;z-index:60;display:grid;grid-template-columns:1.1fr 1fr;background:#0a0f18;overflow-y:auto;overscroll-behavior:contain}
+body:has(#login:not([hidden])){background:#0a0f18}
 .lg-art{background:var(--rail);color:var(--rail-fg);position:relative;overflow:hidden;padding:48px;display:flex;flex-direction:column;justify-content:space-between;gap:32px}
 .lg-art .tread{height:100%;opacity:.55;-webkit-mask:radial-gradient(circle at 80% 30%,#000,transparent 70%);mask:radial-gradient(circle at 80% 30%,#000,transparent 70%)}
 .lg-art > :not(.tread){position:relative}
@@ -451,7 +452,7 @@ textarea{width:100%;font:inherit;padding:10px;border-radius:10px;border:1px soli
 /* acceso · vidrio esmerilado sobre fondo oscuro con trazos de luz (siempre oscuro, en modo claro u oscuro) */
 .login{background:radial-gradient(120% 90% at 85% 10%,#1b3a63 0%,transparent 55%),radial-gradient(90% 70% at 10% 100%,#3a2a05 0%,transparent 55%),#070d18;
   --st-esc:#ff8b8b;--st-vis:#5fe0a8;--muted:#a3b2c7;--line:rgba(255,255,255,.16);color:#eef3fa;isolation:isolate}
-.lg-bg{position:absolute;inset:0;width:100%;height:100%;z-index:-1;pointer-events:none}
+.lg-bg{position:fixed;inset:0;width:100%;height:100%;z-index:-1;pointer-events:none}
 .lg-bg path{fill:none;stroke-linecap:round}
 .lg-art{background:transparent}
 .lg-art .tread{display:none}
@@ -506,6 +507,9 @@ textarea{width:100%;font:inherit;padding:10px;border-radius:10px;border:1px soli
   .main{padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));gap:14px}
   .login{grid-template-columns:1fr}.lg-art{padding:32px 20px;min-height:auto}
 }
+/* celular en tema claro: encabezado y barra de secciones claros (en escritorio el riel lateral sigue oscuro) */
+@media (max-width:900px){:root[data-theme="light"] .rail{--rail:#ffffff;--rail-2:#eef1f5;--rail-fg:#0f1b2d;--rail-mut:#5a6578;border-bottom:1px solid #dfe4ea}:root[data-theme="light"] .rail .nav{border-top-color:#dfe4ea;box-shadow:0 -6px 20px -12px rgba(15,27,45,.25)}:root[data-theme="light"] .rail .nav button.on{color:#0f1b2d;background:#fff1c2}:root[data-theme="light"] .rail .nav button.on svg{color:#b07d00}:root[data-theme="light"] .rail .ghost{border-color:#dfe4ea}}
+@media (max-width:900px) and (prefers-color-scheme:light){:root:not([data-theme="dark"]) .rail{--rail:#ffffff;--rail-2:#eef1f5;--rail-fg:#0f1b2d;--rail-mut:#5a6578;border-bottom:1px solid #dfe4ea}:root:not([data-theme="dark"]) .rail .nav{border-top-color:#dfe4ea;box-shadow:0 -6px 20px -12px rgba(15,27,45,.25)}:root:not([data-theme="dark"]) .rail .nav button.on{color:#0f1b2d;background:#fff1c2}:root:not([data-theme="dark"]) .rail .nav button.on svg{color:#b07d00}:root:not([data-theme="dark"]) .rail .ghost{border-color:#dfe4ea}}
 @media (max-width:640px){
   .tile,.c3,.c4,.c5,.c6{grid-column:span 12}
   .hero{grid-template-columns:1fr;justify-items:start}
@@ -880,7 +884,7 @@ body{background:radial-gradient(1100px 600px at 85% -10%,var(--glow1),transparen
       <button class="btn pri" type="submit" style="padding:12px">Entrar</button>
       <span class="toast" id="lErr" role="alert" style="color:var(--st-esc)" hidden></span>
       <span class="hint" style="font-size:12px">¿No tienes acceso? Pídeselo a tu regional: las cuentas solo se crean por invitación.</span>
-      <span class="hint" style="font-size:11px">Versión 20 nov · tema y usuarios</span>
+      <span class="hint" style="font-size:11px">Versión 20 nov · tema en celular</span>
       <button type="button" class="btn" id="olvide" style="border:0;background:none;color:var(--muted);text-decoration:underline;padding:0;justify-self:start">Olvidé mi contraseña</button>
     </form>
     <form class="lg-card" id="passForm" hidden>
@@ -1599,7 +1603,7 @@ $("chatF").onsubmit=e=>{e.preventDefault();if(!$("chatEnv").disabled)preguntar($
 $("chatQ").addEventListener("keydown",e=>{if(e.key==="Enter"&&!e.shiftKey){e.preventDefault();$("chatF").requestSubmit()}});
 /* ---------- tema claro / oscuro (cada quien lo elige; sin elegir, sigue al celular) ---------- */
 const temaActual=()=>document.documentElement.dataset.theme||(matchMedia("(prefers-color-scheme: dark)").matches?"dark":"light");
-function pintarTema(){const t=temaActual();$("tema").setAttribute("aria-label",t==="dark"?"Cambiar a tema claro":"Cambiar a tema oscuro");$("tema").title=$("tema").getAttribute("aria-label")}
+function pintarTema(){const t=temaActual(),m=document.querySelector('meta[name="theme-color"]');if(m)m.content=!$("login").hidden||t==="dark"?"#0a0f18":"#ffffff";$("tema").setAttribute("aria-label",t==="dark"?"Cambiar a tema claro":"Cambiar a tema oscuro");$("tema").title=$("tema").getAttribute("aria-label")}
 $("tema").onclick=()=>{const t=temaActual()==="dark"?"light":"dark";document.documentElement.dataset.theme=t;try{localStorage.setItem("rf.tema",t)}catch(e){}pintarTema()};
 matchMedia("(prefers-color-scheme: dark)").addEventListener("change",pintarTema);pintarTema();
 /* ---------- campanita de avisos (regional y administración) ---------- */
@@ -2118,7 +2122,7 @@ async function entrar(){
   const ZS=[...new Set(SUC.map(x=>x.reg))].sort((a,b)=>zonaNom(a).localeCompare(zonaNom(b))),op=x=>`<option value="${x.id}">${esc(x.n)} · ${esc(x.g)}</option>`;
   $("vista").innerHTML='<option value="all">Todas las sucursales</option>'+(ZS.length>1?'<optgroup label="Zonas">'+ZS.map(r=>`<option value="z:${r}">Zona de ${esc(zonaNom(r))} · ${SUC.filter(x=>x.reg===r).length} suc.</option>`).join("")+"</optgroup>"
     +ZS.map(r=>`<optgroup label="Sucursales · zona de ${esc(zonaNom(r))}">${SUC.filter(x=>x.reg===r).map(op).join("")}</optgroup>`).join(""):SUC.map(op).join(""));
-  $("vista").value="all";mostrar=10;msgLogin("");nav();render();$("login").hidden=true;$("app").hidden=false;$("app").inert=false;$("fab").hidden=false;window.scrollTo(0,0);animar();tourAuto();
+  $("vista").value="all";mostrar=10;msgLogin("");nav();render();$("login").hidden=true;$("app").hidden=false;$("app").inert=false;$("fab").hidden=false;window.scrollTo(0,0);animar();pintarTema();tourAuto();
 }
 $("loginForm").addEventListener("submit",async e=>{e.preventDefault();
   msgLogin("Entrando…",true);
@@ -2136,7 +2140,7 @@ $("passForm").addEventListener("submit",async e=>{e.preventDefault();const a=$("
   const{error}=await SB.auth.updateUser({password:a});
   if(error){m.textContent="No se guardó: "+error.message;m.hidden=false;return}
   $("passForm").hidden=true;$("loginForm").hidden=false;history.replaceState(null,"",location.pathname);entrar()});
-$("salir").onclick=async()=>{cerrar();cerrarAlta();$("fab").hidden=true;CHK={};$("enCurso").hidden=true;document.body.style.paddingBottom="";document.body.style.setProperty("--barra","0px");await SB.auth.signOut();YO=null;$("login").hidden=false;$("app").hidden=true;$("app").inert=true};
+$("salir").onclick=async()=>{setTimeout(pintarTema,50);cerrar();cerrarAlta();$("fab").hidden=true;CHK={};$("enCurso").hidden=true;document.body.style.paddingBottom="";document.body.style.setProperty("--barra","0px");await SB.auth.signOut();YO=null;$("login").hidden=false;$("app").hidden=true;$("app").inert=true};
 // al volver a la pestaña se actualiza lo que otros registraron
 document.addEventListener("visibilitychange",()=>{if(!document.hidden&&YO)recargar($("ficha").hidden?null:$("ficha").dataset.cli)});
 (async()=>{const{data:{session}}=await SB.auth.getSession();
