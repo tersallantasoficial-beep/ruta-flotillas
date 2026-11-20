@@ -176,6 +176,24 @@ button,input,select{font:inherit;color:inherit}
 .nt-acts{display:flex;flex-wrap:wrap;gap:8px}.nt-acts .btn{min-height:44px;flex:1 1 auto}
 .ghost-b{background:transparent}
 .nt-l{list-style:none;margin:0;padding:0;display:grid;gap:4px;font-size:13px}.nt-l li{display:flex;justify-content:space-between;gap:10px}
+.nt-quien{margin:10px 0 0}
+.nt-tabs{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin:10px 0 4px;position:sticky;top:0;background:var(--panel);padding:6px 0;z-index:1}
+.nt-tabs button{min-height:44px;border:1px solid var(--line);background:var(--soft);color:var(--ink);border-radius:12px;font:inherit;font-size:13px;font-weight:600;display:flex;gap:6px;align-items:center;justify-content:center;cursor:pointer}
+.nt-tabs button b{min-width:22px;height:22px;border-radius:999px;display:grid;place-items:center;font-size:12px;background:var(--soft2)}
+.nt-tabs button[aria-selected="true"]{background:var(--ink);color:var(--panel);border-color:var(--ink)}
+.nt-tabs button[aria-selected="true"]:not(.urg) b{background:color-mix(in srgb,var(--panel) 22%,transparent);color:var(--panel)}
+.nt-tabs button.urg b{background:var(--st-esc);color:#fff}
+.nt.ficha{border:1px solid var(--line);border-left:5px solid var(--c);border-radius:14px;padding:14px;margin-top:10px;background:var(--soft)}
+.nt.ficha .nt-ic{color:var(--c);background:color-mix(in srgb,var(--c) 14%,transparent)}
+.nt-zona{display:flex;gap:10px;align-items:center;justify-content:space-between;padding:10px 0;border-top:1px solid var(--line)}
+.nt-zona>div{min-width:0;display:grid;gap:2px}.nt-zona span{font-size:12.5px;color:var(--muted);line-height:1.35}
+.nt-mini{min-height:40px;padding:6px 12px;font-size:13px;flex:none}
+.nt-ger{display:grid;gap:6px}
+.nt-gr{display:grid;grid-template-columns:36px minmax(0,1fr) auto;gap:10px;align-items:center;text-align:left;border:1px solid var(--line);background:var(--panel);color:var(--ink);border-radius:12px;padding:8px 10px;font:inherit;cursor:pointer;min-height:52px}
+.nt-gr span span{display:block;font-size:12px;color:var(--st-esc);line-height:1.35}.nt-gr i{font-style:normal;color:var(--muted);font-size:20px}
+.nt-av{display:grid;gap:2px;padding:10px 0;border-top:1px solid var(--line)}.nt-av span{font-size:13px;color:var(--ink)}.nt-av small{color:var(--muted);font-size:11.5px}
+.nt-av.leido{opacity:.6}
+.nt.ficha .btn{margin-top:8px}
 .nt-ok{color:var(--st-vis);font-weight:700;margin:0}.nt-err{color:var(--st-esc);margin:0;font-size:13px}
 @media (max-width:640px){.notif{margin:auto 0 0;width:100vw;max-width:100vw;max-height:85dvh;border-radius:20px 20px 0 0;padding-bottom:env(safe-area-inset-bottom,0px)}
   .notif[open]{animation:rf-hoja .3s cubic-bezier(.2,.8,.2,1)}}
@@ -884,7 +902,7 @@ body{background:radial-gradient(1100px 600px at 85% -10%,var(--glow1),transparen
       <button class="btn pri" type="submit" style="padding:12px">Entrar</button>
       <span class="toast" id="lErr" role="alert" style="color:var(--st-esc)" hidden></span>
       <span class="hint" style="font-size:12px">¿No tienes acceso? Pídeselo a tu regional: las cuentas solo se crean por invitación.</span>
-      <span class="hint" style="font-size:11px">Versión 20 nov · chat con teclado</span>
+      <span class="hint" style="font-size:11px">Versión 20 nov · avisos por rol</span>
       <button type="button" class="btn" id="olvide" style="border:0;background:none;color:var(--muted);text-decoration:underline;padding:0;justify-self:start">Olvidé mi contraseña</button>
     </form>
     <form class="lg-card" id="passForm" hidden>
@@ -947,7 +965,7 @@ const cargarMaps=()=>new Promise(ok=>{if(!MAPS_KEY)return ok(false);
 const colorDe=v=>getComputedStyle(document.documentElement).getPropertyValue(v).trim();
 const ordKm=(a,b)=>(a.km??999)-(b.km??999);
 
-let SUC=[],CL=[],VISITAS=[],COTS=[],YO=null,IX={},NOMS={},CUENTAS={},CKS=[],CHK={},CRED={},CREDS=[];
+let AVS=[],SUC=[],CL=[],VISITAS=[],COTS=[],YO=null,IX={},NOMS={},CUENTAS={},CKS=[],CHK={},CRED={},CREDS=[];
 const sinAcento=t=>(t||"").normalize("NFD").replace(/[\u0300-\u036f]/g,"").toLowerCase();
 const quien=e=>NOMS[(e||"").toLowerCase()]||nombreDe(e);
 const cli=id=>IX[id];
@@ -963,13 +981,15 @@ function resumenDe(v){
 const cotDe=x=>({dbid:x.id,id:x.folio,factura:x.factura,cli:x.cliente_id,fecha:x.fecha,monto:+x.monto,estado:x.estado,ganado:x.monto_ganado==null?0:+x.monto_ganado,motivo:x.motivo,cierre:x.cerrada_en,pago:x.forma_pago,linea:!!x.linea_autorizada,ini:x.tramite_inicio,docsOk:x.docs_completos,fin:x.tramite_fin,res:x.credito_result,docs:x.documentos||{}});
 async function cargar(){
   const[s,c,v,q]=await Promise.all([todo("sucursales","*"),
-    todo("clientes","id,empresa,giro,tipo,latitud,longitud,link_maps,ciudad,unidades_flota,id_sucursal,km_sucursal,estatus,semanas_arrastre,intentos,horario_sugerido,motivo_escalado,revisar_ubicacion,codigo_erp,razon_social,ultima_compra,areas_cobertura,cuenta_id,creado_en,observaciones,observaciones_por,observaciones_en,linea_autorizada,linea_desde"),
+    todo("clientes","id,empresa,giro,tipo,latitud,longitud,link_maps,ciudad,unidades_flota,id_sucursal,km_sucursal,estatus,semanas_arrastre,intentos,horario_sugerido,motivo_escalado,revisar_ubicacion,codigo_erp,razon_social,ultima_compra,areas_cobertura,cuenta_id,creado_en,observaciones,observaciones_por,observaciones_en,linea_autorizada,linea_desde,actualizado_en"),
     todo("visitas","*"),todo("cotizaciones","*")]);
   // check-ins: los míos abiertos (visita en curso) y los que quedaron sin check-out
   const{data:cr}=await SB.from("creditos").select("*").order("id");CREDS=cr||[];CRED={};for(const x of CREDS)CRED[x.cliente_id]=x;  // la más reciente por cliente
   const{data:ck}=await SB.from("checkins").select("id,cliente_id,correo,inicio,cerrado_en,abandonado,verificacion,distancia_m,latitud,longitud,ubicacion_incorrecta");CKS=ck||[];
   CHK=Object.fromEntries(CKS.filter(x=>!x.cerrado_en&&x.correo===YO.correo.toLowerCase()).map(x=>[x.cliente_id,x]));
   const q0=q,IX0=Object.fromEntries(c.map(x=>[x.id,1]));
+  // avisos personales de los últimos 7 días (si aún no se instala el SQL 28, se ignora)
+  {const{data:av,error:ea}=await SB.from("avisos").select("id,tipo,titulo,detalle,cliente_id,creado_en,leido_en").gte("creado_en",new Date(Date.now()-7*864e5).toISOString()).order("creado_en",{ascending:false}).limit(50);AVS=ea?[]:(av||[])}
   const{data:cu}=await SB.from("cuentas_v").select("*");CUENTAS=Object.fromEntries((cu||[]).map(k=>[k.id,k]));
   const{data:pf}=await SB.from("perfiles").select("correo,nombre"); // el gerente solo ve el suyo; regional y admin ven todos
   const NOM=Object.fromEntries((pf||[]).filter(x=>x.nombre).map(x=>[x.correo,x.nombre]));NOMS=NOM;
@@ -979,7 +999,7 @@ async function cargar(){
   // sucursales propias; las demás solo aparecen porque se ven sedes de una cuenta centralizada
   SUC=TODAS.filter(x=>YO.rol==="regional"?x.reg===YO.correo.toLowerCase():YO.rol==="gerente"?x.id===YO.id_sucursal:true);
   CL=c.filter(x=>SI[x.id_sucursal]).map(x=>({id:x.id,nombre:x.empresa,giro:x.giro||"Otro",lat:x.latitud,lng:x.longitud,link:x.link_maps,ciudad:x.ciudad,flota:x.unidades_flota,
-    suc:SI[x.id_sucursal],km:x.km_sucursal==null?null:+x.km_sucursal,st:STMAP[x.estatus]||"disp",arr:x.estatus==="asignado"&&x.semanas_arrastre>0?1:0,intentos:x.intentos||0,horario:x.horario_sugerido,motivo:x.motivo_escalado,tipo:x.tipo,revisar:!!x.revisar_ubicacion,erp:x.codigo_erp,rs:x.razon_social,ult:x.ultima_compra,cob:x.areas_cobertura||[],cuenta:x.cuenta_id,alta:x.creado_en?String(x.creado_en).slice(0,10):null,obs:x.observaciones||"",obsPor:x.observaciones_por,obsEn:x.observaciones_en,linea:!!x.linea_autorizada,lineaDesde:x.linea_desde}));
+    suc:SI[x.id_sucursal],km:x.km_sucursal==null?null:+x.km_sucursal,st:STMAP[x.estatus]||"disp",arr:x.estatus==="asignado"&&x.semanas_arrastre>0?1:0,intentos:x.intentos||0,horario:x.horario_sugerido,motivo:x.motivo_escalado,tipo:x.tipo,revisar:!!x.revisar_ubicacion,erp:x.codigo_erp,rs:x.razon_social,ult:x.ultima_compra,cob:x.areas_cobertura||[],cuenta:x.cuenta_id,alta:x.creado_en?String(x.creado_en).slice(0,10):null,obs:x.observaciones||"",obsPor:x.observaciones_por,obsEn:x.observaciones_en,linea:!!x.linea_autorizada,lineaDesde:x.linea_desde,upd:x.actualizado_en}));
   // texto de búsqueda de cada cliente (sin acentos ni mayúsculas)
   const FOL={};for(const q of q0)if(IX0[q.cliente_id])(FOL[q.cliente_id]=FOL[q.cliente_id]||[]).push(q.folio);
   for(const c of CL)c.hay=sinAcento([c.nombre,c.rs,c.erp,c.id,c.ciudad,c.giro,c.obs,c.suc.n,c.suc.g,(CUENTAS[c.cuenta]||{}).nombre,...(FOL[c.id]||[])].filter(Boolean).join(" "));
@@ -1621,48 +1641,123 @@ matchMedia("(prefers-color-scheme: dark)").addEventListener("change",pintarTema)
 /* ---------- campanita de avisos (regional y administración) ---------- */
 const LISTOS=[]; // resueltos mientras el panel está abierto: se muestran como confirmación
 const gmap=(la,ln)=>`https://www.google.com/maps/search/?api=1&query=${la},${ln}`;
-function datosAvisos(){
-  const mios=CL.filter(c=>SUC.some(x=>x.id===c.at));
-  const ubic=mios.filter(c=>c.revisar).map(c=>{const k=CKS.filter(x=>x.cliente_id===c.id&&x.ubicacion_incorrecta&&x.latitud!=null).sort((a,b)=>a.inicio<b.inicio?1:-1)[0];
-    return{c,k,d:k&&c.lat!=null?Math.round(dist(c,{lat:k.latitud,lng:k.longitud})*1000):null}});
-  const escs=mios.filter(c=>c.st==="esc"&&!c.revisar),act=mios.filter(c=>c.tipo===ACT&&!mesDe(c).ok);
-  const por=(a,f)=>{const o={};for(const c of a){const k=f(c);o[k]=(o[k]||0)+1}return Object.entries(o).sort((x,y)=>y[1]-x[1])};
-  return{ubic,escs,act,porMotivo:por(escs,c=>(c.motivo||"Sin motivo").replace(/ → regional$/,"")),porGerEsc:por(escs,c=>c.suc.g),porGerAct:por(act,c=>c.suc.g)};
+/* Cada nivel ve lo que le toca: gerente = qué hago yo; regional = qué resuelvo o reviso con mi equipo (por gerente);
+   directivo = dónde se atora la operación (por regional/zona). Prioridad: urgente (cuenta en el número rojo), para revisar, informativo. */
+let NTAB=null;
+const porK=(a,f)=>{const o={};for(const c of a){const k=f(c);o[k]=(o[k]||0)+1}return Object.entries(o).sort((x,y)=>y[1]-x[1])};
+const listaK=(a,max=4)=>a.slice(0,max).map(([k,v])=>`<li><span>${esc(k)}</span><b>${v}</b></li>`).join("")+(a.length>max?`<li class="hint"><span>y ${a.length-max} más</span></li>`:"");
+const deSucs=sucs=>CL.filter(c=>sucs.some(x=>x.id===c.at));
+const lunesHoy=()=>addDias(HOY,-((new Date(HOY+"T12:00:00").getDay()+6)%7));
+function ubicaciones(sucs){return deSucs(sucs).filter(c=>c.revisar).map(c=>{const k=CKS.filter(x=>x.cliente_id===c.id&&x.ubicacion_incorrecta&&x.latitud!=null).sort((a,b)=>a.inicio<b.inicio?1:-1)[0];
+  return{c,k,d:k&&c.lat!=null?Math.round(dist(c,{lat:k.latitud,lng:k.longitud})*1000):null,dias:k?diasDesde(new Date(k.inicio).toLocaleDateString("en-CA")):null}})}
+function sinCheckout(sucs){const ids=new Set(deSucs(sucs).map(c=>c.id)),h7=addDias(HOY,-7);
+  return CKS.filter(k=>ids.has(k.cliente_id)&&new Date(k.inicio).toLocaleDateString("en-CA")>=h7&&(k.abandonado||(!k.cerrado_en&&Date.now()-new Date(k.inicio)>12*36e5)))}
+const porVencer=sucs=>{const ids=new Set(deSucs(sucs).map(c=>c.id));return COTS.filter(q=>q.estado==="abierta"&&ids.has(q.cli)&&!(q.docsOk&&!q.fin)&&restan(q)<=2).sort((a,b)=>restan(a)-restan(b))};
+// focos rojos de un gerente (su sucursal)
+function focos(x){
+  const cl=CL.filter(c=>c.at===x.id),act=cl.filter(c=>c.tipo===ACT),sinV=act.filter(c=>!mesDe(c).ok).length,F=[];
+  const vs=visitasDe(new Set(cl.filter(prosp).map(c=>c.id)),lunesHoy(),HOY).length,dow=new Date(HOY+"T12:00:00").getDay();
+  const mes1=HOY.slice(0,8)+"01",ids=new Set(cl.map(c=>c.id)),cer=COTS.filter(q=>ids.has(q.cli)&&q.estado!=="abierta"&&q.cierre>=mes1),g=cer.filter(q=>q.estado==="ganada").length;
+  const ck=sinCheckout([x]).length;
+  if(act.length&&sinV>=3&&sinV/act.length>.5)F.push(`${sinV} de ${act.length} activos sin visita`);
+  if((dow>=4||dow===0)&&vs<5)F.push(`meta de la semana ${vs}/10`);
+  if(cer.length>=3&&g/cer.length<.3)F.push(`cierre ${Math.round(g/cer.length*100)}% este mes`);
+  if(ck)F.push(`${ck} ${ck===1?"visita":"visitas"} sin check-out`);
+  return F;
 }
+function ubCard({c,k,d}){return `<article class="nt-ub">
+  <div class="nt-ub-h"><b>${esc(c.nombre)}</b><span>Reportó ${esc(c.suc.g)} · ${k?fecha(new Date(k.inicio).toLocaleDateString("en-CA")):"sin check-in"}</span></div>
+  <p>${k?(d!=null?`El pin actual está a <b>${mts(d)}</b> de donde hizo check-in.`:"El cliente no tenía ubicación.")+` <a class="lnk" href="${gmap(k.latitud,k.longitud)}" target="_blank" rel="noopener">Ver la reportada ↗</a>${c.lat!=null?` · <a class="lnk" href="${gmap(c.lat,c.lng)}" target="_blank" rel="noopener">Ver la actual ↗</a>`:""}`:"No se encontró el check-in con la ubicación reportada; puedes dejar la actual."}</p>
+  <div class="nt-acts">${k?`<button type="button" class="btn pri" data-ub="si" data-cli="${c.id}">Aprobar la nueva</button>`:""}<button type="button" class="btn" data-ub="no" data-cli="${c.id}">Dejar la actual</button><button type="button" class="btn ghost-b" data-id="${c.id}">Abrir ficha</button></div>
+</article>`}
+const F_=(prio,ic,c,t,sub,n,body,acc="")=>({prio,ic,c,t,sub,n,body,acc});
+// bandeja del regional (también la zona propia de un directivo)
+function fichasRegional(sucs,zonaTxt=""){
+  const out=[],U=ubicaciones(sucs),CK=sinCheckout(sucs),QV=porVencer(sucs),cl=deSucs(sucs);
+  if(U.length||LISTOS.length)out.push(F_("urg","📍","--st-esc",`Ubicaciones por aprobar${zonaTxt}`,"Tus gerentes hicieron check-in y reportaron que el pin del cliente está mal",U.length,U.map(ubCard).join("")+LISTOS.map(t=>`<p class="nt-ok">✓ ${esc(t)}</p>`).join("")));
+  if(CK.length)out.push(F_("urg","⏱","--st-esc",`Visitas sin check-out${zonaTxt}`,"Hicieron check-in y no cerraron la visita (últimos 7 días): la duración no se mide",CK.length,`<ul class="nt-l">${listaK(porK(CK,k=>(cli(k.cliente_id)||{suc:{g:"—"}}).suc.g))}</ul>`,`<button type="button" class="btn" data-nv="equipo:tiempos">Ver tiempos por gerente</button>`));
+  if(QV.length)out.push(F_("urg","⌛","--warn",`Cotizaciones por vencer${zonaTxt}`,"Vencen en 2 días o menos: revisa con el gerente si se gana o se pierde",QV.length,`<ul class="nt-l">${QV.slice(0,4).map(q=>{const c=cli(q.cli);return `<li><span>${esc(c.nombre)} · ${esc(c.suc.g)}</span><b>${restan(q)?`${restan(q)} d`:"hoy"}</b></li>`}).join("")}${QV.length>4?`<li class="hint"><span>y ${QV.length-4} más</span></li>`:""}</ul>`,`<button type="button" class="btn" data-nv="ventas:cotSec">Ver cotizaciones</button>`));
+  const E=cl.filter(c=>c.st==="esc"&&!c.revisar),nuevos=E.filter(c=>c.upd&&c.upd.slice(0,10)>=addDias(HOY,-7)).length;
+  if(E.length)out.push(F_("rev","↩︎","--warn",`${YO.rol==="regional"?"Reasignados a ti":"Asignados al regional"} por falta de seguimiento${zonaTxt}`,`Prospectos que el gerente no pudo atender${nuevos?` · ${nuevos} nuevos esta semana`:""}`,E.length,
+    `<ul class="nt-l">${listaK(porK(E,c=>(c.motivo||"Sin motivo").replace(/ → regional$/,"")),3)}</ul><div class="lbl" style="margin-top:8px">Por gerente</div><ul class="nt-l">${listaK(porK(E,c=>c.suc.g))}</ul>`,`<button type="button" class="btn" data-nv="resumen:alertas">Ver la lista y decidir</button>`));
+  const G=sucs.map(x=>({x,f:focos(x)})).filter(r=>r.f.length).sort((a,b)=>b.f.length-a.f.length);
+  if(G.length)out.push(F_("rev","👤","--st-asig",`Gerentes para revisar${zonaTxt}`,"Focos rojos de esta semana y este mes: toca uno para ver su sucursal",G.length,
+    `<div class="nt-ger">${G.slice(0,8).map(({x,f})=>`<button type="button" class="nt-gr" data-nvsuc="${x.id}"><span class="us-av" style="--c:var(--st-esc)">${esc(iniciales(x.g))}</span><span><b>${esc(x.g)}</b><span>${f.map(esc).join(" · ")}</span></span><i aria-hidden="true">›</i></button>`).join("")}</div>${G.length>8?`<p class="hint">y ${G.length-8} más</p>`:""}`));
+  const A=cl.filter(c=>c.tipo===ACT&&!mesDe(c).ok);
+  if(A.length)out.push(F_("info","★","--st-asig",`Activos sin visita en 30 días${zonaTxt}`,"Siguen con su gerente; no se reasignan solos",A.length,`<ul class="nt-l">${listaK(porK(A,c=>c.suc.g))}</ul>`,`<button type="button" class="btn" data-nv="equipo:actSec">Ver por gerente</button>`));
+  return out;
+}
+// supervisión del directivo: por regional
+function fichasDirectivo(){
+  const mio=(YO.correo||"").toLowerCase(),propias=SUC.filter(x=>x.reg===mio),zonas=[...new Set(SUC.filter(x=>x.reg!==mio).map(x=>x.reg))];
+  const out=propias.length?fichasRegional(propias," · tu zona"):[];
+  const Z=zonas.map(r=>{const s2=SUC.filter(x=>x.reg===r),U=ubicaciones(s2),CK=sinCheckout(s2),cl=deSucs(s2),E=cl.filter(c=>c.st==="esc"&&!c.revisar);
+    return{r,nom:zonaNom(r),s2,U,CK,E,nuevos:E.filter(c=>c.upd&&c.upd.slice(0,10)>=addDias(HOY,-7)).length,G:s2.map(x=>({x,f:focos(x)})).filter(g=>g.f.length),A:cl.filter(c=>c.tipo===ACT&&!mesDe(c).ok)}});
+  const btn=r=>`<button type="button" class="btn nt-mini" data-nvzona="${esc(r)}">Ver su zona</button>`;
+  const atoro=Z.filter(z=>z.U.length||z.CK.length);
+  if(atoro.length)out.push(F_("urg","⚑","--st-esc","Pendientes sin resolver por regional","Lo que cada regional tiene por atender con sus gerentes",atoro.reduce((t,z)=>t+z.U.length+z.CK.length,0),
+    atoro.map(z=>{const vieja=Math.max(0,...z.U.map(u=>u.dias||0)),quien=porK(z.U,u=>u.c.suc.g).map(([g,n])=>`${g} (${n})`).join(", ");
+      return `<div class="nt-zona"><div><b>${esc(z.nom)}</b><span>${z.U.length?`${z.U.length} ${z.U.length===1?"ubicación":"ubicaciones"} por aprobar, reportadas por ${esc(quien)}${vieja?`; la más vieja de ${vieja} días`:""}`:""}${z.U.length&&z.CK.length?" · ":""}${z.CK.length?`${z.CK.length} ${z.CK.length===1?"visita":"visitas"} sin check-out`:""}</span></div>${btn(z.r)}</div>`}).join("")));
+  const conE=Z.filter(z=>z.E.length).sort((a,b)=>b.E.length-a.E.length);
+  if(conE.length)out.push(F_("rev","↩︎","--warn","Zonas con más reasignados","Prospectos que los gerentes no atendieron y pasaron al regional",conE.reduce((t,z)=>t+z.E.length,0),
+    conE.map(z=>{const[m,n]=porK(z.E,c=>(c.motivo||"Sin motivo").replace(/ → regional$/,""))[0];return `<div class="nt-zona"><div><b>${esc(z.nom)}: ${z.E.length}</b><span>${z.nuevos?`+${z.nuevos} esta semana · `:""}${Math.round(n/z.E.length*100)}% por «${esc(m)}»</span></div>${btn(z.r)}</div>`}).join("")));
+  const conG=Z.filter(z=>z.G.length).sort((a,b)=>b.G.length-a.G.length);
+  if(conG.length)out.push(F_("rev","👥","--st-asig","Zonas con alertas de desempeño","Gerentes con focos rojos: activos sin visita, meta baja, cierre bajo o visitas sin cerrar",conG.reduce((t,z)=>t+z.G.length,0),
+    conG.map(z=>`<div class="nt-zona"><div><b>${esc(z.nom)}: ${z.G.length} de ${z.s2.length} gerentes</b><span>${z.G.slice(0,3).map(g=>`${esc(g.x.g)} (${esc(g.f[0])})`).join(" · ")}${z.G.length>3?" …":""}</span></div>${btn(z.r)}</div>`).join("")));
+  const conA=Z.filter(z=>z.A.length).sort((a,b)=>b.A.length-a.A.length);
+  if(conA.length)out.push(F_("info","★","--st-asig","Activos sin visita por zona","Clientes activos sin visita en 30 días",conA.reduce((t,z)=>t+z.A.length,0),
+    `<ul class="nt-l">${conA.map(z=>{const[g,n]=porK(z.A,c=>c.suc.g)[0];return `<li><span>${esc(z.nom)} · más: ${esc(g)} (${n})</span><b>${z.A.length}</b></li>`}).join("")}</ul>`));
+  return out;
+}
+// tareas del gerente
+function fichasGerente(){
+  const x=SUC.find(y=>y.id===rol),out=[];if(!x)return out;
+  const abiertas=Object.values(CHK);
+  if(abiertas.length)out.push(F_("urg","⏱","--st-esc","Tienes una visita sin cerrar","Termínala con «Terminar visita» para que se mida la duración",abiertas.length,
+    abiertas.map(k=>{const c=cli(k.cliente_id);return `<div class="nt-zona"><div><b>${esc(c?c.nombre:k.cliente_id)}</b><span>Check-in ${hace(k.inicio)}</span></div><button type="button" class="btn nt-mini" data-id="${k.cliente_id}">Abrir</button></div>`}).join("")));
+  const QV=porVencer([x]);
+  if(QV.length)out.push(F_("urg","⌛","--warn","Cotizaciones por vencer","Vencen en 2 días o menos: confirma con el cliente si se gana o se pierde",QV.length,
+    QV.slice(0,5).map(q=>{const c=cli(q.cli);return `<div class="nt-zona"><div><b>${esc(c.nombre)}</b><span>${q.id} · ${corto(q.monto)} · ${restan(q)?`vence en ${restan(q)} ${restan(q)===1?"día":"días"}`:"vence hoy"}</span></div><button type="button" class="btn nt-mini" data-id="${c.id}">Abrir</button></div>`}).join("")));
+  const nl=AVS.filter(a=>!a.leido_en).length;
+  if(AVS.length)out.push(F_("rev","✉︎","--st-asig","Respuestas de tu regional y de Crédito",nl?`${nl} sin leer · últimos 7 días`:"Últimos 7 días",nl,
+    AVS.map(a=>`<div class="nt-av${a.leido_en?" leido":""}"><b>${esc(a.titulo)}</b><span>${esc(a.detalle||"")}</span><small>${hace(a.creado_en)}</small></div>`).join(""),nl?`<button type="button" class="btn" data-leer>Marcar como leídos</button>`:""));
+  const vs=visitasDe(new Set(CL.filter(c=>c.at===x.id&&prosp(c)).map(c=>c.id)),lunesHoy(),HOY).length;
+  out.push(F_("info","🎯","--st-vis",`Tu meta de la semana: ${vs}/10`,vs>=10?"¡Meta cumplida!":`Te faltan ${10-vs} visitas a prospectos · quedan ${habilesRestantes()} días hábiles`,0,`<div class="meter" style="margin-top:2px"><i style="width:${Math.min(vs/10,1)*100}%"></i></div><p class="hint" style="margin:6px 0 0">${vs} de 10 visitas a prospectos esta semana</p>`,`<button type="button" class="btn" data-nv="semana:gCards">Ver mi lista</button>`));
+  const A=CL.filter(c=>c.at===x.id&&c.tipo===ACT&&!mesDe(c).ok);
+  if(A.length)out.push(F_("info","★","--st-asig","Activos por visitar este mes","Clientes activos sin visita en 30 días",A.length,
+    `<ul class="nt-l">${A.slice(0,4).map(c=>{const m=mesDe(c);return `<li><span>${esc(c.nombre)}</span><b>${m.u?`hace ${m.d} d`:"sin visita"}</b></li>`}).join("")}${A.length>4?`<li class="hint"><span>y ${A.length-4} más</span></li>`:""}</ul>`,`<button type="button" class="btn" data-nv="gclientes:gActSec">Ver mis activos</button>`));
+  return out;
+}
+const nivelAv=()=>rol!=="reg"?"gerente":YO.rol==="admin"?"directivo":"regional";
+const fichasAvisos=()=>{const n=nivelAv();return n==="gerente"?fichasGerente():n==="directivo"?fichasDirectivo():fichasRegional(SUC)};
 function avisos(){
-  const b=$("campana");b.hidden=rol!=="reg";if(b.hidden)return;
-  const A=datosAvisos(),n=A.ubic.length+A.escs.length;
-  $("campanaN").hidden=!n;$("campanaN").textContent=n>99?"99+":n;b.classList.toggle("urge",A.ubic.length>0);
-  b.setAttribute("aria-label",n?`Avisos: ${A.ubic.length} ubicaciones por aprobar, ${A.escs.length} clientes reasignados`:"Avisos: sin pendientes");
-  if($("notif").open)pintarAvisos(A);
+  const b=$("campana");b.hidden=!YO;if(b.hidden)return;
+  const F=fichasAvisos(),urg=F.filter(f=>f.prio==="urg").reduce((t,f)=>t+f.n,0),nl=AVS.filter(a=>!a.leido_en).length;
+  // el número rojo cuenta solo lo urgente; si solo hay respuestas sin leer, un punto
+  $("campanaN").hidden=!urg&&!nl;$("campanaN").textContent=urg?(urg>99?"99+":urg):"•";b.classList.toggle("urge",urg>0);
+  b.setAttribute("aria-label",urg?`Avisos: ${urg} ${urg===1?"urgente":"urgentes"}`:nl?`Avisos: ${nl} sin leer`:"Avisos: sin pendientes urgentes");
+  if($("notif").open)pintarAvisos(F);
 }
-function pintarAvisos(A=datosAvisos()){
-  const lista=(a,max=4)=>a.slice(0,max).map(([k,v])=>`<li><span>${esc(k)}</span><b>${v}</b></li>`).join("")+(a.length>max?`<li class="hint"><span>y ${a.length-max} más</span></li>`:"");
-  const yoReg=YO.rol==="regional";
-  $("notifB").innerHTML=`
-  <section class="nt"><div class="nt-h"><span class="nt-ic" style="--c:var(--st-esc)">📍</span><div><b>Ubicaciones por aprobar</b><span>El gerente hizo check-in y reportó que el pin del cliente está mal</span></div><b class="nt-n">${A.ubic.length}</b></div>
-    ${A.ubic.length?A.ubic.map(({c,k,d})=>`<article class="nt-ub">
-      <div class="nt-ub-h"><b>${esc(c.nombre)}</b><span>${esc(c.suc.g)} · ${k?fecha(new Date(k.inicio).toLocaleDateString("en-CA")):"sin check-in"}</span></div>
-      <p>${k?(d!=null?`El pin actual está a <b>${mts(d)}</b> de donde hizo check-in.`:"El cliente no tenía ubicación.")+` <a class="lnk" href="${gmap(k.latitud,k.longitud)}" target="_blank" rel="noopener">Ver la reportada ↗</a>${c.lat!=null?` · <a class="lnk" href="${gmap(c.lat,c.lng)}" target="_blank" rel="noopener">Ver la actual ↗</a>`:""}`:"No se encontró el check-in con la ubicación reportada; puedes dejar la actual."}</p>
-      <div class="nt-acts">${k?`<button type="button" class="btn pri" data-ub="si" data-cli="${c.id}">Aprobar la nueva</button>`:""}<button type="button" class="btn" data-ub="no" data-cli="${c.id}">Dejar la actual</button><button type="button" class="btn ghost-b" data-id="${c.id}">Abrir ficha</button></div>
-    </article>`).join(""):LISTOS.length?"":'<p class="hint">Nada pendiente.</p>'}
-    ${LISTOS.map(t=>`<p class="nt-ok">✓ ${esc(t)}</p>`).join("")}
-  </section>
-  <section class="nt"><div class="nt-h"><span class="nt-ic" style="--c:var(--warn)">↩︎</span><div><b>${yoReg?"Reasignados a ti por falta de seguimiento":"Asignados al regional por falta de seguimiento"}</b><span>Prospectos que el gerente no pudo atender</span></div><b class="nt-n">${A.escs.length}</b></div>
-    ${A.escs.length?`<ul class="nt-l">${lista(A.porMotivo)}</ul><div class="lbl" style="margin-top:8px">Por gerente</div><ul class="nt-l">${lista(A.porGerEsc)}</ul>
-    <button type="button" class="btn" data-nv="resumen:alertas">Ver la lista y decidir</button>`:'<p class="hint">Nada pendiente.</p>'}
-  </section>
-  <section class="nt"><div class="nt-h"><span class="nt-ic" style="--c:var(--st-asig)">★</span><div><b>Clientes activos sin visita en 30 días</b><span>Informativo: siguen con su gerente; no se reasignan solos</span></div><b class="nt-n">${A.act.length}</b></div>
-    ${A.act.length?`<ul class="nt-l">${lista(A.porGerAct)}</ul><button type="button" class="btn" data-nv="equipo:actSec">Ver por gerente</button>`:'<p class="hint">Todos los activos tienen visita reciente.</p>'}
-  </section>`;
+function pintarAvisos(F=fichasAvisos()){
+  const T=[["urg","Urgente"],["rev","Para revisar"],["info","Informativo"]],cnt=k=>F.filter(f=>f.prio===k).length,tot=k=>F.filter(f=>f.prio===k).reduce((t,f)=>t+f.n,0);
+  if(!NTAB)NTAB=(T.find(([k])=>cnt(k))||T[0])[0];   // al abrir: la primera pestaña con algo
+  const niv=nivelAv();
+  $("notifT").textContent="Avisos";
+  $("notifB").innerHTML=`<p class="hint nt-quien">${niv==="gerente"?"Tus pendientes y las respuestas a lo que reportaste":niv==="directivo"?"Supervisión por regional y zona":"Lo que tienes que resolver o revisar con tus gerentes"}</p>
+   <div class="nt-tabs" role="tablist">${T.map(([k,t])=>`<button type="button" role="tab" aria-selected="${k===NTAB}" data-ntab="${k}" class="${k}">${t}<b>${(tot(k)||cnt(k))>99?"99+":(tot(k)||cnt(k))}</b></button>`).join("")}</div>
+   ${F.filter(f=>f.prio===NTAB).map(f=>`<section class="nt ficha" style="--c:var(${f.c})"><div class="nt-h"><span class="nt-ic">${f.ic}</span><div><b>${esc(f.t)}</b><span>${esc(f.sub)}</span></div>${f.n?`<b class="nt-n">${f.n}</b>`:""}</div>${f.body}${f.acc}</section>`).join("")||'<p class="empty">Nada en esta sección.</p>'}`;
 }
-$("campana").onclick=()=>{pintarAvisos();$("notif").showModal()};
+$("campana").onclick=()=>{NTAB=null;pintarAvisos();$("notif").showModal()};
 $("notifX").onclick=()=>$("notif").close();
 $("notif").addEventListener("close",()=>{LISTOS.length=0});
 $("notif").addEventListener("click",async e=>{const d=$("notif");
   if(e.target===d){d.close();return}   // clic fuera del panel
   if(e.target.closest("[data-id]")){d.close();return}  // «Abrir ficha» lo abre el manejador general
+  const tb=e.target.closest("[data-ntab]");if(tb){NTAB=tb.dataset.ntab;pintarAvisos();return}
   const nv=e.target.closest("[data-nv]");if(nv){const[k,el]=nv.dataset.nv.split(":");d.close();verSec(k);$(el).scrollIntoView({behavior:"smooth",block:"start"});return}
+  const vz=e.target.closest("[data-nvsuc],[data-nvzona]");if(vz){d.close();$("vista").value=vz.dataset.nvsuc||"z:"+vz.dataset.nvzona;mostrar=10;render();verSec("resumen");return}
+  if(e.target.closest("[data-leer]")){const ids=AVS.filter(a=>!a.leido_en).map(a=>a.id),t=new Date().toISOString();
+    const{error}=await SB.from("avisos").update({leido_en:t}).in("id",ids);if(!error)AVS.forEach(a=>{if(!a.leido_en)a.leido_en=t});avisos();pintarAvisos();return}
   const u=e.target.closest("[data-ub]");if(!u)return;
   const art=u.closest(".nt-ub");art.querySelectorAll("button").forEach(x=>x.disabled=true);
   const{error}=await SB.rpc(u.dataset.ub==="si"?"corregir_ubicacion":"rechazar_ubicacion",{cliente:u.dataset.cli});
