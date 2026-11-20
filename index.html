@@ -2,7 +2,7 @@
 <html lang="es">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, interactive-widget=resizes-content">
 <meta name="theme-color" content="#0f1b2d">
 <script>try{var t=localStorage.getItem("rf.tema");if(t==="light"||t==="dark")document.documentElement.dataset.theme=t}catch(e){}</script>
 <meta name="apple-mobile-web-app-capable" content="yes">
@@ -884,7 +884,7 @@ body{background:radial-gradient(1100px 600px at 85% -10%,var(--glow1),transparen
       <button class="btn pri" type="submit" style="padding:12px">Entrar</button>
       <span class="toast" id="lErr" role="alert" style="color:var(--st-esc)" hidden></span>
       <span class="hint" style="font-size:12px">¿No tienes acceso? Pídeselo a tu regional: las cuentas solo se crean por invitación.</span>
-      <span class="hint" style="font-size:11px">Versión 20 nov · tema en celular</span>
+      <span class="hint" style="font-size:11px">Versión 20 nov · chat con teclado</span>
       <button type="button" class="btn" id="olvide" style="border:0;background:none;color:var(--muted);text-decoration:underline;padding:0;justify-self:start">Olvidé mi contraseña</button>
     </form>
     <form class="lg-card" id="passForm" hidden>
@@ -1584,6 +1584,7 @@ function pintarChat(pensando){
 }
 async function preguntar(q){
   q=q.trim();if(!q)return;const hist=CHATH.filter(m=>!m.err).slice(-6).map(({rol,texto})=>({rol,texto}));
+  const teclado=document.activeElement===$("chatQ");  // si escribía, el teclado sigue; si tocó una sugerencia, no se abre
   CHATH.push({rol:"user",texto:q});$("chatQ").value="";$("chatEnv").disabled=true;pintarChat(true);
   let texto,err=false;
   try{const{data,error}=await SB.functions.invoke("asistente",{body:{pregunta:q,historial:hist}});
@@ -1594,10 +1595,21 @@ async function preguntar(q){
       throw new Error(m)}
     texto=data.respuesta;if(data.cupo!=null)$("chatCupo").textContent=`Te quedan ${data.cupo} preguntas hoy`;
   }catch(e){texto=e.message;err=true}
-  CHATH.push({rol:"assistant",texto,err});$("chatEnv").disabled=false;pintarChat();$("chatQ").focus();
+  CHATH.push({rol:"assistant",texto,err});$("chatEnv").disabled=false;pintarChat();if(teclado||!esCel())$("chatQ").focus();
 }
-$("asist").onclick=()=>{pintarChat();$("chat").showModal();$("chatQ").focus()};
+const esCel=()=>matchMedia("(max-width:640px)").matches;
+// iPhone: el teclado no encoge la página; el chat se ajusta al área visible para que se vean el encabezado y la barra para escribir
+function ajustarChat(){
+  const d=$("chat"),vv=window.visualViewport;
+  if(!d.open||!vv||!esCel()||vv.height>innerHeight*0.85){d.style.cssText="";return}   // sin teclado: tamaño normal
+  d.style.cssText=`position:fixed;left:0;right:0;top:${Math.round(vv.offsetTop)}px;height:${Math.round(vv.height)}px;max-height:none;width:100vw;margin:0;border-radius:0`;
+  $("chatB").scrollTop=$("chatB").scrollHeight;
+}
+if(window.visualViewport){visualViewport.addEventListener("resize",ajustarChat);visualViewport.addEventListener("scroll",ajustarChat)}
+$("chatQ").addEventListener("focus",()=>setTimeout(ajustarChat,300));
+$("asist").onclick=()=>{pintarChat();$("chat").showModal();ajustarChat();if(!esCel())$("chatQ").focus()};
 $("chatX").onclick=()=>$("chat").close();
+$("chat").addEventListener("close",()=>{$("chat").style.cssText=""});
 $("chat").addEventListener("click",e=>{if(e.target===$("chat"))$("chat").close();const g=e.target.closest("[data-sug]");if(g)preguntar(g.dataset.sug)});
 $("chatF").onsubmit=e=>{e.preventDefault();if(!$("chatEnv").disabled)preguntar($("chatQ").value)};
 $("chatQ").addEventListener("keydown",e=>{if(e.key==="Enter"&&!e.shiftKey){e.preventDefault();$("chatF").requestSubmit()}});
