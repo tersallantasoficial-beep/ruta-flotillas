@@ -93,6 +93,46 @@ button,input,select{font:inherit;color:inherit}
 .pf-ic{width:22px;height:22px;border-radius:50%;display:grid;place-items:center;font-size:12px;font-weight:800}
 .pf-ck .si .pf-ic{background:var(--st-vis);color:#fff}.pf-ck .no .pf-ic{background:var(--st-esc);color:#fff}.pf-ck .na .pf-ic{background:var(--soft2);color:var(--muted)}.pf-ck .na{color:var(--muted)}
 .pf-b{margin-top:auto;min-height:44px}
+.tour{position:fixed;inset:0;z-index:200}
+.tour-hole{position:fixed;border-radius:14px;box-shadow:0 0 0 9999px rgba(10,15,24,.62);outline:2px solid #f2b705;outline-offset:2px;transition:all .3s cubic-bezier(.2,.8,.2,1);pointer-events:none}
+.tour-bub{position:fixed;background:#fff;color:#0f1b2d;border-radius:18px;padding:16px 16px 14px;box-shadow:0 24px 60px -18px rgba(0,0,0,.55);border:2px solid #0f1b2d;display:grid;gap:8px;animation:rf-pop .3s cubic-bezier(.2,1.4,.4,1)}
+.tour-bub::after{content:"";position:absolute;left:calc(var(--cola) - 10px);width:18px;height:18px;background:#fff;border:2px solid #0f1b2d;transform:rotate(45deg)}
+.tour-bub.abajo::after{top:-11px;border-right:0;border-bottom:0}.tour-bub.arriba::after{bottom:-11px;border-left:0;border-top:0}
+.tour-bub.lado::after{left:-11px;top:calc(var(--cola) - 10px);border-top:0;border-right:0}.tour-bub.dentro::after{display:none}
+.tour-bub.centro{left:50%;top:50%;transform:translate(-50%,-50%);width:min(380px,calc(100vw - 24px));animation:none}.tour-bub.centro::after{display:none}
+.tour-paso{font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:#5a6578;font-weight:700}
+.tour-bub h3{margin:0;font-size:18px}.tour-bub p{margin:0;font-size:14px;line-height:1.45}
+.tour-no{display:flex;gap:8px;align-items:center;font-size:13px;min-height:44px;cursor:pointer}.tour-no input{width:20px;height:20px;accent-color:#0f1b2d}
+.tour-acts{display:grid;grid-template-columns:auto 1fr auto auto;gap:8px}.tour-acts .btn{min-height:44px;background:#fff;color:#0f1b2d;border-color:#dfe4ea}.tour-acts .btn.pri{background:#f2b705;border-color:#f2b705}
+@keyframes rf-pop{from{opacity:0;transform:scale(.92)}}
+@media (prefers-reduced-motion:reduce){.tour-hole{transition:none}.tour-bub{animation:none}}
+.tit-row{display:flex;align-items:center;gap:12px}
+.campana{position:relative;flex:none;width:44px;height:44px;border-radius:50%;border:1px solid var(--edge,var(--line));background:color-mix(in srgb,var(--panel) 85%,transparent);color:var(--ink);display:grid;place-items:center;cursor:pointer;box-shadow:var(--shadow)}
+.campana svg{width:22px;height:22px}#ayuda b{font-size:18px;font-family:var(--display)}.campana:hover{background:var(--panel)}
+.campana .cb{position:absolute;top:-4px;right:-4px;min-width:20px;height:20px;padding:0 5px;border-radius:999px;background:var(--st-esc);color:#fff;font-size:11px;font-weight:800;display:grid;place-items:center;border:2px solid var(--bg)}
+.campana.urge .cb{animation:rf-late 1.6s ease-in-out infinite}
+@keyframes rf-late{0%,100%{box-shadow:0 0 0 0 color-mix(in srgb,var(--st-esc) 55%,transparent)}50%{box-shadow:0 0 0 6px transparent}}
+.notif{border:1px solid var(--edge,var(--line));border-radius:18px;padding:0;width:min(440px,calc(100vw - 32px));max-height:min(80vh,760px);background:var(--panel);color:var(--ink);box-shadow:0 30px 80px -20px rgba(15,27,45,.45);margin:84px 24px auto auto}
+.notif::backdrop{background:rgba(10,15,24,.35);-webkit-backdrop-filter:blur(2px);backdrop-filter:blur(2px)}
+.notif[open]{display:flex;flex-direction:column;animation:rf-entra .25s ease-out}
+.notif-h{display:flex;align-items:center;justify-content:space-between;padding:16px 18px;border-bottom:1px solid var(--line)}.notif-h h2{margin:0;font-size:18px}
+.ghost-x{width:44px;height:44px;border-radius:50%;border:0;background:transparent;color:var(--muted);font-size:18px;cursor:pointer}.ghost-x:hover{background:var(--soft)}
+.notif-b{overflow:auto;padding:6px 18px 18px;display:grid;gap:4px;overscroll-behavior:contain}
+.nt{padding:14px 0;border-bottom:1px solid var(--line);display:grid;gap:10px}.nt:last-child{border-bottom:0}
+.nt-h{display:grid;grid-template-columns:36px minmax(0,1fr) auto;gap:10px;align-items:center}
+.nt-h span:not(.nt-ic){display:block;font-size:12px;color:var(--muted);line-height:1.3}
+.nt-ic{width:36px;height:36px;border-radius:10px;display:grid;place-items:center;background:color-mix(in srgb,var(--c) 14%,transparent);color:var(--c);font-size:16px}
+.nt-n{font-size:22px;font-variant-numeric:tabular-nums}
+.nt-ub{background:var(--soft);border:1px solid var(--line);border-radius:12px;padding:12px;display:grid;gap:8px}
+.nt-ub-h b{display:block}.nt-ub-h span{font-size:12px;color:var(--muted)}.nt-ub p{margin:0;font-size:13px;line-height:1.45}
+.nt-acts{display:flex;flex-wrap:wrap;gap:8px}.nt-acts .btn{min-height:44px;flex:1 1 auto}
+.ghost-b{background:transparent}
+.nt-l{list-style:none;margin:0;padding:0;display:grid;gap:4px;font-size:13px}.nt-l li{display:flex;justify-content:space-between;gap:10px}
+.nt-ok{color:var(--st-vis);font-weight:700;margin:0}.nt-err{color:var(--st-esc);margin:0;font-size:13px}
+@media (max-width:640px){.notif{margin:auto 0 0;width:100vw;max-width:100vw;max-height:85dvh;border-radius:20px 20px 0 0;padding-bottom:env(safe-area-inset-bottom,0px)}
+  .notif[open]{animation:rf-hoja .3s cubic-bezier(.2,.8,.2,1)}}
+@keyframes rf-hoja{from{transform:translateY(100%)}}
+@media (prefers-reduced-motion:reduce){.campana.urge .cb,.notif[open]{animation:none}}
 /* movimiento al crear las gráficas: solo cuando se abre una sección o cambia el periodo/la vista (clase .anim por 1.8 s) */
 @keyframes rf-crece{from{transform:scaleX(0)}}@keyframes rf-sube{from{transform:scaleY(0)}}
 @keyframes rf-revela{from{clip-path:inset(0 100% 0 0)}to{clip-path:inset(0 0 0 0)}}
@@ -494,7 +534,7 @@ body{background:radial-gradient(1100px 600px at 85% -10%,var(--glow1),transparen
     <div class="top" id="resumen">
       <div>
         <div class="eyebrow"><span class="live"><i></i>En vivo</span><span class="eb-sep">·</span><span id="subTop">Tijuana · 5 sucursales</span></div>
-        <h1 id="titulo">Resumen de zona</h1>
+        <div class="tit-row"><h1 id="titulo">Resumen de zona</h1><button type="button" class="campana" id="campana" aria-label="Avisos" aria-haspopup="dialog" hidden><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3a6 6 0 0 0-6 6v3.6L4.4 15.4A1 1 0 0 0 5.3 17h13.4a1 1 0 0 0 .9-1.6L18 12.6V9a6 6 0 0 0-6-6Z" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/><path d="M9.8 19.5a2.4 2.4 0 0 0 4.4 0" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg><span class="cb" id="campanaN" hidden></span></button><button type="button" class="campana" id="ayuda" aria-label="Ver el recorrido de ayuda" title="Recorrido de ayuda"><b aria-hidden="true">?</b></button></div>
       </div>
       <div class="ctrls">
         <div class="gsearch" role="search"><input class="search" id="gq" type="search" autocomplete="off" placeholder="Buscar cliente, código SAP, ciudad o folio" aria-label="Buscar cliente" aria-controls="gres"><div class="gres" id="gres" hidden></div></div>
@@ -713,6 +753,19 @@ body{background:radial-gradient(1100px 600px at 85% -10%,var(--glow1),transparen
     </form>
   </div>
 </aside>
+<div class="tour" id="tour" hidden>
+  <div class="tour-hole" id="tourHole"></div>
+  <div class="tour-bub" id="tourBub" role="dialog" aria-modal="true" aria-labelledby="tourT" aria-describedby="tourX">
+    <span class="tour-paso" id="tourPaso"></span>
+    <h3 id="tourT"></h3><p id="tourX"></p>
+    <label class="tour-no"><input type="checkbox" id="tourNo"> No volver a mostrar</label>
+    <div class="tour-acts"><button type="button" class="btn" id="tourSaltar">Cerrar</button><span></span><button type="button" class="btn" id="tourAtras">Atrás</button><button type="button" class="btn pri" id="tourSig">Siguiente</button></div>
+  </div>
+</div>
+<dialog class="notif" id="notif" aria-labelledby="notifT">
+  <div class="notif-h"><h2 id="notifT">Avisos</h2><button type="button" class="ghost-x" id="notifX" aria-label="Cerrar avisos">✕</button></div>
+  <div class="notif-b" id="notifB"></div>
+</dialog>
 <aside class="drawer" id="ficha" hidden aria-label="Ficha del cliente">
   <div class="dr-h">
     <div style="display:flex;justify-content:space-between;gap:10px;align-items:start"><div id="fChip"></div><button class="btn" type="button" id="cerrar">Cerrar</button></div>
@@ -774,7 +827,7 @@ body{background:radial-gradient(1100px 600px at 85% -10%,var(--glow1),transparen
       <button class="btn pri" type="submit" style="padding:12px">Entrar</button>
       <span class="toast" id="lErr" role="alert" style="color:var(--st-esc)" hidden></span>
       <span class="hint" style="font-size:12px">¿No tienes acceso? Pídeselo a tu regional: las cuentas solo se crean por invitación.</span>
-      <span class="hint" style="font-size:11px">Versión 19 nov · analítica y fichas</span>
+      <span class="hint" style="font-size:11px">Versión 19 nov · recorrido</span>
       <button type="button" class="btn" id="olvide" style="border:0;background:none;color:var(--muted);text-decoration:underline;padding:0;justify-self:start">Olvidé mi contraseña</button>
     </form>
     <form class="lg-card" id="passForm" hidden>
@@ -857,7 +910,7 @@ async function cargar(){
     todo("visitas","*"),todo("cotizaciones","*")]);
   // check-ins: los míos abiertos (visita en curso) y los que quedaron sin check-out
   const{data:cr}=await SB.from("creditos").select("*").order("id");CREDS=cr||[];CRED={};for(const x of CREDS)CRED[x.cliente_id]=x;  // la más reciente por cliente
-  const{data:ck}=await SB.from("checkins").select("id,cliente_id,correo,inicio,cerrado_en,abandonado,verificacion,distancia_m");CKS=ck||[];
+  const{data:ck}=await SB.from("checkins").select("id,cliente_id,correo,inicio,cerrado_en,abandonado,verificacion,distancia_m,latitud,longitud,ubicacion_incorrecta");CKS=ck||[];
   CHK=Object.fromEntries(CKS.filter(x=>!x.cerrado_en&&x.correo===YO.correo.toLowerCase()).map(x=>[x.cliente_id,x]));
   const q0=q,IX0=Object.fromEntries(c.map(x=>[x.id,1]));
   const{data:cu}=await SB.from("cuentas_v").select("*");CUENTAS=Object.fromEntries((cu||[]).map(k=>[k.id,k]));
@@ -1387,6 +1440,114 @@ function nav(){
   SEC=items.some(x=>x[0]===g)?g:items[0][0];
   $("nav").innerHTML=items.map(([k,t,ic])=>`<button type="button" data-ver="${k}" aria-current="${k===SEC}" class="${k===SEC?"on":""}">${svgI(ic)}<span>${t}</span></button>`).join("");
 }
+/* ---------- recorrido de ayuda: globos que explican cada zona; sale en cada inicio hasta marcar «No volver a mostrar» ---------- */
+// shortcut: se recuerda por navegador (localStorage); en otro celular o en el acceso directo del iPhone sale una vez más. Pasarlo a perfiles si molesta.
+const TOUR_K=()=>"rf.tour1."+(YO&&YO.correo);
+const pasosTour=()=>{const n=($("quien").textContent||"").split(" ")[0];
+  return rol==="reg"?[
+  [null,`Hola, ${n} 👋`,"Te enseño en un minuto cómo moverte por Ruta Flotillas. Usa «Siguiente» o cierra cuando quieras; puedes volver a verlo con el botón «?» de arriba."],
+  ["#heroR","Cómo va tu zona","Avance de visitas de la semana contra la meta (10 por gerente). El color te dice si van en ruta, atrasados o críticos.","resumen"],
+  ["#campana","Tus avisos","Aquí llegan las ubicaciones que un gerente reportó mal (tú apruebas o rechazas), los clientes reasignados a ti y los activos sin visita."],
+  ["#alertas","Requieren tu atención","Clientes que el gerente no pudo atender. Toca uno para regresarlo a su lista, devolverlo a la cartera o reasignarlo.","resumen"],
+  ["#seg","Periodo","Cambia entre semana, mes, mes pasado o fechas. Todos los números y gráficas se recalculan."],
+  ["#vista",YO.rol==="regional"?"Sucursal":"Zona o sucursal",YO.rol==="regional"?"Ve toda tu zona o una sola sucursal.":"Ve todo, una zona (regional) o una sola sucursal."],
+  ["#gq","Buscador","Encuentra cualquier cliente por nombre, código SAP, ciudad o folio de cotización, y abre su ficha."],
+  ["#nav","Secciones","Resumen, Equipo (fichas y ranking), Ventas (cotizaciones), Analítica (tendencias y comparativos), Clientes"+(["admin","regional"].includes(YO.rol)?" y Usuarios.":".")],
+  ["#fab","Agregar","Da de alta un cliente o prospecto nuevo con el botón +."],
+  [null,"¡Listo!","Si quieres que este recorrido ya no salga al entrar, marca «No volver a mostrar» y toca «Terminar»."]]
+  :[
+  [null,`Hola, ${n} 👋`,"Te enseño en un minuto cómo registrar tus visitas. Usa «Siguiente» o cierra cuando quieras; puedes volver a verlo con el botón «?» de arriba."],
+  ["#miSemana","Tu semana","Cuántas visitas llevas de tu meta de 10, lo que te falta y tu siguiente parada con «Cómo llegar».","semana"],
+  ["#gCards .card","Tus clientes de la semana","Al llegar con el cliente toca «Llegué» (check-in con GPS). Al terminar llenas la visita y tocas «Terminar visita»; así se mide cuánto duró.","semana"],
+  ["#gq","Buscador","Encuentra cualquier cliente tuyo y abre su ficha: historial, cotizaciones, crédito y observaciones."],
+  ["#seg","Periodo","Cambia entre semana, mes o fechas para ver tus números."],
+  ["#nav","Secciones","Mi semana, Mis clientes (activos), Cotizaciones y Mi zona (mapa)."],
+  ["#fab","Agregar","Da de alta un cliente o prospecto nuevo con el botón +."],
+  [null,"¡Listo!","Si quieres que este recorrido ya no salga al entrar, marca «No volver a mostrar» y toca «Terminar»."]]};
+let TP=[],TI=0;
+function tourAuto(){let visto=null;try{visto=localStorage.getItem(TOUR_K())}catch(e){}if(!visto)setTimeout(tour,900)}
+function tour(){TP=pasosTour().filter(([sel])=>!sel||document.querySelector(sel));TI=0;$("tourNo").checked=false;$("tour").hidden=false;pasoTour()}
+function pasoTour(){
+  const [sel,t,x,sec]=TP[TI],ult=TI===TP.length-1;
+  if(sec&&SEC!==sec)verSec(sec);
+  $("tourPaso").textContent=`${TI+1} de ${TP.length}`;$("tourT").textContent=t;$("tourX").textContent=x;
+  $("tourAtras").hidden=!TI;$("tourSig").textContent=ult?"Terminar":"Siguiente";
+  const el=sel&&document.querySelector(sel),h=$("tourHole"),b=$("tourBub");
+  const colocar=()=>{
+    if(!el||!el.offsetParent){h.style.cssText="left:50%;top:40%;width:0;height:0";b.className="tour-bub centro";b.style.cssText="";return}
+    const r=el.getBoundingClientRect(),m=6,W=innerWidth,H=innerHeight,t0=Math.max(r.top,8),b0=Math.min(r.bottom,H-8);
+    h.style.cssText=`left:${r.left-m}px;top:${t0-m}px;width:${r.width+2*m}px;height:${b0-t0+2*m}px`;
+    const bw=Math.min(340,W-24);b.className="tour-bub";b.style.cssText=`width:${bw}px;left:0;top:0;visibility:hidden`;const bh=b.offsetHeight;
+    let left=Math.max(12,Math.min(W-bw-12,r.left+r.width/2-bw/2)),top,cls;
+    if(H-b0-14>=bh+12){top=b0+14;cls="abajo"}                       // cabe abajo
+    else if(t0-14>=bh+12){top=t0-14-bh;cls="arriba"}                 // cabe arriba
+    else if(r.right+bw+26<=W){left=r.right+14;top=Math.max(12,Math.min(H-bh-12,t0));cls="lado"}  // a un lado (riel de escritorio)
+    else{top=H-bh-12;cls="dentro"}                                     // zona muy grande: globo dentro de la pantalla, sin cola
+    const cola=cls==="lado"?Math.max(18,Math.min(bh-18,(t0+b0)/2-top)):Math.max(18,Math.min(bw-18,r.left+r.width/2-left));
+    b.className="tour-bub "+cls;b.style.cssText=`width:${bw}px;left:${left}px;top:${top}px;--cola:${cola}px`};
+  if(el){const r=el.getBoundingClientRect();if(r.top<70||r.bottom>innerHeight-80)el.scrollIntoView({block:"center"})}
+  requestAnimationFrame(()=>requestAnimationFrame(colocar));
+  $("tourSig").focus({preventScroll:true});
+}
+function cerrarTour(){if($("tourNo").checked)try{localStorage.setItem(TOUR_K(),new Date().toISOString())}catch(e){}$("tour").hidden=true}
+$("tourSig").onclick=()=>{TI===TP.length-1?cerrarTour():(TI++,pasoTour())};
+$("tourAtras").onclick=()=>{if(TI){TI--;pasoTour()}};
+$("tourSaltar").onclick=cerrarTour;
+$("ayuda").onclick=tour;
+addEventListener("keydown",e=>{if($("tour").hidden)return;if(e.key==="Escape")cerrarTour();else if(e.key==="ArrowRight")$("tourSig").click();else if(e.key==="ArrowLeft")$("tourAtras").click()});
+addEventListener("resize",()=>{if(!$("tour").hidden)pasoTour()});
+/* ---------- campanita de avisos (regional y administración) ---------- */
+const LISTOS=[]; // resueltos mientras el panel está abierto: se muestran como confirmación
+const gmap=(la,ln)=>`https://www.google.com/maps/search/?api=1&query=${la},${ln}`;
+function datosAvisos(){
+  const mios=CL.filter(c=>SUC.some(x=>x.id===c.at));
+  const ubic=mios.filter(c=>c.revisar).map(c=>{const k=CKS.filter(x=>x.cliente_id===c.id&&x.ubicacion_incorrecta&&x.latitud!=null).sort((a,b)=>a.inicio<b.inicio?1:-1)[0];
+    return{c,k,d:k&&c.lat!=null?Math.round(dist(c,{lat:k.latitud,lng:k.longitud})*1000):null}});
+  const escs=mios.filter(c=>c.st==="esc"&&!c.revisar),act=mios.filter(c=>c.tipo===ACT&&!mesDe(c).ok);
+  const por=(a,f)=>{const o={};for(const c of a){const k=f(c);o[k]=(o[k]||0)+1}return Object.entries(o).sort((x,y)=>y[1]-x[1])};
+  return{ubic,escs,act,porMotivo:por(escs,c=>(c.motivo||"Sin motivo").replace(/ → regional$/,"")),porGerEsc:por(escs,c=>c.suc.g),porGerAct:por(act,c=>c.suc.g)};
+}
+function avisos(){
+  const b=$("campana");b.hidden=rol!=="reg";if(b.hidden)return;
+  const A=datosAvisos(),n=A.ubic.length+A.escs.length;
+  $("campanaN").hidden=!n;$("campanaN").textContent=n>99?"99+":n;b.classList.toggle("urge",A.ubic.length>0);
+  b.setAttribute("aria-label",n?`Avisos: ${A.ubic.length} ubicaciones por aprobar, ${A.escs.length} clientes reasignados`:"Avisos: sin pendientes");
+  if($("notif").open)pintarAvisos(A);
+}
+function pintarAvisos(A=datosAvisos()){
+  const lista=(a,max=4)=>a.slice(0,max).map(([k,v])=>`<li><span>${esc(k)}</span><b>${v}</b></li>`).join("")+(a.length>max?`<li class="hint"><span>y ${a.length-max} más</span></li>`:"");
+  const yoReg=YO.rol==="regional";
+  $("notifB").innerHTML=`
+  <section class="nt"><div class="nt-h"><span class="nt-ic" style="--c:var(--st-esc)">📍</span><div><b>Ubicaciones por aprobar</b><span>El gerente hizo check-in y reportó que el pin del cliente está mal</span></div><b class="nt-n">${A.ubic.length}</b></div>
+    ${A.ubic.length?A.ubic.map(({c,k,d})=>`<article class="nt-ub">
+      <div class="nt-ub-h"><b>${esc(c.nombre)}</b><span>${esc(c.suc.g)} · ${k?fecha(new Date(k.inicio).toLocaleDateString("en-CA")):"sin check-in"}</span></div>
+      <p>${k?(d!=null?`El pin actual está a <b>${mts(d)}</b> de donde hizo check-in.`:"El cliente no tenía ubicación.")+` <a class="lnk" href="${gmap(k.latitud,k.longitud)}" target="_blank" rel="noopener">Ver la reportada ↗</a>${c.lat!=null?` · <a class="lnk" href="${gmap(c.lat,c.lng)}" target="_blank" rel="noopener">Ver la actual ↗</a>`:""}`:"No se encontró el check-in con la ubicación reportada; puedes dejar la actual."}</p>
+      <div class="nt-acts">${k?`<button type="button" class="btn pri" data-ub="si" data-cli="${c.id}">Aprobar la nueva</button>`:""}<button type="button" class="btn" data-ub="no" data-cli="${c.id}">Dejar la actual</button><button type="button" class="btn ghost-b" data-id="${c.id}">Abrir ficha</button></div>
+    </article>`).join(""):LISTOS.length?"":'<p class="hint">Nada pendiente.</p>'}
+    ${LISTOS.map(t=>`<p class="nt-ok">✓ ${esc(t)}</p>`).join("")}
+  </section>
+  <section class="nt"><div class="nt-h"><span class="nt-ic" style="--c:var(--warn)">↩︎</span><div><b>${yoReg?"Reasignados a ti por falta de seguimiento":"Asignados al regional por falta de seguimiento"}</b><span>Prospectos que el gerente no pudo atender</span></div><b class="nt-n">${A.escs.length}</b></div>
+    ${A.escs.length?`<ul class="nt-l">${lista(A.porMotivo)}</ul><div class="lbl" style="margin-top:8px">Por gerente</div><ul class="nt-l">${lista(A.porGerEsc)}</ul>
+    <button type="button" class="btn" data-nv="resumen:alertas">Ver la lista y decidir</button>`:'<p class="hint">Nada pendiente.</p>'}
+  </section>
+  <section class="nt"><div class="nt-h"><span class="nt-ic" style="--c:var(--st-asig)">★</span><div><b>Clientes activos sin visita en 30 días</b><span>Informativo: siguen con su gerente; no se reasignan solos</span></div><b class="nt-n">${A.act.length}</b></div>
+    ${A.act.length?`<ul class="nt-l">${lista(A.porGerAct)}</ul><button type="button" class="btn" data-nv="equipo:actSec">Ver por gerente</button>`:'<p class="hint">Todos los activos tienen visita reciente.</p>'}
+  </section>`;
+}
+$("campana").onclick=()=>{pintarAvisos();$("notif").showModal()};
+$("notifX").onclick=()=>$("notif").close();
+$("notif").addEventListener("close",()=>{LISTOS.length=0});
+$("notif").addEventListener("click",async e=>{const d=$("notif");
+  if(e.target===d){d.close();return}   // clic fuera del panel
+  if(e.target.closest("[data-id]")){d.close();return}  // «Abrir ficha» lo abre el manejador general
+  const nv=e.target.closest("[data-nv]");if(nv){const[k,el]=nv.dataset.nv.split(":");d.close();verSec(k);$(el).scrollIntoView({behavior:"smooth",block:"start"});return}
+  const u=e.target.closest("[data-ub]");if(!u)return;
+  const art=u.closest(".nt-ub");art.querySelectorAll("button").forEach(x=>x.disabled=true);
+  const{error}=await SB.rpc(u.dataset.ub==="si"?"corregir_ubicacion":"rechazar_ubicacion",{cliente:u.dataset.cli});
+  if(error){art.querySelectorAll("button").forEach(x=>x.disabled=false);let m=art.querySelector(".nt-err");if(!m){m=document.createElement("p");m.className="nt-err";art.append(m)}m.textContent="No se guardó: "+error.message;return}
+  LISTOS.push(`${cli(u.dataset.cli).nombre}: ${u.dataset.ub==="si"?"ubicación actualizada con la del check-in":"se queda la ubicación actual"}.`);
+  await recargar(u.dataset.cli);pintarAvisos();
+});
 /* animación: contar cifras de 0 a su valor y redibujar gráficas, en lo que está a la vista */
 let tAnim=0;
 function animar(){
@@ -1413,7 +1574,7 @@ function verSec(k,arriba=true){
   if(arriba){window.scrollTo(0,0);animar()}}
 function render(){
   const reg=rol==="reg";$("vReg").hidden=!reg;$("vGer").hidden=reg;$("vista").hidden=!reg;
-  reg?renderR():renderG(rol);TIT=$("titulo").textContent;barra();hacerEnfocables();if(SEC)verSec(SEC,false);
+  reg?renderR():renderG(rol);TIT=$("titulo").textContent;barra();avisos();hacerEnfocables();if(SEC)verSec(SEC,false);
   const ids=new Set((reg?CL.filter(c=>SUC.some(x=>x.id===c.at)):CL.filter(c=>c.at===rol)).map(c=>c.id));
   $("zonaCard").innerHTML=`<small>${reg?"Mi zona":"Mi cartera"}</small><b class="num" style="font-size:22px">${ids.size}</b><span style="font-size:12px;color:var(--rail-mut)">empresas · ${[...ids].filter(i=>cli(i).st==="vis").length} visitadas</span>`;
 }
@@ -1612,7 +1773,7 @@ function regBlock(id){
   const otras=SUC.filter(x=>x.id!==c.suc.id).sort((a,b)=>(c.lat!=null&&a.lat!=null&&b.lat!=null)?dist(c,a)-dist(c,b):a.n.localeCompare(b.n));
   el.innerHTML=`<div class="lbl">Acciones de regional</div>
     <div class="hint">${c.st==="esc"?esc(c.motivo||"Escalado")+". ":"Estatus: "+ST[c.st].t+". "}Gerente actual: ${esc(c.suc.g)} (${esc(c.suc.n)}).</div>
-    ${c.revisar?'<div class="aviso">El gerente reportó que la ubicación del cliente está mal.</div><div class="acts"><button class="btn pri" type="button" data-reg="pin">Usar la ubicación reportada por el gerente</button></div>':""}
+    ${c.revisar?'<div class="aviso">El gerente reportó que la ubicación del cliente está mal.</div><div class="acts"><button class="btn pri" type="button" data-reg="pin">Usar la ubicación reportada por el gerente</button><button class="btn" type="button" data-reg="pin-no">Dejar la ubicación actual</button></div>':""}
     ${c.tipo===ACT?"":`<div class="acts"><button class="btn pri" type="button" data-reg="lista">${c.st==="asig"||c.st==="reint"?"Reiniciar intentos y dejar en la lista":"Poner en la lista de esta semana"}</button><button class="btn" type="button" data-reg="cartera">Devolver a la cartera</button></div>`}
     <label class="qlab" for="rSuc">Reasignar a otra sucursal<select class="txt" id="rSuc">${otras.map(x=>`<option value="${x.id}">${esc(x.n)} · ${esc(x.g)}${c.lat!=null&&x.lat!=null?" · "+fk(dist(c,x))+" km":""}</option>`).join("")}</select></label>
     <div class="acts"><button class="btn" type="button" data-reg="mover">${c.tipo===ACT?"Reasignar a esa sucursal":"Reasignar y poner en su lista de esta semana"}</button></div>
@@ -1623,10 +1784,10 @@ async function regAccion(a){
   const id=$("ficha").dataset.cli,c=cli(id),m=$("rMsg");
   const base={intentos:0,semanas_arrastre:0,motivo_escalado:null,horario_sugerido:null,actualizado_en:new Date().toISOString()};
   let cambios,msg;
-  if(a==="pin"){$("fReg").querySelectorAll("button,select").forEach(b=>b.disabled=true);
-    const{error}=await SB.rpc("corregir_ubicacion",{cliente:id});
+  if(a==="pin"||a==="pin-no"){$("fReg").querySelectorAll("button,select").forEach(b=>b.disabled=true);
+    const{error}=await SB.rpc(a==="pin"?"corregir_ubicacion":"rechazar_ubicacion",{cliente:id});
     if(error){regBlock(id);const m2=$("rMsg");m2.textContent="No se guardó: "+error.message;m2.style.color="var(--st-esc)";m2.hidden=false;return}
-    await recargar(id);const t=$("toast");t.textContent="Ubicación corregida con la de la última visita.";t.style.color="var(--st-vis)";t.hidden=false;return}
+    await recargar(id);const t=$("toast");t.textContent=a==="pin"?"Ubicación corregida con la del check-in del gerente.":"Se queda la ubicación actual.";t.style.color="var(--st-vis)";t.hidden=false;return}
   if(a==="lista"){cambios={...base,estatus:"asignado",asignado_en:HOY};msg=`Regresó a la lista de ${c.suc.g}.`}
   else if(a==="cartera"){cambios={...base,estatus:"disponible",asignado_en:null};msg="Regresó a la cartera; se volverá a asignar más adelante."}
   else{const dest=SUC.find(x=>x.id===$("rSuc").value);if(!dest)return;
@@ -1850,7 +2011,7 @@ async function entrar(){
   const ZS=[...new Set(SUC.map(x=>x.reg))].sort((a,b)=>zonaNom(a).localeCompare(zonaNom(b))),op=x=>`<option value="${x.id}">${esc(x.n)} · ${esc(x.g)}</option>`;
   $("vista").innerHTML='<option value="all">Todas las sucursales</option>'+(ZS.length>1?'<optgroup label="Zonas">'+ZS.map(r=>`<option value="z:${r}">Zona de ${esc(zonaNom(r))} · ${SUC.filter(x=>x.reg===r).length} suc.</option>`).join("")+"</optgroup>"
     +ZS.map(r=>`<optgroup label="Sucursales · zona de ${esc(zonaNom(r))}">${SUC.filter(x=>x.reg===r).map(op).join("")}</optgroup>`).join(""):SUC.map(op).join(""));
-  $("vista").value="all";mostrar=10;msgLogin("");nav();render();$("login").hidden=true;$("app").hidden=false;$("app").inert=false;$("fab").hidden=false;window.scrollTo(0,0);animar();
+  $("vista").value="all";mostrar=10;msgLogin("");nav();render();$("login").hidden=true;$("app").hidden=false;$("app").inert=false;$("fab").hidden=false;window.scrollTo(0,0);animar();tourAuto();
 }
 $("loginForm").addEventListener("submit",async e=>{e.preventDefault();
   msgLogin("Entrando…",true);
