@@ -71,6 +71,19 @@ button,input,select{font:inherit;color:inherit}
 .ana-cmp button.lnk{background:none;border:0;padding:6px 0;font:inherit;color:var(--ink);cursor:pointer;text-align:left;white-space:normal;min-height:44px}
 .ana-cmp .pos{font-weight:800;color:var(--muted);margin-right:6px}
 @media (max-width:640px){.ana-cmp td.cmp-acc,.ana-cmp td.cmp-q{grid-column:1/-1}.ana-cmp .acc{min-width:0}}
+/* cada zona o sucursal como ficha propia */
+.ana-cmp td:first-child .lnk b{font-size:17px}.ana-cmp td[data-l="A cargo"] b{font-size:15px}
+.ana-cmp tbody tr:nth-child(odd) td{background:color-mix(in srgb,var(--soft) 60%,transparent)}
+@media (max-width:640px){
+  .ana-cmp tbody{display:grid;gap:16px}
+  .ana-cmp tbody tr{background:var(--panel);border:1px solid var(--line);border-left:6px solid var(--st-asig);border-radius:18px;padding:16px 16px 14px;gap:12px 14px;box-shadow:0 10px 24px -18px rgba(0,0,0,.6)}
+  .ana-cmp tbody tr:nth-child(odd) td{background:none}
+  .ana-cmp td:first-child{padding-bottom:10px!important;border-bottom:1px solid var(--line)!important}
+  .ana-cmp td:first-child .lnk{text-decoration:none;display:flex;align-items:baseline;gap:8px}
+  .ana-cmp td:first-child .lnk b{font-size:22px;line-height:1.2;color:var(--ink)}
+  .ana-cmp td:first-child .pos{font-size:22px;color:var(--st-asig)}
+  .ana-cmp td[data-l="A cargo"]{grid-column:1/-1}.ana-cmp td[data-l="A cargo"] b{font-size:18px}
+}
 .ana-cols3{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px;margin-top:14px}
 @media (max-width:900px){.ana-cols3{grid-template-columns:1fr}}
 .mstat .spark{display:block;width:100%;height:28px;margin-top:6px}
@@ -1297,9 +1310,9 @@ function comparar(sucs,v){
   F.sort((a,b)=>b.vend-a.vend||b.vis/b.meta-a.vis/a.meta);
   $("anaCmpT").textContent=porZona?"Cómo compiten las zonas":"Cómo compiten las sucursales";
   $("anaCmpH").textContent=`${rangoTxt()} · ordenado por lo vendido · toca ${porZona?"una zona":"una sucursal"} para verla sola`;
-  $("anaCmp").innerHTML=`<table><thead><tr><th>${porZona?"Zona":"Sucursal"}</th><th>A cargo</th><th>Visitas a prospectos / meta</th><th>Cotizado</th><th>Vendido</th><th>Cierre</th><th>En sitio</th><th>Reasignados</th><th>Qué hacer</th></tr></thead><tbody>${F.map((r,i)=>`<tr>
-    <td><button type="button" class="lnk" data-suc="${r.g.k}" data-vsec="analitica" data-ir="titulo"><span class="pos">${i+1}</span><b>${esc(r.g.nom)}</b></button><div class="hint">${r.g.s.length} ${r.g.s.length===1?"sucursal":"sucursales"}</div></td>
-    <td data-l="A cargo"><b>${esc(r.resp)}</b>${r.gentes?`<div class="hint">Regional · ${esc(r.gentes)}</div>`:`<div class="hint">${porZona?"":"Regional: "+esc(zonaNom(r.g.s[0].reg))}</div>`}</td>
+  $("anaCmp").innerHTML=`<table><thead><tr><th>${porZona?"Regional":"Sucursal"}</th>${porZona?"":"<th>A cargo</th>"}<th>Visitas a prospectos / meta</th><th>Cotizado</th><th>Vendido</th><th>Cierre</th><th>En sitio</th><th>Reasignados</th><th>Qué hacer</th></tr></thead><tbody>${F.map((r,i)=>`<tr>
+    <td><button type="button" class="lnk" data-suc="${r.g.k}" data-vsec="analitica" data-ir="titulo"><span class="pos">${i+1}</span><b>${esc(porZona?r.resp:r.g.nom)}</b></button><div class="hint">${porZona?"Regional · ":""}${r.g.s.length} ${r.g.s.length===1?"sucursal":"sucursales"}${porZona&&r.gentes?" · "+esc(r.gentes):""}</div></td>
+    ${porZona?"":`<td data-l="A cargo"><b>${esc(r.resp)}</b><div class="hint">Regional: ${esc(zonaNom(r.g.s[0].reg))}</div></td>`}
     <td data-l="Visitas / meta"><b class="num">${r.vis}/${r.meta}</b> ${fl(r.dv)}<div class="meter" style="margin-top:4px"><i style="width:${Math.min(r.vis/r.meta,1)*100}%"></i></div></td>
     <td data-l="Cotizado"><b class="num">${corto(r.cot)}</b><div class="hint">${r.nq} ${r.nq===1?"cotización":"cotizaciones"}</div></td>
     <td data-l="Vendido"><b class="num">${corto(r.vend)}</b> ${fl(r.dvend)}</td>
