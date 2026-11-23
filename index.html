@@ -424,6 +424,14 @@ textarea{width:100%;font:inherit;padding:10px;border-radius:10px;border:1px soli
 .txt{width:100%;padding:9px 10px;border-radius:10px;border:1px solid var(--line);background:var(--soft)}
 .money{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px}
 .mstat{background:var(--soft);border-radius:12px;padding:12px 14px;display:grid;gap:2px;min-width:0}
+.tipos{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:8px}.tipos>div{background:var(--soft);border-radius:12px;padding:10px 12px;border-top:4px solid var(--c);display:grid;gap:2px}.tipos b{font-size:22px}.tipos span{font-weight:700;font-size:13px}.tipos small{color:var(--muted);font-size:12px}
+.actbar{display:grid;gap:8px}.actbar .track{height:10px;border-radius:6px;background:var(--soft2);overflow:hidden}.actbar .track i{display:block;height:100%;background:var(--st-act)}
+.car-seg{display:grid;grid-template-columns:1fr 1fr}.car-seg button{min-height:52px;font-weight:700}
+.tipo-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:10px}
+.tipo-card{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:12px 14px;border-left:4px solid var(--c);display:grid;gap:6px}
+.tipo-h{display:flex;flex-wrap:wrap;gap:6px;align-items:center;justify-content:space-between}
+.tipo-row{display:grid;grid-template-columns:1fr auto auto;gap:10px;align-items:center;font-size:14px}
+.mstat .hint{display:block;margin-top:4px}
 .mstat b{font-size:26px;line-height:1.1;font-weight:800}
 .mstat span{font-size:12px;color:var(--muted)}
 .cot-cols{display:grid;grid-template-columns:minmax(0,2fr) minmax(0,1fr);gap:18px}
@@ -628,6 +636,7 @@ body{background:radial-gradient(1100px 600px at 85% -10%,var(--glow1),transparen
       <section data-sec="resumen" class="mod tile" id="t1"></section>
       <section data-sec="resumen" class="mod tile" id="t2"></section>
       <section data-sec="resumen" class="mod tile" id="t3"></section>
+      <section data-sec="resumen" class="mod tile" id="t4"></section>
 
       <section data-sec="ventas" class="mod c12" id="cotSec">
         <div class="mod-h"><h2>Cotizaciones</h2><span class="hint" id="cotHint"></span><button class="btn" type="button" id="csvVentas">Descargar ventas (CSV)</button></div>
@@ -642,6 +651,8 @@ body{background:radial-gradient(1100px 600px at 85% -10%,var(--glow1),transparen
       <section data-sec="analitica" class="mod c12" id="anaSec">
         <div class="mod-h"><h2>Cómo va la zona</h2><span class="hint" id="anaHint"></span></div>
         <div class="money" id="anaKpi"></div>
+        <div class="mod-h" style="margin:14px 0 6px"><b>Prospectos contra clientes activos</b><span class="hint">mismo periodo, contra el anterior</span></div>
+        <div class="tipo-grid" id="anaTipo"></div>
         <div class="ana-cols">
           <div class="ana-box"><div class="mod-h" style="margin:0 0 6px"><b id="anaLtit">Tendencia</b><div class="seg ana-seg" role="group" aria-label="Qué graficar" id="anaMet">
             <button type="button" data-ana="vis" aria-pressed="true">Visitas</button><button type="button" data-ana="cot" aria-pressed="false">Cotizado</button><button type="button" data-ana="gan" aria-pressed="false">Vendido</button></div></div>
@@ -708,6 +719,8 @@ body{background:radial-gradient(1100px 600px at 85% -10%,var(--glow1),transparen
       </section>
 
       <section data-sec="clientes" class="mod c12" id="clientes">
+        <div class="seg car-seg" role="group" aria-label="Qué parte de la cartera ver" id="carSeg"></div>
+        <div id="carTipos" style="margin:10px 0 14px"></div>
         <div class="tbl-tools">
           <h2 id="tituloLista">Clientes de la zona</h2>
           <div class="ctrls"><div class="filters" id="filtrosTabla"></div><input class="search" id="busca" type="search" placeholder="Buscar empresa o giro" aria-label="Buscar empresa o giro"></div>
@@ -738,13 +751,14 @@ body{background:radial-gradient(1100px 600px at 85% -10%,var(--glow1),transparen
         </div>
         <div class="next" id="gNext"></div>
       </section>
+      <section data-sec="semana" class="mod c12 actbar" id="gActRes" hidden></section>
       <section class="c12" style="display:grid;gap:12px" data-sec="semana">
         <div class="mod-h"><h2>Tus visitas de esta semana</h2><button class="btn" type="button" id="cercaMi">Ordenar por cercanía a mí</button></div>
         <span class="hint" id="ordenHint">Reintentos y arrastrados primero, luego por cercanía a tu sucursal</span>
         <div class="cards" id="gCards"></div>
       </section>
-      <section data-sec="gclientes" class="c12" style="display:grid;gap:12px" id="gActSec">
-        <div class="mod-h"><h2>Clientes activos · visita una vez al mes</h2></div>
+      <section data-sec="semana" class="c12" style="display:grid;gap:12px" id="gActSec">
+        <div class="mod-h"><h2>Clientes activos pendientes · visita una vez al mes</h2></div>
         <span class="hint" id="gActHint"></span>
         <div class="cards" id="gAct"></div>
       </section>
@@ -752,6 +766,7 @@ body{background:radial-gradient(1100px 600px at 85% -10%,var(--glow1),transparen
         <div class="mod-h"><h2>Sedes que atiende otro gerente</h2><span class="hint">Cuentas centralizadas: el cliente pidió un solo contacto. Solo informativo.</span></div>
         <div id="gAjenasL"></div>
       </section>
+      <section data-sec="gclientes" class="mod c12" id="gTipos"><div class="mod-h"><h2>Tu cartera por tipo de cliente</h2></div><div id="gTiposB"></div></section>
       <section data-sec="gclientes" class="mod c12" id="gActHist">
         <div class="mod-h"><h2>Seguimiento de tus clientes activos</h2><span class="hint">Toca un cliente para ver todas sus visitas</span></div>
         <div id="gActTabla"></div>
@@ -902,7 +917,7 @@ body{background:radial-gradient(1100px 600px at 85% -10%,var(--glow1),transparen
       <button class="btn pri" type="submit" style="padding:12px">Entrar</button>
       <span class="toast" id="lErr" role="alert" style="color:var(--st-esc)" hidden></span>
       <span class="hint" style="font-size:12px">¿No tienes acceso? Pídeselo a tu regional: las cuentas solo se crean por invitación.</span>
-      <span class="hint" style="font-size:11px">Versión 20 nov · avisos por rol</span>
+      <span class="hint" style="font-size:11px">Versión 23 nov · prospectos y clientes activos</span>
       <button type="button" class="btn" id="olvide" style="border:0;background:none;color:var(--muted);text-decoration:underline;padding:0;justify-self:start">Olvidé mi contraseña</button>
     </form>
     <form class="lg-card" id="passForm" hidden>
@@ -1024,6 +1039,13 @@ const MOTIVOS=["Precio","Eligió otro proveedor","Ya no la necesita","Sin respue
 const mxn=n=>n.toLocaleString("es-MX",{style:"currency",currency:"MXN",maximumFractionDigits:0});
 const corto=n=>n>=1e6?`$${(n/1e6).toFixed(1)} M`:n>=1e3?`$${Math.round(n/1e3)} k`:`$${n}`;
 const ACT="Cliente activo",prosp=c=>c.tipo!==ACT;
+// prospecto (cliente nuevo) vs cliente activo: siempre visible
+const DEF_TIPOS="Prospecto: empresa que nunca nos ha comprado; está «en frío» si nunca se ha visitado ni hay contacto. Cliente activo: compró en los últimos 180 días (padrón SAP o venta ganada aquí); se visita una vez al mes, aparte de la meta. Cliente inactivo: su última compra fue hace más de 180 días; se trabaja como prospecto para recuperarlo.";
+const frio=c=>c.tipo==="Prospecto"&&c.st==="disp"&&!VISITAS.some(x=>x.cli===c.id);
+// resumen de la cartera por tipo (para el glosario de Clientes)
+function tiposCartera(list){const A=list.filter(c=>c.tipo===ACT),I=list.filter(c=>c.tipo==="Cliente inactivo"),P=list.filter(c=>c.tipo==="Prospecto"),F=P.filter(frio).length,f=x=>x.toLocaleString("es-MX");
+  return `<div class="tipos"><div style="--c:var(--st-asig)"><b class="num">${f(F)}</b><span>Prospectos en frío</span><small>nunca visitados ni contactados</small></div><div style="--c:var(--st-asig)"><b class="num">${f(P.length-F)}</b><span>Prospectos trabajados</span><small>ya tienen visita o están en tu lista</small></div><div style="--c:var(--warn)"><b class="num">${f(I.length)}</b><span>Clientes inactivos</span><small>compraron hace más de 180 días</small></div><div style="--c:var(--st-act)"><b class="num">${f(A.length)}</b><span>Clientes activos</span><small>compraron en los últimos 180 días</small></div></div><p class="hint" style="margin:8px 0 0">${DEF_TIPOS}</p>`}
+const tipoChip=c=>c.tipo===ACT?'<span class="chip" style="--c:var(--st-act)">Cliente activo</span>':c.tipo==="Cliente inactivo"?'<span class="chip" style="--c:var(--warn)">Cliente inactivo</span>':'<span class="chip" style="--c:var(--st-asig)">Prospecto</span>';
 // tipo de cliente bien visible; los días se cuentan desde la última compra del padrón SAP
 const tipoTag=c=>{if(c.tipo!==ACT&&c.tipo!=="Cliente inactivo")return"";const d=c.ult?diasDesde(c.ult):null,t=c.ult?` title="Última compra ${fecha(c.ult)} según padrón SAP"`:"";
   return c.tipo===ACT?`<span class="tb" style="--c:var(--st-act)"${t}>Cliente activo${d!=null?` · compró hace ${d} días`:""}</span>`:`<span class="tb" style="--c:var(--st-esc)"${t}>Cliente inactivo${d!=null?` · ${d} días sin comprar`:""}</span>`};
@@ -1068,7 +1090,7 @@ const ICON={
 };
 const svgI=k=>`<svg viewBox="0 0 24 24" aria-hidden="true">${ICON[k]}</svg>`;
 
-let rol="reg",mostrar=10,busca="",filtroT="todos";
+let rol="reg",mostrar=10,busca="",filtroT="todos",carT="p";
 const visibles=new Set(Object.keys(ST));
 
 /* ---------- mapa ---------- */
@@ -1139,8 +1161,13 @@ function analitica(list,ids,sucs){
     if(d==null)return a?'<span class="hint">sin registro antes</span>':'<span class="hint">igual que antes</span>';
     return `<span class="delta" style="--c:var(${neutro?"--muted":d>=0?"--st-vis":"--st-esc"})">${d>=0?"▲":"▼"} ${Math.abs(Math.round(d))}${pts?" pts":"%"}</span>`};
   $("anaHint").textContent=`${rangoTxt()} contra los ${n} días anteriores`;
-  const K=[["Visitas",v1.length,v0.length,x=>x.toLocaleString("es-MX")],["Cotizado",sum(q1,"monto"),sum(q0,"monto"),corto],["Vendido",sum(g1,"ganado"),sum(g0,"ganado"),corto],
+  const K=[["Visitas (todas)",v1.length,v0.length,x=>x.toLocaleString("es-MX")],["Cotizado",sum(q1,"monto"),sum(q0,"monto"),corto],["Vendido",sum(g1,"ganado"),sum(g0,"ganado"),corto],
     ["Tasa de cierre",tasa(g1,c1),tasa(g0,c0),x=>Math.round(x)+"%",1],["Visitas en sitio (GPS)",sit(v1),sit(v0),x=>Math.round(x)+"%",1],["Duración promedio",dur(v1),dur(v0),x=>Math.round(x)+" min",0,1]];
+  // el mismo resumen separado: esfuerzo en clientes nuevos (prospectos) contra clientes activos
+  const porTipo=(S,nom,col,fr=null)=>{const Vs=(a,b)=>visitasDe(S,a,b),Qs=(a,b)=>COTS.filter(q=>S.has(q.cli)&&en(q.fecha,a,b)),Gs=(a,b)=>COTS.filter(q=>S.has(q.cli)&&q.estado==="ganada"&&en(q.cierre,a,b)),Cs=(a,b)=>COTS.filter(q=>S.has(q.cli)&&q.estado!=="abierta"&&en(q.cierre,a,b));
+    const vv=Vs(desde,hasta).length,r=[["Visitas",vv,Vs(pa,pb).length,x=>x.toLocaleString("es-MX")],["Cotizado",sum(Qs(desde,hasta),"monto"),sum(Qs(pa,pb),"monto"),corto],["Vendido",sum(Gs(desde,hasta),"ganado"),sum(Gs(pa,pb),"ganado"),corto],["Tasa de cierre",tasa(Gs(desde,hasta),Cs(desde,hasta)),tasa(Gs(pa,pb),Cs(pa,pb)),x=>Math.round(x)+"%",1]];
+    return `<div class="tipo-card" style="--c:var(${col})"><div class="tipo-h"><span class="chip" style="--c:var(${col})">${nom}</span><span class="hint">${S.size.toLocaleString("es-MX")} en cartera${fr!=null?` · ${fr.toLocaleString("es-MX")} en frío`:""} · ${v1.length?Math.round(vv/v1.length*100):0}% de las visitas</span></div>${r.map(([l,a,b,f,pts])=>`<div class="tipo-row"><span>${l}</span><b class="num">${a==null?"—":f(a)}</b>${delta(a,b,pts)}</div>`).join("")}</div>`};
+  $("anaTipo").innerHTML=porTipo(new Set(list.filter(prosp).map(c=>c.id)),"Prospectos · clientes nuevos","--st-asig",list.filter(frio).length)+porTipo(new Set(list.filter(c=>!prosp(c)).map(c=>c.id)),"Clientes activos","--st-act");
   // tendencia: este periodo contra el anterior, alineados día por día (o por semana si el periodo es largo)
   const paso=n>45?7:1,k=Math.ceil(n/paso),valM=(M,a,b)=>M==="vis"?V(a,b).length:M==="cot"?sum(Q(a,b),"monto"):sum(G(a,b),"ganado");
   const serM=(M,ini)=>Array.from({length:k},(_,i)=>{const a=addDias(ini,i*paso);return valM(M,a,addDias(a,paso-1))}),ser=ini=>serM(anaM,ini);
@@ -1216,7 +1243,7 @@ function checklist(t,esZona){
   if(esZona){const gs=t.sl.filter(x=>!x.g.startsWith("Sin gerente")),enRuta=gs.filter(x=>t.visG(x)>=t.m*.7).length;
     L.push([gs.length?enRuta/gs.length>=.7:null,"Gerentes en ruta (70% de su meta)",`${enRuta} de ${gs.length}`])}
   L.push([t.sit==null?null:t.sit>=80,"Check-in en sitio (80%+)",t.sit==null?"sin visitas":t.sit+"%"],
-    [t.act?t.actOk/t.act>=.8:null,"Activos visitados este mes (80%+)",t.act?`${t.actOk} de ${t.act}`:"sin activos"],
+    [t.act?t.actOk/t.act>=.8:null,"Clientes activos visitados este mes (80%+)",t.act?`${t.actOk} de ${t.act}`:"sin activos"],
     [t.c1.length?t.cierre>=30:null,"Tasa de cierre (30%+)",t.c1.length?`${t.cierre}% · ${t.g1.length}/${t.c1.length}`:"sin cierres"],
     [t.esc_===0,"Sin clientes reasignados por falta de seguimiento",t.esc_?`${t.esc_} pendientes`:"al día"]);
   if(esZona)L.push([t.sinG.length===0,"Todas sus sucursales con gerente",t.sinG.length?`${t.sinG.length} sin gerente`:"completas"]);
@@ -1309,14 +1336,17 @@ function renderR(){
   $("titulo").textContent=v==="all"?(YO.rol==="regional"?"Resumen de zona":"Resumen general"):zona?"Zona de "+zonaNom(v.slice(2)):sucs[0].g;
   $("subTop").textContent=v==="all"||zona?`${sucs.length} sucursales · ${list.length.toLocaleString("es-MX")} empresas`:`Sucursal ${sucs[0].n} · ${list.length} empresas`;
   $("heroR").innerHTML=`<div style="color:var(--ink)">${ring(n,meta,124,col,"var(--soft2)")}</div>
-    <div style="display:grid;gap:8px"><div class="lbl">Visitas · ${rangoTxt()}</div>
+    <div style="display:grid;gap:8px"><div class="lbl">Visitas a prospectos · ${rangoTxt()}</div>
     <div class="big num">${n}<span> / ${meta}</span></div>
+    <div class="hint" style="color:inherit;opacity:.8">+ ${visT.length-n} visitas a clientes activos (aparte de la meta)</div>
     <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center"><span class="chip" style="--c:var(${col})">${tag}</span><span class="delta ${d>=0?"up":"dn"}">${d>=0?"▲":"▼"} ${Math.abs(d)} vs periodo anterior</span></div></div>`;
-  const cot=new Set(visT.filter(x=>x.res==="Pidió cotización").map(x=>x.cli)).size;
+  const cotC=[...new Set(visT.filter(x=>x.res==="Pidió cotización").map(x=>x.cli))],cot=cotC.length,cotA=cotC.filter(i=>cli(i).tipo===ACT).length;
+  const actTot=list.filter(c=>c.tipo===ACT).length,actPend=list.filter(c=>c.tipo===ACT&&!mesDe(c).ok).length;
   const tiles=[
-    ["t1","Por visitar",list.filter(c=>c.st==="asig"||c.st==="reint").length,`${list.filter(c=>c.arr).length} arrastrados · ${list.filter(c=>c.st==="reint").length} reintentos`,"--st-asig","ruta"],
-    ["t2","Cotizaciones",cot,`pedidas en ${rangoTxt()}`,"--st-vis","actividad"],
-    ["t3",YO.rol==="regional"?"Reasignados a ti por falta de seguimiento":"Asignados al regional por falta de seguimiento de gerentes de sucursal",list.filter(c=>c.st==="esc").length,"detalle en «Requieren tu atención»","--st-esc","equipo"]];
+    ["t1","Prospectos por visitar",list.filter(c=>c.st==="asig"||c.st==="reint").length,`${list.filter(c=>c.arr).length} arrastrados · ${list.filter(c=>c.st==="reint").length} reintentos`,"--st-asig","ruta"],
+    ["t2","Cotizaciones pedidas",cot,`${cot-cotA} de prospectos · ${cotA} de clientes activos · ${rangoTxt()}`,"--st-vis","actividad"],
+    ["t3",YO.rol==="regional"?"Prospectos reasignados a ti por falta de seguimiento":"Prospectos asignados al regional por falta de seguimiento de gerentes de sucursal",list.filter(c=>c.st==="esc").length,"detalle en «Requieren tu atención»","--st-esc","equipo"],
+    ["t4","Clientes activos sin visita en 30 días",actPend,`${actTot-actPend} de ${actTot} al corriente · ya nos compran; visita una vez al mes, aparte de la meta`,"--st-act","equipo"]];
   for(const[id,l,val,sub,c,ic]of tiles)$(id).innerHTML=`<div class="tile-top"><span class="lbl">${l}</span><span class="ic" style="--c:var(${c})">${svgI(ic)}</span></div><div class="v num">${val}</div><div class="s">${sub}</div>`;
 
   const qs=COTS.filter(q=>ids.has(q.cli)),enR=f=>f&&f>=desde&&f<=hasta;
@@ -1324,10 +1354,12 @@ function renderR(){
   const ab=qs.filter(q=>q.estado==="abierta").sort((a,b)=>a.fecha.localeCompare(b.fecha));
   const sum=(a,k)=>a.reduce((s,q)=>s+q[k],0);
   $("cotHint").textContent=rangoTxt();
+  const esA=q=>cli(q.cli).tipo===ACT,parte=(a,k)=>{const A=a.filter(esA);return `<span class="hint">Prospectos ${k?corto(sum(a,k)-sum(A,k)):a.length-A.length} · Clientes activos ${k?corto(sum(A,k)):A.length}</span>`};
+  const tc=a=>{const g=a.filter(q=>q.estado==="ganada").length;return a.length?Math.round(g/a.length*100)+"%":"—"};
   $("cotStats").innerHTML=[
-    ["Cotizado en el periodo",corto(sum(qR,"monto")),`${qR.length} cotizaciones nuevas`],
-    ["Ganado en el periodo",corto(sum(gan,"ganado")),`${gan.length} ${gan.length===1?"venta cerrada":"ventas cerradas"}, de cotizaciones de cualquier fecha`],
-    ["Tasa de cierre",cerr.length?Math.round(gan.length/cerr.length*100)+"%":"—",`${gan.length} ganadas de ${cerr.length} cerradas en el periodo`],
+    ["Cotizado en el periodo",corto(sum(qR,"monto")),`${qR.length} cotizaciones nuevas${parte(qR,"monto")}`],
+    ["Ganado en el periodo",corto(sum(gan,"ganado")),`${gan.length} ${gan.length===1?"venta cerrada":"ventas cerradas"}, de cotizaciones de cualquier fecha${parte(gan,"ganado")}`],
+    ["Tasa de cierre",cerr.length?Math.round(gan.length/cerr.length*100)+"%":"—",`${gan.length} ganadas de ${cerr.length} cerradas en el periodo<span class="hint">Prospectos ${tc(cerr.filter(q=>!esA(q)))} · Clientes activos ${tc(cerr.filter(esA))}</span>`],
     ["Cotizaciones sin cerrar (histórico)",corto(sum(ab,"monto")),`${ab.length} abiertas de cualquier fecha`]
   ].map(([l,v2,s2])=>`<div class="mstat"><span class="lbl">${l}</span><b class="num">${v2}</b><span>${s2}</span></div>`).join("");
   tramPanel(qs,ids);
@@ -1360,18 +1392,29 @@ function renderR(){
     return `<div class="br" title="${g}: ${vv} visitados de ${tot}"><div class="br-top"><span>${g}</span><span class="tn">${vv}/${tot}</span></div><div class="br-track"><i style="width:${tot/gmax*100}%;background:var(--soft2);filter:brightness(.92)"></i><i style="width:${vv/gmax*100}%;background:var(--st-vis)"></i></div></div>`}).join("");
 
   const escs=list.filter(c=>c.st==="esc"||c.revisar);
-  $("alertas").innerHTML=escs.length?escs.slice(0,alTodas?escs.length:8).map(c=>`<div class="ev" data-id="${c.id}" style="--c:var(--st-esc)"><span class="dot">!</span><div><div class="ev-h"><b>${esc(c.nombre)}</b><span>${c.suc.g}</span></div><p>${c.revisar?"El gerente reportó que la ubicación del cliente está mal":c.motivo||"2 semanas asignado sin visita. Reasignar o visitar esta semana."} · ${c.giro} · ${fk(c.km)} km</p></div></div>`).join("")+(escs.length>8?`<button type="button" class="btn" data-al style="margin-top:8px;width:100%;min-height:44px">${alTodas?"Ver menos":`Ver los ${escs.length}`}</button>`:""):'<div class="empty">Nada escalado. Todo el equipo va al corriente.</div>';
+  $("alertas").innerHTML=escs.length?escs.slice(0,alTodas?escs.length:8).map(c=>`<div class="ev" data-id="${c.id}" style="--c:var(--st-esc)"><span class="dot">!</span><div><div class="ev-h"><b>${esc(c.nombre)}</b><span>${c.suc.g}</span></div><p>${tipoChip(c)} ${c.revisar?"El gerente reportó que la ubicación del cliente está mal":c.motivo||"2 semanas asignado sin visita. Reasignar o visitar esta semana."} · ${c.giro} · ${fk(c.km)} km</p></div></div>`).join("")+(escs.length>8?`<button type="button" class="btn" data-al style="margin-top:8px;width:100%;min-height:44px">${alTodas?"Ver menos":`Ver los ${escs.length}`}</button>`:""):'<div class="empty">Nada escalado. Todo el equipo va al corriente.</div>';
 
-  $("actHint").textContent=`${visT.length} visitas · ${rangoTxt()}`;
+  $("actHint").textContent=`${n} a prospectos · ${visT.length-n} a clientes activos · ${rangoTxt()}`;
   $("feed").innerHTML=feed(visT,6,true);
   cartera(list);
 
+  // Cartera: prospectos (la mayoría) y clientes activos, cada uno con sus propios filtros
+  const PR=list.filter(prosp),AC=list.filter(c=>c.tipo===ACT),esAc=carT==="a";
+  $("carSeg").innerHTML=`<button type="button" data-ct="p" aria-pressed="${!esAc}">Prospectos · ${PR.length.toLocaleString("es-MX")}</button><button type="button" data-ct="a" aria-pressed="${esAc}">Clientes activos · ${AC.length.toLocaleString("es-MX")}</button>`;
+  $("carTipos").innerHTML=tiposCartera(list);
+  const FT=esAc?[["todos","Todos","--muted"],["ok","Al corriente","--st-act"],["toca","Toca visita","--warn"],["sinv","Sin visita registrada","--st-esc"]]
+    :[["todos","Todos","--muted"],["frio","En frío","--st-disp"],...Object.entries(ST).filter(([k])=>k!=="act").map(([k,x])=>[k,x.t,x.c]),["inact","Clientes inactivos","--warn"]];
+  $("filtrosTabla").innerHTML=FT.map(([k,t,c])=>`<button type="button" data-ft="${k}" aria-pressed="${k===filtroT}" style="--c:var(${c})"><i></i>${t}</button>`).join("");
+  const pasa=c=>{if(filtroT==="todos")return true;if(esAc){const m=mesDe(c);return filtroT==="ok"?m.ok:filtroT==="sinv"?m.d==null:!m.ok&&m.d!=null}
+    return filtroT==="frio"?frio(c):filtroT==="inact"?c.tipo==="Cliente inactivo":c.st===filtroT};
   const orden={esc:0,reint:1,asig:2,seg:3,vis:4,act:5,disp:6},q=busca.toLowerCase();
-  const filas=list.filter(c=>(filtroT==="todos"||c.st===filtroT)&&(!q||c.nombre.toLowerCase().includes(q)||c.giro.toLowerCase().includes(q))).sort((a,b)=>orden[a.st]-orden[b.st]||ordKm(a,b));
-  $("tituloLista").textContent=v==="all"?"Clientes de la zona":zona?"Clientes de la zona de "+zonaNom(v.slice(2)):"Clientes de "+sucs[0].n;
-  $("lista").innerHTML=filas.slice(0,mostrar).map(c=>`<tr data-id="${c.id}"><td><b>${esc(c.nombre)}</b><span class="sub">${c.id}${c.arr?" · arrastrado":""}</span>${tipoTag(c)}</td><td data-l="Giro">${c.giro}</td><td class="tn" data-l="Flota">${c.flota??"—"}</td><td data-l="Sucursal">${c.suc.n}</td><td class="tn" data-l="Km a sucursal">${fk(c.km)}</td><td data-l="Estatus">${chip(c.st)}</td><td data-l="Ubicación"><a class="lnk" href="${maps(c)}" target="_blank" rel="noopener">Google Maps ↗</a></td></tr>`).join("")||'<tr><td colspan="7" class="empty">Sin resultados con ese filtro.</td></tr>';
+  const filas=(esAc?AC:PR).filter(c=>pasa(c)&&(!q||c.nombre.toLowerCase().includes(q)||c.giro.toLowerCase().includes(q))).sort(esAc?(a,b)=>(mesDe(b).d??1e9)-(mesDe(a).d??1e9):(a,b)=>orden[a.st]-orden[b.st]||ordKm(a,b));
+  const tl=esAc?"Clientes activos":"Prospectos";
+  $("tituloLista").textContent=v==="all"?tl+" de la zona":zona?tl+" de la zona de "+zonaNom(v.slice(2)):tl+" de "+sucs[0].n;
+  const stAc=c=>{const m=mesDe(c);return `<span class="chip" style="--c:var(${m.ok?"--st-act":m.d==null?"--st-esc":"--warn"})">${m.ok?"Al corriente":m.d==null?"Sin visita registrada":"Última visita hace "+m.d+" d"}</span>`};
+  $("lista").innerHTML=filas.slice(0,mostrar).map(c=>`<tr data-id="${c.id}"><td><b>${esc(c.nombre)}</b><span class="sub">${c.id}${c.arr?" · arrastrado":""}</span>${tipoTag(c)}</td><td data-l="Giro">${c.giro}</td><td class="tn" data-l="Flota">${c.flota??"—"}</td><td data-l="Sucursal">${c.suc.n}</td><td class="tn" data-l="Km a sucursal">${fk(c.km)}</td><td data-l="Estatus">${esAc?stAc(c):chip(c.st)}</td><td data-l="Ubicación"><a class="lnk" href="${maps(c)}" target="_blank" rel="noopener">Google Maps ↗</a></td></tr>`).join("")||'<tr><td colspan="7" class="empty">Sin resultados con ese filtro.</td></tr>';
   $("verMas").parentElement.hidden=filas.length<=10;
-  $("verMas").textContent=mostrar<filas.length?`Ver las ${filas.length} empresas`:"Ver menos";
+  $("verMas").textContent=mostrar<filas.length?`Ver los ${filas.length.toLocaleString("es-MX")} ${esAc?"clientes activos":"prospectos"}`:"Ver menos";
 }
 
 const mts=m=>m==null?"":m<1000?m+" m":(m/1000).toFixed(1)+" km";
@@ -1381,7 +1424,7 @@ const verif=x=>({en_sitio:`<span class="chip" style="--c:var(--st-vis)">En sitio
 function feed(vis,max,conGerente){
   const ult=[...vis].reverse().sort((a,b)=>b.fecha.localeCompare(a.fecha)).slice(0,max);
   return ult.length?ult.map(x=>{const c=cli(x.cli);
-    return `<div class="ev" data-id="${c.id}" style="--c:var(${RES[x.res]})"><span class="dot">${conGerente?iniciales(c.suc.g):fecha(x.fecha).split(" ")[0]}</span><div><div class="ev-h"><b>${esc(c.nombre)}</b><span>${fecha(x.fecha)}${conGerente?" · "+c.suc.n:""}</span></div><p><span class="chip" style="--c:var(${RES[x.res]})">${x.res}</span> ${verif(x)} ${esc(x.com)}</p></div></div>`}).join(""):'<div class="empty">Sin visitas en este periodo.</div>';
+    return `<div class="ev" data-id="${c.id}" style="--c:var(${RES[x.res]})"><span class="dot">${conGerente?iniciales(c.suc.g):fecha(x.fecha).split(" ")[0]}</span><div><div class="ev-h"><b>${esc(c.nombre)}</b><span>${fecha(x.fecha)}${conGerente?" · "+c.suc.n:""}</span></div><p>${tipoChip(c)} <span class="chip" style="--c:var(${RES[x.res]})">${x.res}</span> ${verif(x)} ${esc(x.com)}</p></div></div>`}).join(""):'<div class="empty">Sin visitas en este periodo.</div>';
 }
 
 function actTabla(arr){
@@ -1486,11 +1529,11 @@ function renderG(id){
   $("titulo").textContent="Mi semana";
   $("subTop").textContent=`Sucursal ${suc.n} · semana del ${fecha(LUNES)} al ${fecha(addDias(LUNES,5))}`;
   $("gRing").innerHTML=`<div style="color:var(--panel)">${ring(n,m,150,col,"color-mix(in srgb,var(--panel) 14%,transparent)")}</div>`;
-  $("gLbl").textContent=`Visitas · ${rangoTxt()}`;
+  $("gLbl").textContent=`Visitas a prospectos · ${rangoTxt()}`;
   const falta=Math.max(m-n,0);
   $("gTit").innerHTML=falta?`Llevas <span class="num">${n}</span> de ${m}. Te faltan ${falta} para la meta.`:`Meta cumplida: ${n} de ${m}.`;
   const cot=new Set(visT.filter(x=>x.res==="Pidió cotización").map(x=>x.cli)).size;
-  $("gStats").innerHTML=`<div><b class="num">${sem.length}</b><span>por visitar</span></div><div><b class="num">${sem.filter(c=>c.st==="reint").length}</b><span>reintentos</span></div><div><b class="num">${sem.filter(c=>c.arr).length}</b><span>arrastrados</span></div><div><b class="num">${cot}</b><span>cotizaciones</span></div><div><b class="num">${habilesRestantes()}</b><span>días hábiles restantes</span></div>`;
+  $("gStats").innerHTML=`<div><b class="num">${sem.length}</b><span>prospectos por visitar</span></div><div><b class="num">${mis.filter(c=>c.tipo===ACT&&!mesDe(c).ok).length}</b><span>clientes activos sin visita este mes</span></div><div><b class="num">${sem.filter(c=>c.st==="reint").length}</b><span>reintentos</span></div><div><b class="num">${sem.filter(c=>c.arr).length}</b><span>arrastrados</span></div><div><b class="num">${cot}</b><span>cotizaciones</span></div><div><b class="num">${habilesRestantes()}</b><span>días hábiles restantes</span></div>`;
   const gq=COTS.filter(q=>ids.has(q.cli)),gab=gq.filter(q=>q.estado==="abierta").sort((a,b)=>a.fecha.localeCompare(b.fecha));
   const ganG=gq.filter(q=>q.estado==="ganada"&&q.cierre>=desde&&q.cierre<=hasta).reduce((s,q)=>s+q.ganado,0);
   const enCurso=Object.keys(CHK).filter(k=>ids.has(k)).length,pmG=promMin(visT.filter(x=>x.correo===YO.correo.toLowerCase()));
@@ -1508,7 +1551,14 @@ function renderG(id){
   </div>`).join(""):'<div class="mod empty">No tienes clientes pendientes esta semana. Tu lista nueva llega el lunes.</div>';
   const act=mis.filter(c=>c.tipo===ACT).map(c=>({c,m:mesDe(c)})),pend=act.filter(x=>!x.m.ok).sort((p,q)=>(q.m.d??1e9)-(p.m.d??1e9)||(yo(p.c)??ordKm(p.c,q.c))-(yo(q.c)??0));
   $("gActSec").hidden=$("gActHist").hidden=!act.length;$("gActTabla").innerHTML=act.length?actTabla(act.map(x=>x.c)):"";
-  $("gActHint").textContent=`${act.length-pend.length} de ${act.length} visitados en los últimos 30 días · cuentan aparte de tus 10 de la semana`;
+  $("gActHint").textContent=`${act.length-pend.length} de ${act.length} visitados en los últimos 30 días · cuentan aparte de tus 10 de la semana · los más atrasados primero`;
+  const finMes=diasDesde(HOY)-diasDesde(addDias(HOY.slice(0,8)+"01",40).slice(0,8)+"01")-1,sinV=pend.filter(x=>x.m.d==null).length;
+  $("gActRes").hidden=!act.length;
+  $("gActRes").innerHTML=`<div class="mod-h" style="margin:0"><h2>Clientes activos · visita del mes</h2><span class="chip" style="--c:var(${pend.length?"--st-esc":"--st-act"})">${pend.length?pend.length+(pend.length===1?" pendiente":" pendientes"):"Al corriente"}</span></div>
+    <div class="track" role="img" aria-label="${act.length-pend.length} de ${act.length} al corriente"><i style="width:${act.length?(act.length-pend.length)/act.length*100:0}%"></i></div>
+    <p style="margin:0"><b class="num">${act.length-pend.length}</b> de ${act.length} clientes activos visitados en los últimos 30 días${pend.length?` · ${sinV} sin ninguna visita · quedan ${finMes} días del mes`:""}.</p>
+    ${pend.length?`<button class="btn pri" type="button" data-ir="gActSec">${pend.length===1?"Ver el pendiente":`Ver los ${pend.length} pendientes`}</button>`:""}<span class="hint">Son clientes que ya nos compran: no cuentan para la meta de 10, pero no se deben descuidar.</span>`;
+  $("gTiposB").innerHTML=tiposCartera(mis);
   $("gAct").innerHTML=pend.map(({c,m:mm})=>`<div class="card${CHK[c.id]?" curso":""}">
     <div class="card-h"><span class="lbl">${c.giro}</span><span class="chip" style="--c:var(${mm.d==null?"--st-asig":"--warn"})">${mm.d==null?"Sin visita registrada":"Última visita hace "+mm.d+" días"}</span></div>
     <h3>${esc(c.nombre)}</h3>${CHK[c.id]?'<span class="chip" style="--c:var(--st-vis)">Visita en curso</span>':""}${tipoTag(c)}${yo(c)!=null?`<span class="yo">A ${fk(yo(c))} km de ti</span>`:""}
@@ -1524,9 +1574,9 @@ function renderG(id){
 
 /* ---------- controles ---------- */
 // secciones: en lugar de una sola página larga, cada vista se divide y se muestra una a la vez
-const SECS=()=>rol==="reg"?[["resumen","Resumen","resumen"],["equipo","Equipo","equipo"],["ventas","Ventas","ventas"],["analitica","Analítica","analitica"],["clientes","Clientes","clientes"],
+const SECS=()=>rol==="reg"?[["resumen","Resumen","resumen"],["equipo","Equipo","equipo"],["ventas","Ventas","ventas"],["analitica","Analítica","analitica"],["clientes","Cartera","clientes"],
     ...(["admin","regional"].includes(YO.rol)?[["usuarios","Usuarios","usuarios"]]:[])]
-  :[["semana","Mi semana","ruta"],["gclientes","Mis clientes","clientes"],["cotiz","Cotizaciones","ventas"],["zona","Mi zona","mapa"]];
+  :[["semana","Mi semana","ruta"],["gclientes","Mi cartera","clientes"],["cotiz","Cotizaciones","ventas"],["zona","Mi zona","mapa"]];
 let SEC=null,TIT="";
 function nav(){
   const items=SECS();let g=null;try{g=localStorage.getItem("rf.sec."+rol)}catch(e){}
@@ -1542,21 +1592,24 @@ const pasosTour=()=>{const n=($("quien").textContent||"").split(" ")[0];
   ["#heroR","Cómo va tu zona","Avance de visitas de la semana contra la meta (10 por gerente). El color te dice si van en ruta, atrasados o críticos.","resumen"],
   ["#campana","Tus avisos","Aquí llegan las ubicaciones que un gerente reportó mal (tú apruebas o rechazas), los clientes reasignados a ti y los activos sin visita."],
   ["#asist","Tersa Boy","Asistente con IA: pregúntale en tus palabras por clientes, ventas, cotizaciones o cómo hacer algo. Solo ve lo mismo que tú."],
+  [null,"Tipos de cliente",DEF_TIPOS],
   ["#alertas","Requieren tu atención","Clientes que el gerente no pudo atender. Toca uno para regresarlo a su lista, devolverlo a la cartera o reasignarlo.","resumen"],
   ["#seg","Periodo","Cambia entre semana, mes, mes pasado o fechas. Todos los números y gráficas se recalculan."],
   ["#vista",YO.rol==="regional"?"Sucursal":"Zona o sucursal",YO.rol==="regional"?"Ve toda tu zona o una sola sucursal.":"Ve todo, una zona (regional) o una sola sucursal."],
   ["#gq","Buscador","Encuentra cualquier cliente por nombre, código SAP, ciudad o folio de cotización, y abre su ficha."],
-  ["#nav","Secciones","Resumen, Equipo (fichas y ranking), Ventas (cotizaciones), Analítica (tendencias y comparativos), Clientes"+(["admin","regional"].includes(YO.rol)?" y Usuarios.":".")],
+  ["#nav","Secciones","Resumen, Equipo (fichas y ranking), Ventas (cotizaciones), Analítica (tendencias y comparativos), Cartera (prospectos y clientes activos por separado)"+(["admin","regional"].includes(YO.rol)?" y Usuarios.":".")],
   ["#fab","Agregar","Da de alta un cliente o prospecto nuevo con el botón +."],
   [null,"¡Listo!","Si quieres que este recorrido ya no salga al entrar, marca «No volver a mostrar» y toca «Terminar»."]]
   :[
   [null,`Hola, ${n} 👋`,"Te enseño en un minuto cómo registrar tus visitas. Usa «Siguiente» o cierra cuando quieras; puedes volver a verlo con el botón «?» de arriba."],
   ["#miSemana","Tu semana","Cuántas visitas llevas de tu meta de 10, lo que te falta y tu siguiente parada con «Cómo llegar».","semana"],
+  [null,"Tipos de cliente",DEF_TIPOS],
+  ["#gActRes","Tus clientes activos","Además de tus 10 prospectos de la semana, visita una vez al mes a cada cliente activo. Aquí ves cuántos te faltan y cuántos días quedan del mes.","semana"],
   ["#gCards .card","Tus clientes de la semana","Al llegar con el cliente toca «Llegué» (check-in con GPS). Al terminar llenas la visita y tocas «Terminar visita»; así se mide cuánto duró.","semana"],
   ["#gq","Buscador","Encuentra cualquier cliente tuyo y abre su ficha: historial, cotizaciones, crédito y observaciones."],
   ["#asist","Tersa Boy","Asistente con IA: pregúntale, por ejemplo, «¿qué clientes tengo pendientes?» o «¿cuánto llevo vendido este mes?». Solo ve tus datos."],
   ["#seg","Periodo","Cambia entre semana, mes o fechas para ver tus números."],
-  ["#nav","Secciones","Mi semana, Mis clientes (activos), Cotizaciones y Mi zona (mapa)."],
+  ["#nav","Secciones","Mi semana (prospectos y activos pendientes), Mi cartera (por tipo de cliente y el seguimiento de activos), Cotizaciones y Mi zona (mapa)."],
   ["#fab","Agregar","Da de alta un cliente o prospecto nuevo con el botón +."],
   [null,"¡Listo!","Si quieres que este recorrido ya no salga al entrar, marca «No volver a mostrar» y toca «Terminar»."]]};
 let TP=[],TI=0;
@@ -1797,7 +1850,7 @@ function render(){
 }
 
 $("filtrosMapa").innerHTML=Object.entries(ST).map(([k,x])=>`<button type="button" data-st="${k}" aria-pressed="true" style="--c:var(${x.c})"><i></i>${x.t}</button>`).join("");
-$("filtrosTabla").innerHTML=[["todos","Todos","--muted"],...Object.entries(ST).map(([k,x])=>[k,x.t,x.c])].map(([k,t,c])=>`<button type="button" data-ft="${k}" aria-pressed="${k==="todos"}" style="--c:var(${c})"><i></i>${t}</button>`).join("");
+
 
 
 function abrir(id){const c=cli(id);if(!c)return;
@@ -2041,7 +2094,9 @@ document.addEventListener("click",e=>{
   const qa=e.target.closest("[data-cot]");if(qa){cotAccion(qa.dataset.cot);return}
   const ra=e.target.closest("[data-reg]");if(ra){regAccion(ra.dataset.reg);return}
   const st=e.target.closest("[data-st]");if(st){const k=st.dataset.st,on=visibles.has(k);on?visibles.delete(k):visibles.add(k);st.setAttribute("aria-pressed",!on);render();return}
-  const ft=e.target.closest("[data-ft]");if(ft){filtroT=ft.dataset.ft;mostrar=10;document.querySelectorAll("[data-ft]").forEach(b=>b.setAttribute("aria-pressed",b===ft));render();return}
+  const ct=e.target.closest("[data-ct]");if(ct){carT=ct.dataset.ct;filtroT="todos";mostrar=10;render();return}
+  const ft=e.target.closest("[data-ft]");if(ft){filtroT=ft.dataset.ft;mostrar=10;render();return}
+  const ir=e.target.closest("[data-ir]:not([data-suc])");if(ir){$(ir.dataset.ir).scrollIntoView({behavior:"smooth",block:"start"});return}
   const sc=e.target.closest("[data-suc]");if(sc){$("vista").value=$("vista").value===sc.dataset.suc?"all":sc.dataset.suc;mostrar=10;render();
     // en celular el detalle queda abajo: se lleva la vista ahí para que se note el cambio
     if(sc.dataset.vsec)verSec(sc.dataset.vsec);
