@@ -943,7 +943,7 @@ body{background:radial-gradient(1100px 600px at 85% -10%,var(--glow1),transparen
       <button class="btn pri" type="submit" style="padding:12px">Entrar</button>
       <span class="toast" id="lErr" role="alert" style="color:var(--st-esc)" hidden></span>
       <span class="hint" style="font-size:12px">¿No tienes acceso? Pídeselo a tu regional: las cuentas solo se crean por invitación.</span>
-      <span class="hint" style="font-size:11px">Versión 23 nov · lista semanal: inactivos y prospectos</span>
+      <span class="hint" style="font-size:11px">Versión 24 nov · crédito: XRPPOS y consulta</span>
       <button type="button" class="btn" id="olvide" style="border:0;background:none;color:var(--muted);text-decoration:underline;padding:0;justify-self:start">Olvidé mi contraseña</button>
     </form>
     <form class="lg-card" id="passForm" hidden>
@@ -2003,6 +2003,13 @@ function comBlock(id){const el=$("fComs"),H=hilosC(k=>k.cliente_id===id),nuevo=p
   el.hidden=!H.length&&!puedoIniciar();if(el.hidden)return;
   el.innerHTML=`<div class="lbl">Comentarios${H.filter(porResponder).length?` · <span style="color:var(--st-esc)">${H.filter(porResponder).length} por responder</span>`:""}</div>
    ${H.map(h=>hiloHTML(h,{conCli:false})).join("")}${nuevo?nuevoComHTML(id):""}`}
+// Consulta de estatus a la jefa de crédito de la zona (clientes con crédito o que no aparecen en XRPPOS)
+function consBlock(id,ok){if(!ok)return"";
+  SB.from("consultas_credito").select("creado_en,creado_por").eq("cliente_id",id).order("creado_en",{ascending:false}).limit(1).then(({data})=>{const u=$("consUlt");if(u&&data&&data[0])u.textContent=`Última consulta: ${fecha(String(data[0].creado_en).slice(0,10))} por ${data[0].creado_por}.`});
+  return `<details class="cons"><summary class="btn" style="width:fit-content">Consultar estatus de crédito</summary>
+      <div class="hint" style="margin:8px 0">Le llega a la jefa de crédito de la sucursal; te contesta por correo.</div>
+      <textarea id="consNota" maxlength="500" aria-label="Comentario para Crédito (opcional)" placeholder="Opcional: qué necesitas saber (por ejemplo, si tiene saldo disponible para un pedido de 20 llantas)"></textarea>
+      <div class="acts"><button class="btn pri" type="button" data-cred="consulta">Enviar consulta</button></div></details><div class="hint" id="consUlt"></div>`}
 // Crédito del cliente (prospecto o cliente de contado): solicitud con documentos → Crédito y Cobranza → aprobado / no aprobado
 function credBlock(id){
   const c=cli(id),el=$("fCred"),k=CRED[id],ok=puedeAtender(c),cta=CUENTAS[c.cuenta],abierta=k&&!k.fin;
@@ -2010,11 +2017,7 @@ function credBlock(id){
   let h=`<div class="lbl">Crédito</div>`;
   if(c.linea||(cta&&cta.linea_autorizada)){
     h+=`<div class="aviso" style="--c:var(--st-vis)">Línea de crédito autorizada${c.lineaDesde?` desde el ${fecha(c.lineaDesde)}`:""}${!c.linea&&cta?` (de la cuenta ${esc(cta.nombre)})`:""}. Sus cotizaciones a crédito no llevan trámite.</div>`;
-    if(ok)h+=`<details class="cons"><summary class="btn" style="width:fit-content">Consultar estatus de crédito</summary>
-      <div class="hint" style="margin:8px 0">Le llega a la jefa de crédito de la sucursal; te contesta por correo.</div>
-      <textarea id="consNota" maxlength="500" aria-label="Comentario para Crédito (opcional)" placeholder="Opcional: qué necesitas saber (por ejemplo, si tiene saldo disponible para un pedido de 20 llantas)"></textarea>
-      <div class="acts"><button class="btn pri" type="button" data-cred="consulta">Enviar consulta</button></div></details><div class="hint" id="consUlt"></div>`;
-    SB.from("consultas_credito").select("creado_en,creado_por").eq("cliente_id",id).order("creado_en",{ascending:false}).limit(1).then(({data})=>{const u=$("consUlt");if(u&&data&&data[0])u.textContent=`Última consulta: ${fecha(String(data[0].creado_en).slice(0,10))} por ${data[0].creado_por}.`})}
+    h+=consBlock(id,ok)}
   else if(abierta){const x={ini:k.inicio,docsOk:k.docs_completos,fin:null,docs:k.documentos||{}},n=DOCS.filter(([d])=>x.docs[d]).length,dd=entre(x.ini,x.docsOk||HOY);
     if(!x.docsOk){
       h+=`<div class="aviso" style="--c:var(--warn)">Solicitud de crédito · esperando documentos del cliente: ${n} de ${DOCS.length} · ${dd} ${dd===1?"día":"días"} desde que se pidieron.</div>
@@ -2027,6 +2030,9 @@ function credBlock(id){
   else{
     if(k)h+=`<div class="hint">Su última solicitud no fue aprobada (${fecha(k.fin)}).</div>`;
     if(pidio)h+=`<div class="hint">En su visita del ${fecha(pidio.fecha)} dijo que pagaría a crédito.</div>`;
+    // cliente de SAP: el gerente revisa en XRPPOS si ya tiene crédito; si no aparece, lo consulta
+    if(c.tipo!=="Prospecto"&&!k&&ok)h+=`<div class="aviso" style="--c:var(--st-asig)">¿Ya tiene crédito? Búscalo en <b>XRPPOS</b>. Si aparece con crédito, márcalo aquí. Si no aparece, consúltalo con Crédito.</div>
+      <div class="acts" style="margin:0"><button class="btn" type="button" data-cred="xrppos">Sí tiene crédito (lo vi en XRPPOS)</button></div>${consBlock(id,ok)}`;
     h+=ok?`<div class="acts" style="margin:0"><button class="btn${pidio?" pri":""}" type="button" data-cred="nuevo">${k?"Volver a solicitar crédito":"¿Quiere crédito? Iniciar solicitud y pedir documentos"}</button></div>`:'<div class="hint">Sin línea de crédito.</div>'}
   el.innerHTML=h+'<span class="toast" id="credMsg" role="status" hidden></span>';el.hidden=false}
 async function credAccion(a){
@@ -2036,6 +2042,8 @@ async function credAccion(a){
     const{data,error}=await SB.rpc("consultar_credito",{cliente:id,nota:$("consNota").value});
     if(error){b.disabled=false;return m(/YA_CONSULTADO/.test(error.message)?"Ya se mandó una consulta de este cliente hoy.":"No se envió: "+error.message)}
     credBlock(id);const x=$("credMsg");x.textContent=`Consulta enviada a ${data}. Te contestará por correo.`;x.style.color="var(--st-vis)";x.hidden=false;return}
+  if(a==="xrppos"){const{error}=await SB.rpc("marcar_credito_xrppos",{cliente:id});if(error)return m("No se guardó: "+error.message);
+    cli(id).linea=true;cli(id).lineaDesde=HOY;credBlock(id);return}
   if(a==="nuevo")r=SB.from("creditos").insert({cliente_id:id});
   else if(!k)return;
   else if(a.startsWith("doc:")){const d=a.slice(4),antes=k.documentos||{},nd={...antes};if(nd[d])delete nd[d];else nd[d]=HOY;k.documentos=nd;credBlock(id);
