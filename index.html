@@ -943,7 +943,7 @@ body{background:radial-gradient(1100px 600px at 85% -10%,var(--glow1),transparen
       <button class="btn pri" type="submit" style="padding:12px">Entrar</button>
       <span class="toast" id="lErr" role="alert" style="color:var(--st-esc)" hidden></span>
       <span class="hint" style="font-size:12px">¿No tienes acceso? Pídeselo a tu regional: las cuentas solo se crean por invitación.</span>
-      <span class="hint" style="font-size:11px">Versión 24 nov · crédito: XRPPOS y consulta</span>
+      <span class="hint" style="font-size:11px">Versión 24 nov · crédito: consulta a Crédito</span>
       <button type="button" class="btn" id="olvide" style="border:0;background:none;color:var(--muted);text-decoration:underline;padding:0;justify-self:start">Olvidé mi contraseña</button>
     </form>
     <form class="lg-card" id="passForm" hidden>
@@ -2030,9 +2030,9 @@ function credBlock(id){
   else{
     if(k)h+=`<div class="hint">Su última solicitud no fue aprobada (${fecha(k.fin)}).</div>`;
     if(pidio)h+=`<div class="hint">En su visita del ${fecha(pidio.fecha)} dijo que pagaría a crédito.</div>`;
-    // cliente de SAP: el gerente revisa en XRPPOS si ya tiene crédito; si no aparece, lo consulta
-    if(c.tipo!=="Prospecto"&&!k&&ok)h+=`<div class="aviso" style="--c:var(--st-asig)">¿Ya tiene crédito? Búscalo en <b>XRPPOS</b>. Si aparece con crédito, márcalo aquí. Si no aparece, consúltalo con Crédito.</div>
-      <div class="acts" style="margin:0"><button class="btn" type="button" data-cred="xrppos">Sí tiene crédito (lo vi en XRPPOS)</button></div>${consBlock(id,ok)}`;
+    // cliente activo o inactivo: se le pregunta a Crédito (no todos los gerentes ven XRPPOS); si confirman, se marca
+    if(c.tipo!=="Prospecto"&&!k&&ok)h+=`<div class="aviso" style="--c:var(--st-asig)">¿Ya tiene crédito? Pregúntale a Crédito con <b>Consultar estatus de crédito</b>: te contestan por correo. Si te confirman que sí, márcalo aquí.</div>
+      ${consBlock(id,ok)}<div class="acts" style="margin:0"><button class="btn" type="button" data-cred="xrppos">Crédito confirmó que sí tiene crédito</button></div>`;
     h+=ok?`<div class="acts" style="margin:0"><button class="btn${pidio?" pri":""}" type="button" data-cred="nuevo">${k?"Volver a solicitar crédito":"¿Quiere crédito? Iniciar solicitud y pedir documentos"}</button></div>`:'<div class="hint">Sin línea de crédito.</div>'}
   el.innerHTML=h+'<span class="toast" id="credMsg" role="status" hidden></span>';el.hidden=false}
 async function credAccion(a){
@@ -2042,7 +2042,7 @@ async function credAccion(a){
     const{data,error}=await SB.rpc("consultar_credito",{cliente:id,nota:$("consNota").value});
     if(error){b.disabled=false;return m(/YA_CONSULTADO/.test(error.message)?"Ya se mandó una consulta de este cliente hoy.":"No se envió: "+error.message)}
     credBlock(id);const x=$("credMsg");x.textContent=`Consulta enviada a ${data}. Te contestará por correo.`;x.style.color="var(--st-vis)";x.hidden=false;return}
-  if(a==="xrppos"){const{error}=await SB.rpc("marcar_credito_xrppos",{cliente:id});if(error)return m("No se guardó: "+error.message);
+  if(a==="xrppos"){const{error}=await SB.rpc("marcar_credito_confirmado",{cliente:id});if(error)return m("No se guardó: "+error.message);
     cli(id).linea=true;cli(id).lineaDesde=HOY;credBlock(id);return}
   if(a==="nuevo")r=SB.from("creditos").insert({cliente_id:id});
   else if(!k)return;
