@@ -206,6 +206,13 @@ button,input,select{font:inherit;color:inherit}
 .nt-gr span span{display:block;font-size:12px;color:var(--st-esc);line-height:1.35}.nt-gr i{font-style:normal;color:var(--muted);font-size:20px}
 .nt-av{display:grid;gap:2px;padding:10px 0;border-top:1px solid var(--line)}.nt-av span{font-size:13px;color:var(--ink)}.nt-av small{color:var(--muted);font-size:11.5px}
 .nt-av.leido{opacity:.6}
+.com-h{display:grid;gap:8px;padding:10px 0;border-top:1px solid var(--line)}
+.com-cli{font-size:12.5px;color:var(--muted)}
+.com-m{background:var(--soft);border-radius:12px;padding:8px 12px;max-width:92%}.com-m.mio{justify-self:end;background:color-mix(in srgb,var(--st-asig) 12%,var(--panel))}
+.com-m b{font-size:12.5px}.com-m p{margin:2px 0 0;white-space:pre-wrap;font-size:14px;color:var(--ink)}.com-m small{color:var(--muted);font-size:11.5px}
+.com-f{display:grid;gap:6px}.com-f textarea{min-height:60px}.com-f select{min-height:44px;border-radius:10px;border:1px solid var(--line);background:var(--soft);color:var(--ink);font:inherit;padding:0 10px}
+.com-acts{display:flex;gap:8px;flex-wrap:wrap}.com-acts .btn{margin-top:0!important}
+.com-ban{display:flex;gap:12px;align-items:center;justify-content:space-between;border-left:6px solid var(--st-esc)!important}
 .nt.ficha .btn{margin-top:8px}
 .nt-ok{color:var(--st-vis);font-weight:700;margin:0}.nt-err{color:var(--st-esc);margin:0;font-size:13px}
 @media (max-width:640px){.notif{margin:auto 0 0;width:100vw;max-width:100vw;max-height:85dvh;border-radius:20px 20px 0 0;padding-bottom:env(safe-area-inset-bottom,0px)}
@@ -288,6 +295,7 @@ h2{font-family:var(--display);font-variation-settings:"wdth" 110;font-weight:700
 .delta.up{color:var(--st-vis);background:color-mix(in srgb,var(--st-vis) 14%,transparent)}
 .delta.dn{color:var(--st-esc);background:color-mix(in srgb,var(--st-esc) 14%,transparent)}
 .tile{grid-column:span 2;display:grid;gap:6px;align-content:space-between}
+#vReg .hero{grid-column:span 4}  /* hero + 4 recuadros en una fila */
 .tile .v{font-size:36px;line-height:1;font-weight:800}
 .tile .s{font-size:12px;color:var(--muted)}
 .tile .ic{width:30px;height:30px;border-radius:8px;display:grid;place-items:center;background:color-mix(in srgb,var(--c) 14%,transparent);color:var(--c)}
@@ -528,7 +536,7 @@ body:has(#login:not([hidden])){background:#0a0f18}
 @media (prefers-reduced-motion:reduce){.lg-glass{animation:none}.lg-bg .flow{animation:none}}
 @media (max-width:900px){.login{display:flex;flex-direction:column}.lg-art,.lg-form{flex:none}.lg-stats{display:none}.lg-art{padding:28px 20px 4px;gap:18px}.lg-art h2{font-size:28px;max-width:none}.lg-form{padding-top:20px;padding-bottom:max(32px,env(safe-area-inset-bottom,0px))}.lg-glass .lg-card{padding:28px 22px 24px}.lg-shard{display:none}}
 
-@media (max-width:1100px){.hero{grid-column:span 12}.tile{grid-column:span 4}.c3,.c4,.c5{grid-column:span 6}.c7,.c8{grid-column:span 12}.ghero{grid-template-columns:auto minmax(0,1fr)}.next{grid-column:1/-1}}
+@media (max-width:1100px){.hero,#vReg .hero{grid-column:span 12}.tile{grid-column:span 3}.c3,.c4,.c5{grid-column:span 6}.c7,.c8{grid-column:span 12}.ghero{grid-template-columns:auto minmax(0,1fr)}.next{grid-column:1/-1}}
 @media (max-width:900px){
   .app{grid-template-columns:1fr}
   .rail{position:sticky;top:0;height:auto;flex-direction:row;align-items:center;gap:12px;padding:10px max(16px,env(safe-area-inset-right,0px)) 10px max(16px,env(safe-area-inset-left,0px));z-index:30;top:env(safe-area-inset-top,0px)}
@@ -754,6 +762,7 @@ body{background:radial-gradient(1100px 600px at 85% -10%,var(--glow1),transparen
 
     <!-- GERENTE -->
     <div class="grid" id="vGer" hidden>
+      <section data-sec="semana" class="mod c12 com-ban" id="gComBan" hidden></section>
       <section data-sec="semana" class="mod ghero" id="miSemana">
         <div class="tread" aria-hidden="true"></div>
         <div id="gRing"></div>
@@ -881,6 +890,7 @@ body{background:radial-gradient(1100px 600px at 85% -10%,var(--glow1),transparen
     <div id="fRes" style="display:grid;gap:14px"></div>
     <div class="cotbox" id="fReg" hidden></div>
     <div class="cotbox" id="fCta" hidden></div>
+    <div class="cotbox" id="fComs" hidden></div>
     <div class="cotbox" id="fCred" hidden></div>
     <div class="cotbox" id="fCot" hidden></div>
     <form id="form" style="display:grid;gap:12px">
@@ -930,7 +940,7 @@ body{background:radial-gradient(1100px 600px at 85% -10%,var(--glow1),transparen
       <button class="btn pri" type="submit" style="padding:12px">Entrar</button>
       <span class="toast" id="lErr" role="alert" style="color:var(--st-esc)" hidden></span>
       <span class="hint" style="font-size:12px">¿No tienes acceso? Pídeselo a tu regional: las cuentas solo se crean por invitación.</span>
-      <span class="hint" style="font-size:11px">Versión 23 nov · prospectos y clientes activos</span>
+      <span class="hint" style="font-size:11px">Versión 23 nov · comentarios y correos a Crédito</span>
       <button type="button" class="btn" id="olvide" style="border:0;background:none;color:var(--muted);text-decoration:underline;padding:0;justify-self:start">Olvidé mi contraseña</button>
     </form>
     <form class="lg-card" id="passForm" hidden>
@@ -993,7 +1003,7 @@ const cargarMaps=()=>new Promise(ok=>{if(!MAPS_KEY)return ok(false);
 const colorDe=v=>getComputedStyle(document.documentElement).getPropertyValue(v).trim();
 const ordKm=(a,b)=>(a.km??999)-(b.km??999);
 
-let AVS=[],SUC=[],CL=[],VISITAS=[],COTS=[],YO=null,IX={},NOMS={},CUENTAS={},CKS=[],CHK={},CRED={},CREDS=[];
+let COMS=[],AVS=[],SUC=[],CL=[],VISITAS=[],COTS=[],YO=null,IX={},NOMS={},CUENTAS={},CKS=[],CHK={},CRED={},CREDS=[];
 const sinAcento=t=>(t||"").normalize("NFD").replace(/[\u0300-\u036f]/g,"").toLowerCase();
 const quien=e=>NOMS[(e||"").toLowerCase()]||nombreDe(e);
 const cli=id=>IX[id];
@@ -1018,11 +1028,13 @@ async function cargar(){
   const q0=q,IX0=Object.fromEntries(c.map(x=>[x.id,1]));
   // avisos personales de los últimos 7 días (si aún no se instala el SQL 28, se ignora)
   {const{data:av,error:ea}=await SB.from("avisos").select("id,tipo,titulo,detalle,cliente_id,creado_en,leido_en").gte("creado_en",new Date(Date.now()-7*864e5).toISOString()).order("creado_en",{ascending:false}).limit(50);AVS=ea?[]:(av||[])}
+  // comentarios de directivos y regionales (si aún no se instala el SQL 31, se ignora)
+  {const{data:cm,error:ec}=await SB.from("comentarios").select("*").gte("creado_en",new Date(Date.now()-90*864e5).toISOString()).order("creado_en").limit(1000);COMS=ec?[]:(cm||[])}
   const{data:cu}=await SB.from("cuentas_v").select("*");CUENTAS=Object.fromEntries((cu||[]).map(k=>[k.id,k]));
   const{data:pf}=await SB.from("perfiles").select("correo,nombre"); // el gerente solo ve el suyo; regional y admin ven todos
   const NOM=Object.fromEntries((pf||[]).filter(x=>x.nombre).map(x=>[x.correo,x.nombre]));NOMS=NOM;
   const conCli=new Set(c.map(x=>x.id_sucursal));
-  const TODAS=s.filter(x=>conCli.has(x.id)||x.id===YO.id_sucursal).map(x=>({id:x.id,n:corta(x.nombre),g:x.gerente_correo?NOM[x.gerente_correo.toLowerCase()]||nombreDe(x.gerente_correo):"Sin gerente · "+corta(x.nombre),lat:x.latitud,lng:x.longitud,reg:(x.regional_correo||"").toLowerCase()}));
+  const TODAS=s.filter(x=>conCli.has(x.id)||x.id===YO.id_sucursal).map(x=>({id:x.id,n:corta(x.nombre),g:x.gerente_correo?NOM[x.gerente_correo.toLowerCase()]||nombreDe(x.gerente_correo):"Sin gerente · "+corta(x.nombre),lat:x.latitud,lng:x.longitud,reg:(x.regional_correo||"").toLowerCase(),gc:(x.gerente_correo||"").toLowerCase()}));
   const SI=Object.fromEntries(TODAS.map(x=>[x.id,x]));
   // sucursales propias; las demás solo aparecen porque se ven sedes de una cuenta centralizada
   SUC=TODAS.filter(x=>YO.rol==="regional"?x.reg===YO.correo.toLowerCase():YO.rol==="gerente"?x.id===YO.id_sucursal:true);
@@ -1044,6 +1056,9 @@ async function cargar(){
 // mismos valores que config en Supabase (vigencia_cotizacion, dias_credito)
 const VIG=7,DCRED=3,DOCS=[["csf","Constancia de situación fiscal"],["domicilio","Comprobante de domicilio (no mayor a 3 meses)"],["ingresos","Comprobante de ingresos: 3 últimos estados de cuenta y/o declaración anual"],["solicitud","Solicitud de crédito llenada y firmada"],["acta","Acta constitutiva y poder del representante legal (actos de dominio o para suscribir títulos de crédito)"],["id_rep","Identificación oficial del representante legal y/o aval"],["firmas","Registro de firmas autorizadas con ID vigente de los autorizados"],["circulo","Carta de autorización para consultar Círculo de Crédito"]];
 const entre=(a,b)=>Math.round((new Date(b)-new Date(a))/864e5);
+// días hábiles (lunes a viernes) después de a hasta b; igual que dias_habiles() en la base
+const habiles=(a,b)=>{let n=0;for(let d=new Date(a+"T12:00:00Z"),f=new Date(b+"T12:00:00Z");d<f;){d.setUTCDate(d.getUTCDate()+1);const w=d.getUTCDay();if(w&&w<6)n++}return n};
+const folioRF=id=>"RF-"+String(id).padStart(4,"0");
 const enTram=q=>!!q.ini&&!q.fin;
 const diasTram=q=>q.ini?entre(q.ini,q.fin||HOY):0;
 const enVerif=q=>!!q.docsOk&&!q.fin;
@@ -1516,10 +1531,10 @@ document.addEventListener("click",async e=>{
 function tramPanel(cots,ids){
   const qs=CREDS.filter(k=>ids.has(k.cliente_id)).map(k=>{const q=cots.filter(x=>x.cli===k.cliente_id&&x.ini).sort((a,b)=>b.fecha.localeCompare(a.fecha))[0];
     return{cli:k.cliente_id,id:q?q.id:"Solicitud de crédito",fecha:q?q.fecha:k.inicio,monto:q?q.monto:0,estado:k.fin?"cerrada":"abierta",ini:k.inicio,docsOk:k.docs_completos,fin:k.fin,res:k.resultado,docs:k.documentos||{},sinCot:!q}});
-  const cur=qs.filter(q=>q.estado==="abierta"&&enTram(q)),doc=cur.filter(q=>!q.docsOk),ver=cur.filter(q=>q.docsOk),fuera=ver.filter(q=>entre(q.docsOk,HOY)>DCRED);
+  const cur=qs.filter(q=>q.estado==="abierta"&&enTram(q)),doc=cur.filter(q=>!q.docsOk),ver=cur.filter(q=>q.docsOk),fuera=ver.filter(q=>habiles(q.docsOk,HOY)>DCRED);
   const con=qs.filter(q=>q.fin&&q.fin>=desde&&q.fin<=hasta),avg=a=>a.length?(a.reduce((s,x)=>s+x,0)/a.length).toFixed(1):"—";
   const dT=avg(con.map(diasTram)),dV=avg(con.filter(q=>q.docsOk).map(q=>entre(q.docsOk,q.fin))),pV=con.length?Math.round(con.reduce((s,q)=>s+diasTram(q),0)/con.length/VIG*100)+"%":"—";
-  const st=[["En trámite hoy",cur.length,`${corto(cur.reduce((s,q)=>s+q.monto,0))} detenidos`],["Esperando documentos",doc.length,doc.length?`promedio ${avg(doc.map(q=>entre(q.ini,HOY)))} días`:"del cliente"],["En Crédito y Cobranza",ver.length,`${fuera.length} fuera del plazo de ${DCRED} días`],
+  const st=[["En trámite hoy",cur.length,`${corto(cur.reduce((s,q)=>s+q.monto,0))} detenidos`],["Esperando documentos",doc.length,doc.length?`promedio ${avg(doc.map(q=>entre(q.ini,HOY)))} días`:"del cliente"],["En Crédito y Cobranza",ver.length,`${fuera.length} fuera del plazo de ${DCRED} días hábiles`],
     ["Crédito aprobado",con.filter(q=>q.res==="aprobado").length,con.length?`${Math.round(con.filter(q=>q.res==="aprobado").length/con.length*100)}% de ${con.length} resueltos · ${rangoTxt()}`:`ninguno resuelto · ${rangoTxt()}`],["Crédito no aprobado",con.filter(q=>q.res==="rechazado").length,con.length?`${Math.round(con.filter(q=>q.res==="rechazado").length/con.length*100)}% de ${con.length} resueltos · ${rangoTxt()}`:`ninguno resuelto · ${rangoTxt()}`],["Duración promedio",dT==="—"?"—":dT+" d",`verificación ${dV==="—"?"—":dV+" d"} · meta ${DCRED} d`],["Vigencia consumida",pV,`promedio, de ${VIG} días`]];
   $("cotTram").innerHTML=(cur.length||con.length)?`<div class="lbl" style="margin-top:6px">Trámite de crédito · documentos del cliente (la vigencia corre) y Crédito y Cobranza (la vigencia se pausa)</div>
     <div class="money">${st.map(([l,v,s2])=>`<div class="mstat"><span class="lbl">${l}</span><b class="num">${v}</b><span>${s2}</span></div>`).join("")}</div>
@@ -1794,8 +1809,33 @@ function fichasGerente(){
     `<ul class="nt-l">${A.slice(0,4).map(c=>{const m=mesDe(c);return `<li><span>${esc(c.nombre)}</span><b>${m.u?`hace ${m.d} d`:"sin visita"}</b></li>`}).join("")}${A.length>4?`<li class="hint"><span>y ${A.length-4} más</span></li>`:""}</ul>`,`<button type="button" class="btn" data-nv="gclientes:gActSec">Ver mis activos</button>`));
   return out;
 }
+/* ---------- comentarios: directivo → regional/gerente, regional → gerente; el gerente solo responde ---------- */
+const yoC=()=>(YO&&YO.correo||"").toLowerCase();
+const nomC=e=>e===yoC()?"Tú":NOMS[e]||nombreDe(e);
+const puedoIniciar=()=>rol==="reg"&&(YO.rol==="admin"||YO.rol==="regional");
+function hilosC(f=()=>true){return COMS.filter(k=>!k.hilo&&f(k)).map(r=>({r,m:[r,...COMS.filter(k=>k.hilo===r.id)]})).sort((a,b)=>a.m[a.m.length-1].creado_en<b.m[b.m.length-1].creado_en?1:-1)}
+const porResponder=h=>!h.r.atendido_en&&h.m[h.m.length-1].para===yoC();
+function hiloHTML(h,{conCli=true}={}){const yo=yoC(),parte=[h.r.de,h.r.para].includes(yo),c=h.r.cliente_id&&cli(h.r.cliente_id);
+  return `<div class="com-h" data-hilo="${h.r.id}">
+   <div class="com-cli">${esc(nomC(h.r.de))} → ${esc(nomC(h.r.para))}${conCli&&h.r.cliente_id?` · sobre <button type="button" class="lnk" data-id="${h.r.cliente_id}">${esc(c?c.nombre:h.r.cliente_id)}</button>`:""}${h.r.atendido_en?` · <b style="color:var(--st-vis)">Atendido</b>`:""}</div>
+   ${h.m.map(k=>`<div class="com-m${k.de===yo?" mio":""}"><b>${esc(nomC(k.de))}</b> <small>${hace(k.creado_en)}</small><p>${esc(k.texto)}</p></div>`).join("")}
+   ${parte&&!h.r.atendido_en?`<div class="com-f"><textarea maxlength="1000" aria-label="Tu respuesta" placeholder="Escribe tu respuesta…"></textarea>
+     <div class="com-acts"><button type="button" class="btn pri" data-com="resp">Responder</button>${h.r.de===yo?`<button type="button" class="btn" data-com="ok">Marcar atendido</button>`:""}</div></div>`:""}
+  </div>`}
+function nuevoComHTML(cliente){
+  const dest=cliente?null:YO.rol==="admin"?[...new Map([...SUC.filter(x=>x.reg).map(x=>[x.reg,"Regional · "+zonaNom(x.reg)]),...SUC.filter(x=>x.gc).map(x=>[x.gc,"Gerente · "+x.g+" ("+x.n+")"])])]:SUC.filter(x=>x.gc).map(x=>[x.gc,x.g+" ("+x.n+")"]);
+  return `<div class="com-f" data-comnuevo="${cliente||""}">
+   ${dest?`<select aria-label="Para quién"><option value="">¿Para quién?</option>${dest.map(([v,t])=>`<option value="${esc(v)}">${esc(t)}</option>`).join("")}</select>`:""}
+   <textarea maxlength="1000" aria-label="Comentario" placeholder="${cliente?"Comentario para el gerente sobre este cliente…":"Escribe el comentario…"}"></textarea>
+   <div class="com-acts"><button type="button" class="btn pri" data-com="nuevo">Enviar comentario</button></div></div>`}
+function fichasComentarios(){const out=[],P=hilosC().filter(porResponder);
+  if(P.length)out.push(F_("urg","💬","--st-esc","Comentarios por responder",P.some(h=>h.r.cliente_id)?"Tu respuesta queda en el historial del cliente":"Respóndelos aquí mismo",P.length,P.map(h=>hiloHTML(h)).join("")));
+  if(puedoIniciar()){const E=hilosC(h=>h.de===yoC()&&!h.atendido_en).filter(h=>!porResponder(h));
+    out.push(F_("rev","✎","--st-asig","Comentarios que enviaste",E.length?"Esperando respuesta o por marcar como atendidos":"Escríbele a un gerente"+(YO.rol==="admin"?" o regional":"")+". Si es sobre un cliente, hazlo desde su ficha.",E.length,
+      nuevoComHTML()+E.map(h=>hiloHTML(h)).join("")))}
+  return out}
 const nivelAv=()=>rol!=="reg"?"gerente":YO.rol==="admin"?"directivo":"regional";
-const fichasAvisos=()=>{const n=nivelAv();return n==="gerente"?fichasGerente():n==="directivo"?fichasDirectivo():fichasRegional(SUC)};
+const fichasAvisos=()=>{const n=nivelAv();return[...fichasComentarios(),...(n==="gerente"?fichasGerente():n==="directivo"?fichasDirectivo():fichasRegional(SUC))]};
 function avisos(){
   const b=$("campana");b.hidden=!YO;if(b.hidden)return;
   const F=fichasAvisos(),urg=F.filter(f=>f.prio==="urg").reduce((t,f)=>t+f.n,0),nl=AVS.filter(a=>!a.leido_en).length;
@@ -1803,8 +1843,12 @@ function avisos(){
   $("campanaN").hidden=!urg&&!nl;$("campanaN").textContent=urg?(urg>99?"99+":urg):"•";b.classList.toggle("urge",urg>0);
   b.setAttribute("aria-label",urg?`Avisos: ${urg} ${urg===1?"urgente":"urgentes"}`:nl?`Avisos: ${nl} sin leer`:"Avisos: sin pendientes urgentes");
   if($("notif").open)pintarAvisos(F);
+  const P=hilosC().filter(porResponder).length,bn=$("gComBan");
+  if(bn){bn.hidden=!P;bn.innerHTML=P?`<div><b>Tienes ${P} ${P===1?"comentario":"comentarios"} por responder</b><div class="hint" style="margin:2px 0 0">Te ${P===1?"lo dejó":"los dejaron"} tu regional o dirección; aparecen como urgentes hasta que respondas.</div></div><button type="button" class="btn pri" data-comver>Responder</button>`:""}
 }
 function pintarAvisos(F=fichasAvisos()){
+  const sinLeer=[...new Set(COMS.filter(k=>k.para===yoC()&&!k.leido_en).map(k=>k.hilo||k.id))];
+  if(sinLeer.length&&NTAB==="urg"){const t=new Date().toISOString();COMS.forEach(k=>{if(k.para===yoC()&&!k.leido_en)k.leido_en=t});sinLeer.forEach(h=>SB.rpc("leer_comentarios",{hilo_id:h}))}
   const T=[["urg","Urgente"],["rev","Para revisar"],["info","Informativo"]],cnt=k=>F.filter(f=>f.prio===k).length,tot=k=>F.filter(f=>f.prio===k).reduce((t,f)=>t+f.n,0);
   if(!NTAB)NTAB=(T.find(([k])=>cnt(k))||T[0])[0];   // al abrir: la primera pestaña con algo
   const niv=nivelAv();
@@ -1870,7 +1914,7 @@ function abrir(id){const c=cli(id);if(!c)return;
   $("fChip").innerHTML=chip(c.st);$("fNombre").textContent=c.nombre;$("fTipo").innerHTML=tipoTag(c)+(c.tipo===ACT?`<div class="hint" style="margin-top:6px">${(m=>m.d==null?"Sin visita registrada.":`Última visita atendida: ${fecha(m.u)} (hace ${m.d} días) por ${esc(quien(VISITAS.filter(x=>x.cli===c.id&&x.fecha===m.u&&atendida(x)).pop().correo))}.`)(mesDe(c))} Se visita una vez al mes; no entra en la lista semanal.</div>`:"");
   $("fFacts").innerHTML=`<span><b class="num">${c.flota??"—"}</b>unidades</span><span><b class="num">${fk(c.km)}</b>km de ${c.suc.n}</span><span><b>${c.giro}</b>giro</span>`;
   $("fActs").innerHTML=`<a class="btn" href="${maps(c)}" target="_blank" rel="noopener">Abrir en Google Maps ↗</a>`;
-  $("form").reset();actualizarForm();$("toast").hidden=true;$("ficha").dataset.cli=id;ckBlock(id);resBlock(id);historial(id);cotModo=null;credBlock(id);cotBlock(id);regBlock(id);ctaBlock(id);
+  $("form").reset();actualizarForm();$("toast").hidden=true;$("ficha").dataset.cli=id;ckBlock(id);resBlock(id);historial(id);cotModo=null;comBlock(id);credBlock(id);cotBlock(id);regBlock(id);ctaBlock(id);
   $("ficha").hidden=$("scrim").hidden=false;$("cerrar").focus()}
 function cerrar(){$("ficha").hidden=$("scrim").hidden=true}
 // resumen del cliente: lo cotizado y vendido en la plataforma, visitas, datos y dónde opera
@@ -1931,24 +1975,34 @@ let cotModo=null;
 // Trámite de crédito. En la cotización solo se muestra cómo va (afecta su vigencia); se avanza en la sección Crédito del cliente.
 function tramBlock(q){
   if(!q.ini)return"";
-  const dd=entre(q.ini,q.docsOk||q.fin||HOY),dv=q.docsOk?entre(q.docsOk,q.fin||HOY):null,dt=diasTram(q),pct=Math.round(dt/VIG*100);
-  const etapa=!enTram(q)?`Crédito ${q.res==="aprobado"?"aprobado":"no aprobado"} el ${fecha(q.fin)}.`:q.docsOk?`En Crédito y Cobranza: día ${dv} de ${DCRED}. La vigencia está en pausa.`:`Esperando documentos del cliente (${DOCS.filter(([k])=>q.docs[k]).length} de ${DOCS.length}).`;
+  const dd=entre(q.ini,q.docsOk||q.fin||HOY),dv=q.docsOk?entre(q.docsOk,q.fin||HOY):null,dh=q.docsOk?habiles(q.docsOk,q.fin||HOY):null,dt=diasTram(q),pct=Math.round(dt/VIG*100);
+  const etapa=!enTram(q)?`Crédito ${q.res==="aprobado"?"aprobado":"no aprobado"} el ${fecha(q.fin)}.`:q.docsOk?`En Crédito y Cobranza: día hábil ${dh} de ${DCRED}. La vigencia está en pausa.`:`Esperando documentos del cliente (${DOCS.filter(([k])=>q.docs[k]).length} de ${DOCS.length}).`;
   return `<div class="aviso" style="--c:var(${!enTram(q)?(q.res==="aprobado"?"--st-vis":"--st-esc"):q.docsOk?"--st-asig":"--warn"})">Cotización a crédito · ${etapa} El avance se marca en la sección <b>Crédito</b> del cliente.</div>
   <div class="hint">Trámite: ${dt} ${dt===1?"día":"días"} (${dd} esperando documentos${dv!=null?` · ${dv} en Crédito y Cobranza`:""}) = ${pct}% de la vigencia de ${VIG} días.</div>`}
+function comBlock(id){const el=$("fComs"),H=hilosC(k=>k.cliente_id===id),nuevo=puedoIniciar()&&!H.some(h=>!h.r.atendido_en&&h.r.de===yoC());
+  el.hidden=!H.length&&!puedoIniciar();if(el.hidden)return;
+  el.innerHTML=`<div class="lbl">Comentarios${H.filter(porResponder).length?` · <span style="color:var(--st-esc)">${H.filter(porResponder).length} por responder</span>`:""}</div>
+   ${H.map(h=>hiloHTML(h,{conCli:false})).join("")}${nuevo?nuevoComHTML(id):""}`}
 // Crédito del cliente (prospecto o cliente de contado): solicitud con documentos → Crédito y Cobranza → aprobado / no aprobado
 function credBlock(id){
   const c=cli(id),el=$("fCred"),k=CRED[id],ok=puedeAtender(c),cta=CUENTAS[c.cuenta],abierta=k&&!k.fin;
   const pidio=VISITAS.filter(x=>x.cli===id&&x.pago==="Crédito").sort((a,b)=>b.fecha.localeCompare(a.fecha))[0];
   let h=`<div class="lbl">Crédito</div>`;
   if(c.linea||(cta&&cta.linea_autorizada)){
-    h+=`<div class="aviso" style="--c:var(--st-vis)">Línea de crédito autorizada${c.lineaDesde?` desde el ${fecha(c.lineaDesde)}`:""}${!c.linea&&cta?` (de la cuenta ${esc(cta.nombre)})`:""}. Sus cotizaciones a crédito no llevan trámite.</div>`}
+    h+=`<div class="aviso" style="--c:var(--st-vis)">Línea de crédito autorizada${c.lineaDesde?` desde el ${fecha(c.lineaDesde)}`:""}${!c.linea&&cta?` (de la cuenta ${esc(cta.nombre)})`:""}. Sus cotizaciones a crédito no llevan trámite.</div>`;
+    if(ok)h+=`<details class="cons"><summary class="btn" style="width:fit-content">Consultar estatus de crédito</summary>
+      <div class="hint" style="margin:8px 0">Le llega a la jefa de crédito de la sucursal; te contesta por correo.</div>
+      <textarea id="consNota" maxlength="500" aria-label="Comentario para Crédito (opcional)" placeholder="Opcional: qué necesitas saber (por ejemplo, si tiene saldo disponible para un pedido de 20 llantas)"></textarea>
+      <div class="acts"><button class="btn pri" type="button" data-cred="consulta">Enviar consulta</button></div></details><div class="hint" id="consUlt"></div>`;
+    SB.from("consultas_credito").select("creado_en,creado_por").eq("cliente_id",id).order("creado_en",{ascending:false}).limit(1).then(({data})=>{const u=$("consUlt");if(u&&data&&data[0])u.textContent=`Última consulta: ${fecha(String(data[0].creado_en).slice(0,10))} por ${data[0].creado_por}.`})}
   else if(abierta){const x={ini:k.inicio,docsOk:k.docs_completos,fin:null,docs:k.documentos||{}},n=DOCS.filter(([d])=>x.docs[d]).length,dd=entre(x.ini,x.docsOk||HOY);
     if(!x.docsOk){
       h+=`<div class="aviso" style="--c:var(--warn)">Solicitud de crédito · esperando documentos del cliente: ${n} de ${DOCS.length} · ${dd} ${dd===1?"día":"días"} desde que se pidieron.</div>
       <div style="display:grid;gap:6px">${DOCS.map(([d,t])=>ok?`<button type="button" class="btn" data-cred="doc:${d}" style="justify-content:flex-start;text-align:left;${x.docs[d]?"border-color:var(--st-vis)":""}"><span aria-hidden="true" style="color:var(${x.docs[d]?"--st-vis":"--muted"})">${x.docs[d]?"✔":"○"}</span>&nbsp;${t}</button>`:`<div><span style="color:var(${x.docs[d]?"--st-vis":"--muted"})">${x.docs[d]?"✔":"○"}</span> ${t}</div>`).join("")}</div>
       ${ok?`<div class="acts"><button class="btn pri" type="button" data-cred="env"${n<DOCS.length?" disabled":""}>Entregar a Crédito y Cobranza</button></div>`:""}`}
-    else{const dv=entre(x.docsOk,HOY),tarde=dv>DCRED;
-      h+=`<div class="aviso" style="--c:var(${tarde?"--st-esc":"--st-asig"})">En Crédito y Cobranza: día ${dv} de ${DCRED}${tarde?" · fuera de plazo":""}. Documentos entregados el ${fecha(x.docsOk)}.</div>
+    else{const dv=habiles(x.docsOk,HOY),tarde=dv>DCRED;
+      h+=`<div class="aviso" style="--c:var(${tarde?"--st-esc":"--st-asig"})">En Crédito y Cobranza · folio <b>${folioRF(k.id)}</b>: día hábil ${dv} de ${DCRED}${tarde?" · fuera de plazo (se le manda recordatorio diario)":""}. Documentos entregados el ${fecha(x.docsOk)}.</div>
+      <div class="hint">Se le avisó por correo a la Analista de Crédito con copia a ti, a tu regional y a Crédito y Cobranza. Responde ese correo con los documentos adjuntos.</div>
       ${ok?`<div class="acts"><button class="btn pri" type="button" data-cred="ok">Crédito aprobado</button><button class="btn" type="button" data-cred="no">Crédito no aprobado</button><button class="btn" type="button" data-cred="falta">Faltó información</button></div>`:""}`}}
   else{
     if(k)h+=`<div class="hint">Su última solicitud no fue aprobada (${fecha(k.fin)}).</div>`;
@@ -1958,6 +2012,10 @@ function credBlock(id){
 async function credAccion(a){
   const id=$("ficha").dataset.cli,k=CRED[id],m=t=>{const x=$("credMsg");x.textContent=t;x.style.color="var(--st-esc)";x.hidden=false};
   let r;
+  if(a==="consulta"){const b=$("fCred").querySelector('[data-cred="consulta"]');b.disabled=true;
+    const{data,error}=await SB.rpc("consultar_credito",{cliente:id,nota:$("consNota").value});
+    if(error){b.disabled=false;return m(/YA_CONSULTADO/.test(error.message)?"Ya se mandó una consulta de este cliente hoy.":"No se envió: "+error.message)}
+    credBlock(id);const x=$("credMsg");x.textContent=`Consulta enviada a ${data}. Te contestará por correo.`;x.style.color="var(--st-vis)";x.hidden=false;return}
   if(a==="nuevo")r=SB.from("creditos").insert({cliente_id:id});
   else if(!k)return;
   else if(a.startsWith("doc:")){const d=a.slice(4),antes=k.documentos||{},nd={...antes};if(nd[d])delete nd[d];else nd[d]=HOY;k.documentos=nd;credBlock(id);
@@ -1971,7 +2029,24 @@ async function credAccion(a){
   $("fCred").querySelectorAll("button").forEach(b=>b.disabled=true);
   const{data,error}=await r.select("*");
   if(error||!data||!data.length){credBlock(id);return m("No se guardó: "+(error?error.message:"tu usuario no tiene permiso."))}
-  CRED[id]=data[0];if(a==="ok"){cli(id).linea=true;cli(id).lineaDesde=HOY}credBlock(id);recargar(id)}
+  CRED[id]=data[0];if(a==="env")setTimeout(()=>{const x=$("credMsg");if(x){x.textContent=`Enviado a Crédito y Cobranza con folio ${folioRF(data[0].id)}.`;x.style.color="var(--st-vis)";x.hidden=false}},0);if(a==="ok"){cli(id).linea=true;cli(id).lineaDesde=HOY}credBlock(id);recargar(id)}
+document.addEventListener("click",async e=>{
+  if(e.target.closest("[data-comver]")){NTAB="urg";pintarAvisos();$("notif").showModal();return}
+  const b=e.target.closest("[data-com]");if(!b)return;
+  const box=b.closest(".com-f"),txt=box.querySelector("textarea").value.trim(),a=b.dataset.com,hilo=b.closest("[data-hilo]");
+  const msg=t=>{let m=box.querySelector(".nt-err");if(!m){m=document.createElement("p");m.className="nt-err";box.append(m)}m.textContent=t};
+  if(a!=="ok"&&!txt)return msg("Escribe el comentario.");
+  let r;
+  if(a==="nuevo"){const sel=box.querySelector("select"),cliente=box.dataset.comnuevo||null;if(sel&&!sel.value)return msg("Elige para quién es.");
+    r=SB.rpc("comentar",{texto:txt,para:sel?sel.value:null,cliente})}
+  else if(a==="resp")r=SB.rpc("responder_comentario",{hilo_id:+hilo.dataset.hilo,texto:txt});
+  else r=SB.rpc("atender_comentario",{hilo_id:+hilo.dataset.hilo});
+  box.querySelectorAll("button,textarea,select").forEach(x=>x.disabled=true);
+  const{error}=await r;
+  if(error){box.querySelectorAll("button,textarea,select").forEach(x=>x.disabled=false);
+    return msg(/SOLO_RESPONDE/.test(error.message)?"Solo puedes escribirle a quien está a tu cargo.":/HILO_CERRADO/.test(error.message)?"Este comentario ya se marcó como atendido.":"No se envió: "+error.message)}
+  const{data:cm}=await SB.from("comentarios").select("*").gte("creado_en",new Date(Date.now()-90*864e5).toISOString()).order("creado_en").limit(1000);COMS=cm||COMS;
+  avisos();if($("notif").open)pintarAvisos();if(!$("ficha").hidden)comBlock($("ficha").dataset.cli)});
 document.addEventListener("click",e=>{const b=e.target.closest("[data-cred]");if(b){e.stopPropagation();credAccion(b.dataset.cred)}},true);
 // ¿Puedo registrar visitas y cotizaciones a este cliente? (la base lo valida igual)
 const puedeAtender=c=>rol==="reg"?(YO.rol!=="regional"||SUC.some(x=>x.id===c.at)):c.at===rol;
