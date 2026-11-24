@@ -41,6 +41,7 @@ img{max-width:100%}
 [hidden]{display:none!important}
 body{background:var(--bg);color:var(--ink);font-family:var(--body);font-size:14px;line-height:1.45}
 button,input,select{font:inherit;color:inherit}
+button,a,[role=button]{touch-action:manipulation;-webkit-tap-highlight-color:transparent}
 :focus-visible{outline:2px solid var(--accent);outline-offset:2px}
 .num{font-family:var(--display);font-variation-settings:"wdth" 112;font-variant-numeric:tabular-nums}
 
@@ -374,7 +375,7 @@ td .sub{display:block;font-size:11px;color:var(--muted);font-family:var(--mono)}
 .lnk:hover{text-decoration:underline}
 .more{display:flex;justify-content:center}
 .btn{border:1px solid var(--line);background:var(--panel);border-radius:10px;padding:8px 14px;cursor:pointer;font-weight:500}
-.btn:hover{background:var(--soft)}
+@media (hover:hover){.btn:hover{background:var(--soft)}} /* en celular el hover se queda pegado (se veía azul en tema oscuro) */
 .btn.pri{background:var(--accent);border-color:var(--accent);color:var(--accent-ink);font-weight:700}
 .btn.pri:hover{filter:brightness(1.05)}
 a.btn{text-decoration:none;color:var(--ink);display:inline-flex;align-items:center;gap:6px}
@@ -1620,6 +1621,7 @@ const pasosTour=()=>{const n=($("quien").textContent||"").split(" ")[0];
   ["#heroR","Cómo va tu zona","Avance de visitas de la semana contra la meta (10 por gerente). El color te dice si van en ruta, atrasados o críticos.","resumen"],
   ["#campana","Tus avisos","Aquí llegan las ubicaciones que un gerente reportó mal (tú apruebas o rechazas), los clientes reasignados a ti y los activos sin visita."],
   ["#asist","Tersa Boy","Asistente con IA: pregúntale en tus palabras por clientes, ventas, cotizaciones o cómo hacer algo. Solo ve lo mismo que tú."],
+  ["#campana","Comentarios a tu equipo",YO.rol==="admin"?"Déjale un comentario a un regional o a un gerente: desde la ficha de un cliente (sección Comentarios) o desde la campanita → «Para revisar». Les sale como urgente hasta que respondan; tú lo marcas como «Atendido».":"Déjale un comentario a un gerente: desde la ficha del cliente (sección Comentarios) o desde la campanita → «Para revisar». Le sale como urgente hasta que responda; tú lo marcas como «Atendido». Lo que te escriba dirección también llega aquí."],
   [null,"Tipos de cliente",DEF_TIPOS],
   ["#alertas","Requieren tu atención","Clientes que el gerente no pudo atender. Toca uno para regresarlo a su lista, devolverlo a la cartera o reasignarlo.","resumen"],
   ["#seg","Periodo","Cambia entre semana, mes, mes pasado o fechas. Todos los números y gráficas se recalculan."],
@@ -1635,13 +1637,15 @@ const pasosTour=()=>{const n=($("quien").textContent||"").split(" ")[0];
   ["#gActRes","Tus clientes activos","Además de tus 10 prospectos de la semana, visita una vez al mes a cada cliente activo. Aquí ves cuántos te faltan y cuántos días quedan del mes.","semana"],
   ["#gCards .card","Tus clientes de la semana","Al llegar con el cliente toca «Llegué» (check-in con GPS). Al terminar llenas la visita y tocas «Terminar visita»; así se mide cuánto duró.","semana"],
   ["#gq","Buscador","Encuentra cualquier cliente tuyo y abre su ficha: historial, cotizaciones, crédito y observaciones."],
+  ["#campana","Comentarios de tu regional","Tu regional o dirección te pueden dejar comentarios sobre un cliente o sobre tu trabajo. Salen como urgentes en esta campanita y arriba de «Mi semana» hasta que los respondas. Respóndelos ahí mismo."],
   ["#asist","Tersa Boy","Asistente con IA: pregúntale, por ejemplo, «¿qué clientes tengo pendientes?» o «¿cuánto llevo vendido este mes?». Solo ve tus datos."],
   ["#seg","Periodo","Cambia entre semana, mes o fechas para ver tus números."],
   ["#nav","Secciones","Mi semana (prospectos y activos pendientes), Mi cartera (por tipo de cliente y el seguimiento de activos), Cotizaciones y Mi zona (mapa)."],
   ["#fab","Agregar","Da de alta un cliente o prospecto nuevo con el botón +."],
   [null,"¡Listo!","Si quieres que este recorrido ya no salga al entrar, marca «No volver a mostrar» y toca «Terminar»."]]};
 let TP=[],TI=0;
-function tourAuto(){let visto=null;try{visto=localStorage.getItem(TOUR_K())}catch(e){}if(!visto)setTimeout(tour,900)}
+let tourT=0,tourCerrado=false;
+function tourAuto(){let visto=null;try{visto=localStorage.getItem(TOUR_K())||sessionStorage.getItem(TOUR_K())}catch(e){}clearTimeout(tourT);if(!visto&&!tourCerrado)tourT=setTimeout(()=>{if(!tourCerrado&&$("tour").hidden)tour()},900)}
 function tour(){TP=pasosTour().filter(([sel])=>{if(!sel)return true;const e=document.querySelector(sel);return !!e&&!e.closest("[hidden]")});TI=0;$("tourNo").checked=false;$("tour").hidden=false;pasoTour()}
 function pasoTour(){
   const [sel,t,x,sec]=TP[TI],ult=TI===TP.length-1;
@@ -1665,7 +1669,7 @@ function pasoTour(){
   requestAnimationFrame(()=>requestAnimationFrame(colocar));
   $("tourSig").focus({preventScroll:true});
 }
-function cerrarTour(){if($("tourNo").checked)try{localStorage.setItem(TOUR_K(),new Date().toISOString())}catch(e){}$("tour").hidden=true}
+function cerrarTour(){clearTimeout(tourT);tourCerrado=true;try{sessionStorage.setItem(TOUR_K(),"1");if($("tourNo").checked)localStorage.setItem(TOUR_K(),new Date().toISOString())}catch(e){}$("tour").hidden=true}
 $("tourSig").onclick=()=>{TI===TP.length-1?cerrarTour():(TI++,pasoTour())};
 $("tourAtras").onclick=()=>{if(TI){TI--;pasoTour()}};
 $("tourSaltar").onclick=cerrarTour;
