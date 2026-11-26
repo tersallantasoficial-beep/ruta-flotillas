@@ -943,7 +943,7 @@ body{background:radial-gradient(1100px 600px at 85% -10%,var(--glow1),transparen
       <button class="btn pri" type="submit" style="padding:12px">Entrar</button>
       <span class="toast" id="lErr" role="alert" style="color:var(--st-esc)" hidden></span>
       <span class="hint" style="font-size:12px">¿No tienes acceso? Pídeselo a tu regional: las cuentas solo se crean por invitación.</span>
-      <span class="hint" style="font-size:11px">Versión 24 nov · crédito: consulta a Crédito</span>
+      <span class="hint" style="font-size:11px">Versión 25 nov · más rápida</span>
       <button type="button" class="btn" id="olvide" style="border:0;background:none;color:var(--muted);text-decoration:underline;padding:0;justify-self:start">Olvidé mi contraseña</button>
     </form>
     <form class="lg-card" id="passForm" hidden>
@@ -1049,6 +1049,7 @@ async function cargar(){
   // sucursal que ATIENDE: la responsable si la cuenta es centralizada
   for(const c of CL){const k=CUENTAS[c.cuenta];c.at=k&&k.modo==="centralizada"&&k.sucursal_resp?k.sucursal_resp:c.suc.id}
   IX=Object.fromEntries(CL.map(x=>[x.id,x]));
+  ULTV=VPOR=null;
   VISITAS=v.filter(x=>IX[x.cliente_id]).map(x=>({cli:x.cliente_id,fecha:new Date(x.fecha).toLocaleDateString("en-CA"),res:resDe(x),com:resumenDe(x),ver:x.verificacion,dist:x.distancia_m,tipoV:x.tipo_visita,correo:x.correo,dur:x.duracion_min,pago:x.forma_pago}));
   COTS=q.filter(x=>IX[x.cliente_id]).map(cotDe);
   // pidió cotización en su última visita con interés y todavía no se le registra una
@@ -1080,7 +1081,7 @@ function ritmoAct(cl){const act=cl.filter(c=>c.tipo===ACT),pend=act.filter(c=>!m
   const hechas=new Set(visitasDe(ids,LUNES,HOY).filter(atendida).map(x=>x.cli)).size,f=new Date(HOY.slice(0,7)+"-01T12:00:00");f.setMonth(f.getMonth()+1);
   const rest=Math.round((f-new Date(LUNES+"T12:00:00"))/864e5),sem=Math.max(1,Math.ceil(rest/7));
   return{tot:act.length,pend,sem,n:Math.min(act.length,Math.ceil((pend+hechas)/sem)),hechas}}
-const frio=c=>c.tipo==="Prospecto"&&c.st==="disp"&&!VISITAS.some(x=>x.cli===c.id);
+const frio=c=>c.tipo==="Prospecto"&&c.st==="disp"&&!visDeCli(c.id).length;
 // resumen de la cartera por tipo (para el glosario de Clientes)
 function tiposCartera(list){const A=list.filter(c=>c.tipo===ACT),I=list.filter(c=>c.tipo==="Cliente inactivo"),P=list.filter(c=>c.tipo==="Prospecto"),F=P.filter(frio).length,f=x=>x.toLocaleString("es-MX");
   return `<div class="tipos"><div style="--c:var(--st-asig)"><b class="num">${f(F)}</b><span>Prospectos en frío</span><small>nunca visitados ni contactados</small></div><div style="--c:var(--st-asig)"><b class="num">${f(P.length-F)}</b><span>Prospectos trabajados</span><small>ya tienen visita o están en tu lista</small></div><div style="--c:var(--warn)"><b class="num">${f(I.length)}</b><span>Clientes inactivos</span><small>compraron hace más de 180 días</small></div><div style="--c:var(--st-act)"><b class="num">${f(A.length)}</b><span>Clientes activos</span><small>compraron en los últimos 180 días</small></div></div><p class="hint" style="margin:8px 0 0">${DEF_TIPOS}</p>`}
@@ -1089,7 +1090,11 @@ const tipoChip=c=>c.tipo===ACT?'<span class="chip" style="--c:var(--st-act)">Cli
 const tipoTag=c=>{if(c.tipo!==ACT&&c.tipo!=="Cliente inactivo")return"";const d=c.ult?diasDesde(c.ult):null,t=c.ult?` title="Última compra ${fecha(c.ult)} según padrón SAP"`:"";
   return c.tipo===ACT?`<span class="tb" style="--c:var(--st-act)"${t}>Cliente activo${d!=null?` · compró hace ${d} días`:""}</span>`:`<span class="tb" style="--c:var(--st-esc)"${t}>Cliente inactivo${d!=null?` · ${d} días sin comprar`:""}</span>`};
 const atendida=x=>x.res!=="No se encontró"&&x.res!=="Dirección no existe";
-function mesDe(c){const u=VISITAS.filter(x=>x.cli===c.id&&atendida(x)).map(x=>x.fecha).sort().pop(),d=u?diasDesde(u):null;return{u,d,ok:d!=null&&d<30}}
+// última visita atendida por cliente: se arma una vez por carga (antes se recorrían todas las visitas por cada cliente)
+let ULTV=null,VPOR=null;
+const visDeCli=id=>{if(!VPOR){VPOR={};for(const x of VISITAS)(VPOR[x.cli]||(VPOR[x.cli]=[])).push(x)}return VPOR[id]||[]};
+const ultAtendida=id=>{if(!ULTV){ULTV={};for(const x of VISITAS)if(atendida(x)&&!(ULTV[x.cli]>=x.fecha))ULTV[x.cli]=x.fecha}return ULTV[id]};
+function mesDe(c){const u=ultAtendida(c.id),d=u?diasDesde(u):null;return{u,d,ok:d!=null&&d<30}}
 const diasDesde=f=>Math.round((new Date(HOY)-new Date(f))/864e5);
 const restan=q=>Math.max(0,-diasDesde(vence(q)));
 const credRow=x=>{const c=cli(x.cli);return `<div class="qrow" data-id="${c.id}"><div style="min-width:0"><b>${esc(c.nombre)}</b><span class="sub">Solicitud de crédito sin cotización · desde ${fecha(x.ini)} · ${c.suc.n}</span></div><b class="num">—</b>${x.docsOk?'<span class="chip" style="--c:var(--st-asig)">En Crédito y Cobranza</span>':`<span class="chip" style="--c:var(--warn)">Faltan documentos · ${DOCS.filter(([d])=>x.docs[d]).length} de ${DOCS.length}</span>`}</div>`};
@@ -1135,8 +1140,12 @@ const visibles=new Set(Object.keys(ST));
 /* ---------- mapa ---------- */
 const MAX_PUNTOS=1500; // más puntos congelan el celular; arriba de esto se ocultan los disponibles
 let ocultos=0;
+// el mapa solo se dibuja cuando su sección está a la vista (dibujarlo en cada cambio de filtro congelaba la página)
+const MAPAPEND={};
 function mapa(svgId,pts,sucs,hi){
-  const svg=$(svgId);
+  const svg=$(svgId),sec=svg.closest("[data-sec]");
+  if(sec&&SEC&&sec.dataset.sec!==SEC){MAPAPEND[svgId]=[pts,sucs,hi];return}
+  delete MAPAPEND[svgId];
   pts=pts.filter(c=>c.lat!=null&&(hi==="all"||c.suc.id===hi));
   ocultos=0;if(pts.length>MAX_PUNTOS){const n=pts.length;pts=pts.filter(c=>c.st!=="disp");ocultos=n-pts.length}
   if(GM&&window.google&&google.maps){svg.toggleAttribute("hidden",true);return gmapa(svgId,pts,sucs,hi)} // en SVG no existe .hidden
@@ -1468,7 +1477,7 @@ function feed(vis,max,conGerente){
 }
 
 function actTabla(arr){
-  const filas=arr.map(c=>({c,m:mesDe(c),u:VISITAS.filter(x=>x.cli===c.id).sort((a,b)=>b.fecha.localeCompare(a.fecha))[0]}))
+  const filas=arr.map(c=>({c,m:mesDe(c),u:visDeCli(c.id).slice().sort((a,b)=>b.fecha.localeCompare(a.fecha))[0]}))
     .sort((a,b)=>a.m.ok-b.m.ok||(b.m.d??1e9)-(a.m.d??1e9)||a.c.nombre.localeCompare(b.c.nombre));
   const est=m=>m.ok?["Al corriente","--st-act"]:m.d==null?["Sin visita","--st-asig"]:["Toca visita","--warn"];
   return `<div class="tbl seg"><table><thead><tr><th>Cliente</th><th>Última compra</th><th>Última visita</th><th>Visitó</th><th>Resultado</th><th>Estado del mes</th></tr></thead><tbody>${filas.map(({c,m,u})=>{const[t,col]=est(m);
@@ -1918,6 +1927,7 @@ function verSec(k,arriba=true){
   const base=k==="resumen"||k==="semana";
   $("titulo").textContent=base?TIT:rol==="reg"?t+($("vista").value==="all"?"":$("vista").value.startsWith("z:")?" · Zona de "+zonaNom($("vista").value.slice(2)):" · "+(SUC.find(x=>x.id===$("vista").value)||{}).g):t;
   if(k==="usuarios")usuarios();
+  for(const id in MAPAPEND){const sec=$(id).closest("[data-sec]");if(sec&&sec.dataset.sec===k)mapa(id,...MAPAPEND[id])}
   if(arriba){window.scrollTo(0,0);animar()}}
 function render(){
   const reg=rol==="reg";$("vReg").hidden=!reg;$("vGer").hidden=reg;$("vista").hidden=!reg;
