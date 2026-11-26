@@ -943,7 +943,7 @@ body{background:radial-gradient(1100px 600px at 85% -10%,var(--glow1),transparen
       <button class="btn pri" type="submit" style="padding:12px">Entrar</button>
       <span class="toast" id="lErr" role="alert" style="color:var(--st-esc)" hidden></span>
       <span class="hint" style="font-size:12px">¿No tienes acceso? Pídeselo a tu regional: las cuentas solo se crean por invitación.</span>
-      <span class="hint" style="font-size:11px">Versión 25 nov · más rápida</span>
+      <span class="hint" style="font-size:11px">Versión 25 nov · optimizada</span>
       <button type="button" class="btn" id="olvide" style="border:0;background:none;color:var(--muted);text-decoration:underline;padding:0;justify-self:start">Olvidé mi contraseña</button>
     </form>
     <form class="lg-card" id="passForm" hidden>
@@ -1010,8 +1010,13 @@ let COMS=[],AVS=[],SUC=[],CL=[],VISITAS=[],COTS=[],YO=null,IX={},NOMS={},CUENTAS
 const sinAcento=t=>(t||"").normalize("NFD").replace(/[\u0300-\u036f]/g,"").toLowerCase();
 const quien=e=>NOMS[(e||"").toLowerCase()]||nombreDe(e);
 const cli=id=>IX[id];
-async function todo(tabla,cols){ // la API entrega máximo 1000 filas por llamada
-  let out=[];for(let i=0;;i+=1000){const{data,error}=await SB.from(tabla).select(cols).order("id").range(i,i+999);if(error)throw error;out=out.concat(data);if(data.length<1000)return out}}
+async function todo(tabla,cols,filtro=q=>q){ // la API entrega máximo 1000 filas por llamada: se piden de 4 en 4 páginas a la vez
+  const pag=i=>filtro(SB.from(tabla).select(cols)).order("id").range(i,i+999).then(({data,error})=>{if(error)throw error;return data});
+  let out=await pag(0);if(out.length<1000)return out;
+  for(let i=1000;;i+=4000){const P=await Promise.all([0,1,2,3].map(k=>pag(i+k*1000)));for(const d of P)out=out.concat(d);if(P.some(d=>d.length<1000))return out}}
+// visitas: solo las columnas que usa la página y desde el 1 de enero del año pasado (el resumen comercial compara contra ese año)
+const COLS_VIS="id,cliente_id,fecha,interes,contacto,horario,comentario,contacto_nombre,contacto_puesto,unidades,tipos_unidad,necesidades,proveedor,forma_pago,siguiente_paso,verificacion,distancia_m,tipo_visita,correo,duracion_min";
+const DESDE_VIS=()=>(new Date().getFullYear()-1)+"-01-01";
 function resDe(v){return v.interes||(REINT.includes(v.contacto)?"No se encontró":v.contacto==="La dirección no existe"?"Dirección no existe":"Interesado")}
 function resumenDe(v){
   if(REINT.includes(v.contacto))return `${v.contacto}.${v.horario?" Volver "+v.horario.toLowerCase()+".":""}${v.comentario?" "+v.comentario:""}`;
@@ -1023,7 +1028,7 @@ const cotDe=x=>({dbid:x.id,id:x.folio,factura:x.factura,cli:x.cliente_id,fecha:x
 async function cargar(){
   const[s,c,v,q]=await Promise.all([todo("sucursales","*"),
     todo("clientes","id,empresa,giro,tipo,latitud,longitud,link_maps,ciudad,unidades_flota,id_sucursal,km_sucursal,estatus,semanas_arrastre,intentos,horario_sugerido,motivo_escalado,revisar_ubicacion,codigo_erp,razon_social,ultima_compra,areas_cobertura,cuenta_id,creado_en,observaciones,observaciones_por,observaciones_en,linea_autorizada,linea_desde,actualizado_en"),
-    todo("visitas","*"),todo("cotizaciones","*")]);
+    todo("visitas",COLS_VIS,q=>q.gte("fecha",DESDE_VIS())),todo("cotizaciones","*")]);
   // check-ins: los míos abiertos (visita en curso) y los que quedaron sin check-out
   const{data:cr}=await SB.from("creditos").select("*").order("id");CREDS=cr||[];CRED={};for(const x of CREDS)CRED[x.cliente_id]=x;  // la más reciente por cliente
   const{data:ck}=await SB.from("checkins").select("id,cliente_id,correo,inicio,cerrado_en,abandonado,verificacion,distancia_m,latitud,longitud,ubicacion_incorrecta");CKS=ck||[];
@@ -1146,7 +1151,7 @@ function mapa(svgId,pts,sucs,hi){
   const svg=$(svgId),sec=svg.closest("[data-sec]");
   if(sec&&SEC&&sec.dataset.sec!==SEC){MAPAPEND[svgId]=[pts,sucs,hi];return}
   delete MAPAPEND[svgId];
-  pts=pts.filter(c=>c.lat!=null&&(hi==="all"||c.suc.id===hi));
+  pts=pts.filter(c=>c.lat!=null&&(enVista(c.suc,hi)));
   ocultos=0;if(pts.length>MAX_PUNTOS){const n=pts.length;pts=pts.filter(c=>c.st!=="disp");ocultos=n-pts.length}
   if(GM&&window.google&&google.maps){svg.toggleAttribute("hidden",true);return gmapa(svgId,pts,sucs,hi)} // en SVG no existe .hidden
   svg.toggleAttribute("hidden",false);if(GMI[svgId])GMI[svgId].div.hidden=true;
@@ -1164,7 +1169,7 @@ function mapa(svgId,pts,sucs,hi){
   g+=calles.map(([a,b,c,d],i)=>`<line x1="${a}" y1="${b}" x2="${c}" y2="${d}" stroke="var(--soft2)" stroke-width="${i<2?9:5}" stroke-linecap="round"/>`).join("");
   for(const x of sucs){const on=enVista(x,hi);if(!on)continue;
     g+=`<circle cx="${X(x.lng)}" cy="${Y(x.lat)}" r="${R5}" fill="var(--accent-soft)" stroke="var(--accent)" stroke-opacity=".55" stroke-dasharray="4 5"/>`}
-  for(const c of pts){if(!visibles.has(c.st))continue;const on=hi==="all"||c.suc.id===hi;
+  for(const c of pts){if(!visibles.has(c.st))continue;const on=enVista(c.suc,hi);
     g+=`<circle data-id="${c.id}" cx="${X(c.lng).toFixed(1)}" cy="${Y(c.lat).toFixed(1)}" r="${on?7:4}" fill="var(${ST[c.st].c})" opacity="${on?1:.2}" stroke="var(--panel)" stroke-width="2" style="cursor:pointer"><title>${esc(c.nombre)} · ${ST[c.st].t}${c.km!=null?" · "+fk(c.km)+" km":""}</title></circle>`}
   for(const x of sucs){const on=enVista(x,hi),px=X(x.lng),py=Y(x.lat);
     g+=`<g opacity="${on?1:.4}"><rect x="${px-9}" y="${py-9}" width="18" height="18" rx="4" fill="var(--ink)" transform="rotate(45 ${px} ${py})"/><circle cx="${px}" cy="${py}" r="3.5" fill="var(--accent)"/>
@@ -1177,15 +1182,17 @@ function gmapa(svgId,pts,sucs,hi){
   let m=GMI[svgId];
   if(!m){const div=document.createElement("div");div.className="gmap";$(svgId).after(div);
     const map=new google.maps.Map(div,{mapTypeControl:false,streetViewControl:false,fullscreenControl:true,gestureHandling:"cooperative",clickableIcons:false});
-    map.data.addListener("click",e=>abrir(e.feature.getProperty("id")));
-    m=GMI[svgId]={div,map,extra:[]}}
+    m=GMI[svgId]={div,map,extra:[],data:null}}
   m.div.hidden=false;
-  m.map.data.forEach(f=>m.map.data.remove(f));m.extra.forEach(x=>x.setMap(null));m.extra=[];
+  // capa nueva en cada dibujo: quitar los puntos uno por uno tardaba decenas de segundos con miles de clientes
+  if(m.data)m.data.setMap(null);
+  m.data=new google.maps.Data({map:m.map});m.data.addListener("click",e=>abrir(e.feature.getProperty("id")));
+  m.extra.forEach(x=>x.setMap(null));m.extra=[];
   const P=pts.filter(c=>c.lat!=null&&visibles.has(c.st)),b=new google.maps.LatLngBounds();
-  m.map.data.addGeoJson({type:"FeatureCollection",features:P.map(c=>({type:"Feature",geometry:{type:"Point",coordinates:[c.lng,c.lat]},properties:{id:c.id,st:c.st,on:hi==="all"||c.suc.id===hi}}))});
+  m.data.addGeoJson({type:"FeatureCollection",features:P.map(c=>({type:"Feature",geometry:{type:"Point",coordinates:[c.lng,c.lat]},properties:{id:c.id,n:c.nombre,st:c.st,on:enVista(c.suc,hi)}}))});
   const COL=Object.fromEntries(Object.keys(ST).map(k=>[k,colorDe(ST[k].c)]));
-  m.map.data.setStyle(f=>({title:cli(f.getProperty("id")).nombre,icon:{path:google.maps.SymbolPath.CIRCLE,scale:f.getProperty("on")?6:4,fillColor:COL[f.getProperty("st")],fillOpacity:f.getProperty("on")?1:.25,strokeColor:"#ffffff",strokeWeight:1.5}}));
-  P.forEach(c=>{if(hi==="all"||c.suc.id===hi)b.extend({lat:c.lat,lng:c.lng})});
+  m.data.setStyle(f=>({title:f.getProperty("n"),icon:{path:google.maps.SymbolPath.CIRCLE,scale:f.getProperty("on")?6:4,fillColor:COL[f.getProperty("st")],fillOpacity:f.getProperty("on")?1:.25,strokeColor:"#ffffff",strokeWeight:1.5}}));
+  P.forEach(c=>{if(enVista(c.suc,hi))b.extend({lat:c.lat,lng:c.lng})});
   for(const x of sucs.filter(x=>x.lat!=null)){const on=enVista(x,hi);
     m.extra.push(new google.maps.Marker({map:m.map,position:{lat:x.lat,lng:x.lng},title:"Sucursal "+x.n,zIndex:999,opacity:on?1:.45,
       icon:{path:"M0,-9 9,0 0,9 -9,0z",fillColor:"#0f1b2d",fillOpacity:1,strokeColor:"#f2b705",strokeWeight:2.5,scale:1}}));
@@ -2386,7 +2393,7 @@ $("cercaMi").onclick=async()=>{const b=$("cercaMi");b.disabled=true;b.textConten
   $("ordenHint").textContent=YOPOS?"Ordenados por cercanía a donde estás ahora":"No se pudo obtener tu ubicación. Revisa que el navegador tenga permiso de ubicación.";render()};
 $("verMas").onclick=()=>{mostrar=mostrar===10?Infinity:10;render()};
 $("vista").onchange=()=>{mostrar=10;render();animar()};
-$("busca").oninput=e=>{busca=e.target.value;mostrar=10;render()};
+let buscaT=null;$("busca").oninput=e=>{busca=e.target.value;mostrar=10;clearTimeout(buscaT);buscaT=setTimeout(render,200)}; // espera a que deje de escribir
 function aplicarRango(){$("fechas").hidden=modo!=="otro";
   if(modo==="otro"){const a=$("fDesde").value,b=$("fHasta").value;if(!a||!b||a>b)return;desde=a;hasta=b}else[desde,hasta]=RANGOS[modo];
   render();animar()}
